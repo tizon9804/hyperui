@@ -2,6 +2,9 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.4.1 — 2026-10-03
+- License changed from MIT to Apache License 2.0; `NOTICE` added (attribution must be preserved).
+
 ## 0.4.0 — 2026-10-03
 - **Work on a repo from any directory:** `/hyperui --repo <path> …` (or the path said in words) makes that path the project root for everything — `.hyperui/`, repo inspection, specs, code, ship/infra files — and remembers it per directory in the per-machine `~/.claude/plugins/data/hyperui/user.md` (`roots:`; pinned there because hooks and Bash-tool commands see different `CLAUDE_PLUGIN_DATA`), so it is said once; `--repo .` forgets it. Onboarding asks "Where is the repo?" only when the current directory does not look like a project.
 - **Several repos from one directory:** `--repo` is repeatable (first = primary); each repo keeps its own `.hyperui/`, the primary holds `.hyperui/workspace.md` (repos, roles, cross-repo next step); routing by role word, one question when ambiguous; rules in `references/workspace.md`.

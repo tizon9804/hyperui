@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hyperui — ship (terminal demo)</title>
+<!--
+  Source of docs/assets/examples/ship.webp. One deterministic, time-driven timeline (0–8 s):
+  the user line is typed, `ship` thinks, then the real (unedited) answer excerpt appears line by line.
+  Open it in a browser to watch it play; `?record` loads it paused at t = 0 and exposes
+  window.__seek(t) / window.__duration / window.__ready for frame-exact rendering (see docs/assets/README.md).
+  Tuned for a 960×420 viewport.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0d12; --surface:#141822; --raised:#1c2130; --border:#262c3a;
+    --text:#e6e9f0; --muted:#8a93a6; --dim:#5a6377; --emerald:#3ecf8e; --amber:#f2b84b; --sky:#7cc4ff;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace; --display:Sora,Inter,system-ui,sans-serif;
+  }
+  html,body{margin:0;height:100%}
+  body{background:var(--bg);color:var(--text);font:400 15px/22px var(--mono);-webkit-font-smoothing:antialiased;overflow:hidden}
+  .stage{position:relative;width:960px;height:420px;overflow:hidden;background:
+    radial-gradient(640px 320px at 78% -10%, rgba(62,207,142,.14), transparent 70%),
+    radial-gradient(520px 320px at 8% 112%, rgba(124,196,255,.08), transparent 70%), var(--bg)}
+  .win{position:absolute;left:16px;top:16px;width:928px;height:388px;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    box-shadow:0 30px 80px -30px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.02) inset;overflow:hidden;will-change:transform,opacity}
+  .bar{height:38px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:1px solid var(--border);background:var(--raised)}
+  .bar i{width:11px;height:11px;border-radius:50%;background:#3b4152}
+  .bar i:nth-child(1){background:#ff5f57}.bar i:nth-child(2){background:#febc2e}.bar i:nth-child(3){background:#28c840}
+  .bar .title{margin-left:10px;font:600 12.5px/1 var(--display);color:var(--muted);letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .bar .title b{color:var(--text)}
+  .bar .title em{font-style:normal;color:var(--dim)}
+  .bar .tag{margin-left:auto;display:flex;align-items:center;gap:7px;font:600 11px/1 var(--display);color:var(--emerald);border:1px solid #244a39;background:#10211a;border-radius:6px;padding:5px 8px}
+  .bar .tag i{width:6px;height:6px;background:var(--emerald);box-shadow:0 0 0 3px rgba(62,207,142,.2)}
+  .body{padding:14px 22px 0}
+  .line{height:22px;white-space:pre;opacity:0;transform:translateY(4px);will-change:transform,opacity}
+  .line.on{opacity:1;transform:none}
+  .prompt{color:var(--text)}
+  .prompt .ps{color:var(--emerald);font-weight:600}
+  .prompt .cmd{color:var(--sky);font-weight:600}
+  .think{color:var(--dim)}
+  .think .d{display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--emerald);margin:0 2px 2px;opacity:.25}
+  .think .d.on{opacity:1}
+  .ok{color:var(--emerald);font-weight:600}
+  .alt{color:var(--sky);font-weight:600}
+  .warn{color:var(--amber);font-weight:600}
+  .url{color:var(--muted);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--dim)}
+  .caret{display:inline-block;width:8px;height:17px;background:var(--emerald);vertical-align:-3px;margin-left:1px;border-radius:1px}
+  .caret.off{visibility:hidden}
+  .fin{color:var(--muted);text-align:right;font:600 11px/1 var(--display);position:absolute;right:16px;bottom:11px;opacity:0;letter-spacing:.02em}
+  .fin b{color:var(--text)}
+  @media (prefers-reduced-motion:reduce){.line{transition:none}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="win" id="win">
+    <div class="bar"><i></i><i></i><i></i>
+      <div class="title"><b>hyperui</b><em>—</em>ship<em>·</em>payments by seller country</div>
+      <div class="tag"><i></i>test run · unedited</div>
+    </div>
+    <div class="body" id="body"></div>
+    <div class="fin" id="fin">seller in <b>Colombia</b> · Stripe not available there · <b>ship</b> recommends Polar, flags Lemon Squeezy</div>
+  </div>
+</div>
+<script>
+(() => {
+  const DURATION = 8;
+  const USER = "¿cómo cobro con tarjeta en mi página?";
+  const TYPE_START = 0.55, TYPE_END = 2.3;          // the user line is typed between these
+  const THINK_START = 2.35, ANSWER_START = 2.95;    // thinking dots, then the answer
+  const LINE_STEP = 0.28;                           // one answer line every 0.28 s
+  const ANSWER = [
+    [["", "Respuesta corta: con Polar. Como vendes desde Colombia,"]],
+    [["", "Stripe no está disponible aquí. Polar cobra por ti, se"]],
+    [["", "encarga de los impuestos de cada país y te paga a tu cuenta."]],
+    null,
+    [["ok", "Recomendado: Polar"], ["", " · 5% + 50¢ por venta, sin cuota mensual,"]],
+    [["", "Colombia aceptada para pagos (verificado hoy)"]],
+    [["", "· "], ["url", "https://polar.sh/resources/pricing"]],
+    null,
+    [["alt", "Alternativa: Mercado Pago"], ["", " · si tus alumnos están casi todos"]],
+    [["", "en Colombia y pagan con PSE o tarjeta local. …"]],
+    null,
+    [["warn", "Evita Lemon Squeezy"], ["", ": se está integrando en un producto de"]],
+    [["", "Stripe que excluye Latinoamérica."]],
+  ];
+  // the time each answer line appears (blank lines come with the next real line)
+  const lineTimes = []; let k = 0;
+  ANSWER.forEach((l, i) => { if (l) { lineTimes[i] = ANSWER_START + k * LINE_STEP; k++; } });
+  for (let i = ANSWER.length - 1; i >= 0; i--) if (lineTimes[i] === undefined) lineTimes[i] = lineTimes[i + 1] ?? ANSWER_START;
+  const ANSWER_END = ANSWER_START + k * LINE_STEP;
+
+  const body = document.getElementById("body"), win = document.getElementById("win"), fin = document.getElementById("fin");
+  const mk = (cls) => { const d = document.createElement("div"); d.className = "line " + (cls || ""); body.appendChild(d); return d; };
+  const prompt = mk("prompt"); const think = mk("think");
+  const rows = ANSWER.map(() => mk(""));
+  const prompt2 = mk("prompt");
+  rows.forEach((row, i) => { const l = ANSWER[i]; if (!l) return; l.forEach(([cls, txt]) => { const s = document.createElement("span"); if (cls) s.className = cls; s.textContent = txt; row.appendChild(s); }); });
+  const span = (cls, txt) => { const s = document.createElement("span"); s.className = cls; s.textContent = txt; return s; };
+
+  const clamp01 = (x) => Math.max(0, Math.min(1, x));
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+  const blink = (t) => Math.floor(t * 2) % 2 === 0;
+
+  function seek(t) {
+    t = Math.max(0, Math.min(DURATION, t));
+    const inP = easeOut(clamp01(t / 0.4));
+    win.style.opacity = inP; win.style.transform = `translateY(${(1 - inP) * 10}px) scale(${.985 + .015 * inP})`;
+    // prompt line: "❯ /hyperui " + typed user text + caret while typing
+    const typed = Math.round(USER.length * clamp01((t - TYPE_START) / (TYPE_END - TYPE_START)));
+    prompt.replaceChildren(span("ps", "❯ "), span("cmd", "/hyperui "), document.createTextNode(USER.slice(0, typed)));
+    const typing = t < ANSWER_START;
+    if (typing) { const c = span("caret" + (t >= TYPE_END && !blink(t) ? " off" : ""), ""); prompt.appendChild(c); }
+    prompt.classList.toggle("on", t >= 0.3);
+    // thinking dots
+    const thinking = t >= THINK_START && t < ANSWER_START;
+    think.classList.toggle("on", thinking);
+    if (thinking) {
+      const n = Math.floor((t - THINK_START) / 0.15) % 4;
+      think.replaceChildren(document.createTextNode("ship · checking card processors available in Colombia "));
+      for (let i = 0; i < 3; i++) think.appendChild(span("d" + (i < n ? " on" : ""), ""));
+    }
+    // collapse the thinking row once the answer starts so the lines sit under the prompt
+    think.style.display = t >= ANSWER_START ? "none" : "";
+    rows.forEach((row, i) => row.classList.toggle("on", t >= lineTimes[i]));
+    // final prompt with blinking caret
+    const done = t >= ANSWER_END + 0.2;
+    prompt2.replaceChildren(span("ps", "❯ "), span("caret" + (blink(t) ? "" : " off"), ""));
+    prompt2.classList.toggle("on", done);
+    fin.style.opacity = easeOut(clamp01((t - ANSWER_END - 0.35) / 0.5));
+  }
+
+  const recordMode = /[?&]record\b/.test(location.search);
+  window.__seek = seek; window.__duration = DURATION;
+  window.__ready = (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => { seek(0); });
+  if (!recordMode) {
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.__ready.then(() => {
+      if (reduce) { seek(DURATION); return; }
+      const t0 = performance.now();
+      const step = (now) => { const t = (now - t0) / 1000; seek(t); if (t < DURATION + 2) requestAnimationFrame(step); else { setTimeout(() => { const t1 = performance.now(); const again = (n) => { const tt = (n - t1) / 1000; seek(tt); if (tt < DURATION + 2) requestAnimationFrame(again); else setTimeout(() => requestAnimationFrame(again), 0); }; requestAnimationFrame(again); }, 0); } };
+      requestAnimationFrame(step);
+    });
+  }
+})();
+</script>
+</body>
+</html>

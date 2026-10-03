@@ -16,8 +16,11 @@
 #                                         AND stays scoped to the plugin; bare Read leaks,
 #                                         single-slash form never matches)      (gated)
 #   (d3) preamble lint                  — every skills/*/SKILL.md except setup/doctor contains
-#                                         the exact phrase "invoke the `hyperui` skill first"
-#                                         (profile-missing fallback)    (gated)
+#                                         the exact root-resolution preamble sentence (see
+#                                         PREAMBLE below: profile.sh root + profile-missing
+#                                         fallback "invoke the `hyperui` skill first") and
+#                                         declares Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+#                                         in allowed-tools (every specialist runs `root`) (gated)
 #   (e) company-agnostic grep           — no employer/team-specific strings anywhere in the
 #                                         repo (excluding .git, node_modules and this file,
 #                                         which necessarily contains the pattern)  (hard fail)
@@ -50,6 +53,9 @@ case "$GATE" in
   lenient|strict) ;;
   *) bad ".hyperui-gate: unknown value '$GATE' (expected lenient|strict)"; GATE="strict" ;;
 esac
+# (d3) the exact preamble sentence every specialist must contain, on one line
+PREAMBLE='Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.'
+
 # gated: report a gated finding as a warning (lenient) or a failure (strict)
 gated() { if [[ "$GATE" == "strict" ]]; then bad "$*"; else warn "$* (gate: lenient)"; fi; }
 
@@ -103,12 +109,15 @@ for f in "${skill_files[@]}"; do
   if ! grep -qF 'Read(//${CLAUDE_PLUGIN_ROOT}/**)' <<<"$fm"; then
     gated "$f: specialist lacks allowed-tools 'Read(//\${CLAUDE_PLUGIN_ROOT}/**)' (reference reads outside the project need it)"; gated_count=$((gated_count + 1))
   fi
-  if ! grep -qF 'invoke the `hyperui` skill first' "$f"; then
-    gated "$f: specialist lacks the preamble phrase 'invoke the \`hyperui\` skill first'"; gated_count=$((gated_count + 1))
+  if ! grep -qF -- "$PREAMBLE" "$f"; then
+    gated "$f: specialist lacks the exact root-resolution preamble sentence (see PREAMBLE in check.sh)"; gated_count=$((gated_count + 1))
+  fi
+  if ! grep -qF 'Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)' <<<"$fm"; then
+    gated "$f: specialist lacks allowed-tools 'Bash(\${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)' (needed for profile.sh root)"; gated_count=$((gated_count + 1))
   fi
 done
 [[ $fm_fail -eq 0 ]] && ok "frontmatter name/description on ${#skill_files[@]} SKILL.md file(s)"
-[[ $gated_count -eq 0 ]] && ok "specialists: user-invocable: false + ## Sources + allowed-tools + preamble phrase (gate: $GATE)"
+[[ $gated_count -eq 0 ]] && ok "specialists: user-invocable: false + ## Sources + allowed-tools (Read + profile.sh) + root preamble (gate: $GATE)"
 
 # (e) company-agnostic grep
 if hits="$(grep -rniE '\bolo\b|ubits|ololabs|engage-specs|OLO-[0-9]' \

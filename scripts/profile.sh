@@ -1,28 +1,42 @@
 #!/usr/bin/env bash
-# hyperui memory helper: reads/writes the YAML frontmatter of .hyperui/profile.md
-# and ${CLAUDE_PLUGIN_DATA}/user.md. No dependencies beyond python3 (awk fallback).
+# hyperui memory helper: reads/writes the YAML frontmatter of <root>/.hyperui/profile.md
+# and ~/.claude/plugins/data/hyperui/user.md (HYPERUI_DATA overrides). No dependencies beyond python3 (awk fallback).
 #
 # Usage:
-#   profile.sh init [--private]        copy seed templates into .hyperui/ (never overwrites)
+#   profile.sh [--repo <path>] <command> ...
+#   profile.sh init [--private]        copy seed templates into <root>/.hyperui/ (never overwrites)
 #   profile.sh get <dotted.key>        print a value (lists as comma-separated)
 #   profile.sh set <dotted.key> <value> create/update a key (value with commas -> list)
-#   profile.sh private                 add .hyperui/ to .gitignore, set private: true
-#   profile.sh user-get <key>          read ${CLAUDE_PLUGIN_DATA}/user.md
-#   profile.sh user-set <key> <value>  write ${CLAUDE_PLUGIN_DATA}/user.md
-#   profile.sh path                    print the .hyperui directory
+#   profile.sh private                 add .hyperui/ to <root>/.gitignore, set private: true
+#   profile.sh user-get <key>          read the per-machine user.md
+#   profile.sh user-set <key> <value>  write the per-machine user.md
+#   profile.sh path                    print the .hyperui directory of the resolved root
+#   profile.sh root                    print the primary project root (absolute)
+#   profile.sh roots                   print every root, one per line (primary first)
+#   profile.sh root-set [--replace] <path>...
+#                                      remember <path>(s) as the root(s) for the current
+#                                      directory; appends unless --replace; `root-set .`
+#                                      forgets the mapping (= work on cwd)
+#   profile.sh root-clear              forget the mapping for the current directory
+#   profile.sh inspect [<root>]        print the repo's top-level files, stack markers and
+#                                      manifest dependencies (works for a root outside cwd)
+#
+# Root resolution, first match wins: $HYPERUI_ROOT (colon-separated) -> --repo <path>
+# (repeatable, any command) -> user.md `roots:` map (current directory -> repo or list) ->
+# the current directory (${CLAUDE_PROJECT_DIR:-$PWD}). The first root is the primary one.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$SCRIPT_DIR/.." && pwd)}"
-PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$PWD}"
-HYPERUI_DIR="$PROJECT_DIR/.hyperui"
-PROFILE="$HYPERUI_DIR/profile.md"
-DATA_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.claude/plugins/data/hyperui}"
+CWD="${CLAUDE_PROJECT_DIR:-$PWD}"
+# Per-machine file. One fixed path on purpose: hooks receive CLAUDE_PLUGIN_DATA (id-dependent,
+# e.g. data/hyperui-tizonai) but Bash-tool commands never do, and both must read the same roots map.
+DATA_DIR="${HYPERUI_DATA:-$HOME/.claude/plugins/data/hyperui}"
 USER_FILE="$DATA_DIR/user.md"
 
 die() { echo "profile.sh: $*" >&2; exit 1; }
 
-usage() { sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,28p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 have_python() { command -v python3 >/dev/null 2>&1; }
 
@@ -269,12 +283,99 @@ def cmd_set(path_str, value, fname):
         f.write(out)
     os.replace(tmp, fname)
 
+# ---- roots map (user.md): `roots:` block of  "<cwd>": <repo>  lines
+def roots_span(fm):
+    idx, depth, s, e, _ = find(fm, ["roots"])
+    if idx is None or depth != 1:
+        return None
+    return idx, s, e
+
+def roots_items(fm):
+    span = roots_span(fm)
+    if not span:
+        return []
+    idx, s, e = span
+    out = []
+    for i in range(s, e):
+        m = KEY_RE.match(fm[i])
+        if m and fm[i].strip() and not fm[i].lstrip().startswith("#"):
+            out.append((i, unquote(m.group(2)), render_value(m.group(4))))
+    return out
+
+def load_fm(fname):
+    text = open(fname, encoding="utf-8").read() if os.path.exists(fname) else ""
+    fm, body = split_doc(text)
+    if fm is None:
+        fm, body = [], text
+    return fm, body
+
+def save_fm(fm, body, fname):
+    out = "---\n" + "".join(l + "\n" for l in fm) + "---\n" + body
+    tmp = fname + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write(out)
+    os.replace(tmp, fname)
+
+def cmd_root_get(cwd, fname):
+    """Print the roots mapped to cwd, one per line (a scalar or a flow list in the file)."""
+    if not os.path.exists(fname):
+        sys.exit(1)
+    fm, _ = load_fm(fname)
+    for i, k, _ in roots_items(fm):
+        if k == cwd:
+            raw = strip_comment(KEY_RE.match(fm[i]).group(4))
+            items = split_flow(raw[1:-1]) if raw.startswith("[") and raw.endswith("]") else [raw]
+            items = [unquote(x) for x in items if unquote(x)]
+            if not items:
+                sys.exit(1)
+            print("\n".join(items)); return
+    sys.exit(1)
+
+def cmd_root_set(cwd, repos, fname):
+    """repos: newline-separated absolute paths; stored as a flow list."""
+    fm, body = load_fm(fname)
+    items = [r for r in repos.split("\n") if r]
+    val = "[" + ", ".join(fmt_scalar(r) for r in items) + "]"
+    line = "  \"" + cwd.replace("\\", "\\\\").replace("\"", "\\\"") + "\": " + val
+    for i, k, _ in roots_items(fm):
+        if k == cwd:
+            fm[i] = line; save_fm(fm, body, fname); return
+    span = roots_span(fm)
+    if span:
+        idx, s, e = span
+        fm[idx] = " " * indent_of(fm[idx]) + "roots:"   # drop a scalar/inline value if any
+        fm[e:e] = [line]
+    else:
+        at = len(fm)
+        while at > 0 and not fm[at-1].strip():
+            at -= 1
+        fm[at:at] = ["roots:", line]
+    save_fm(fm, body, fname)
+
+def cmd_root_del(cwd, fname):
+    if not os.path.exists(fname):
+        return
+    fm, body = load_fm(fname)
+    for i, k, _ in roots_items(fm):
+        if k == cwd:
+            del fm[i]
+            span = roots_span(fm)
+            if span and span[1] == span[2]:
+                del fm[span[0]]
+            save_fm(fm, body, fname); return
+
 if __name__ == "__main__":
     op = sys.argv[1]
     if op == "get":
         cmd_get(sys.argv[2], sys.argv[3])
     elif op == "set":
         cmd_set(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif op == "root-get":
+        cmd_root_get(sys.argv[2], sys.argv[3])
+    elif op == "root-set":
+        cmd_root_set(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif op == "root-del":
+        cmd_root_del(sys.argv[2], sys.argv[3])
 '
 
 # ---------------------------------------------------------------- awk fallback
@@ -341,6 +442,182 @@ fm_set() { # key value file
   if have_python; then python3 -c "$PY_CORE" set "$1" "$2" "$3"; else awk_set "$1" "$2" "$3"; fi
 }
 
+# roots map fallback: lines under a top-level `roots:` shaped  "<cwd>": <repo>
+awk_root_get() { # cwd file
+  awk -v key="$1" '
+    NR == 1 && $0 ~ /^---[ \t]*$/ { infm = 1; next }
+    infm && $0 ~ /^---[ \t]*$/ { exit }
+    !infm { exit }
+    /^[^ \t#]/ { inroots = ($0 ~ /^roots:[ \t]*$/); next }
+    inroots && /^[ \t]+["\x27]?[^"\x27]+["\x27]?:[ \t]*[^ \t]/ {
+      k = $0; sub(/^[ \t]+/, "", k); v = k
+      sub(/["\x27]?:[ \t].*$/, "", k); sub(/^["\x27]/, "", k)
+      sub(/^[^:]*:[ \t]*/, "", v); sub(/[ \t]+#.*$/, "", v)
+      if (v ~ /^\[.*\]$/) { v = substr(v, 2, length(v) - 2); gsub(/[ \t]*,[ \t]*/, "\n", v) }
+      gsub(/^["\x27]|["\x27]$/, "", v); gsub(/\n["\x27]|["\x27]\n/, "\n", v)
+      if (k == key) { print v; found = 1; exit }
+    }
+    END { exit found ? 0 : 1 }' "$2"
+}
+
+awk_root_del() { # cwd file
+  local tmp; [ -f "$2" ] || return 0
+  tmp="$(mktemp)"
+  awk -v key="$1" '
+    NR == 1 && $0 ~ /^---[ \t]*$/ { infm = 1; print; next }
+    infm && $0 ~ /^---[ \t]*$/ { infm = 0 }
+    infm && /^[^ \t#]/ { inroots = ($0 ~ /^roots:[ \t]*$/) }
+    infm && inroots && /^[ \t]+/ {
+      k = $0; sub(/^[ \t]+/, "", k); sub(/["\x27]?:[ \t].*$/, "", k); sub(/^["\x27]/, "", k)
+      if (k == key) next
+    }
+    { print }' "$2" > "$tmp" && mv "$tmp" "$2"
+  # drop a `roots:` line left without children
+  tmp="$(mktemp)"
+  awk '{ lines[NR] = $0 } END {
+    for (i = 1; i <= NR; i++) {
+      if (lines[i] ~ /^roots:[ \t]*$/ && (i == NR || lines[i+1] !~ /^[ \t]+[^ \t]/)) continue
+      print lines[i] } }' "$2" > "$tmp" && mv "$tmp" "$2"
+}
+
+awk_root_set() { # cwd repos(newline-separated) file
+  local tmp val
+  val="[$(printf '%s' "$2" | awk 'NR > 1 { printf ", " } { printf "%s", $0 }')]"
+  set -- "$1" "$val" "$3"
+  awk_root_del "$1" "$3"
+  [ -f "$3" ] || printf -- '---\n---\n' > "$3"
+  tmp="$(mktemp)"
+  awk -v key="$1" -v val="$2" '
+    NR == 1 && $0 ~ /^---[ \t]*$/ { infm = 1; print; next }
+    infm && $0 ~ /^---[ \t]*$/ {
+      if (!done) { if (!hasroots) print "roots:"; print "  \"" key "\": " val; done = 1 }
+      infm = 0; print; next
+    }
+    infm && /^roots:[ \t]*$/ { hasroots = 1; print; print "  \"" key "\": " val; done = 1; next }
+    { print }' "$3" > "$tmp" && mv "$tmp" "$3"
+}
+
+root_map_get() { # cwd
+  [ -f "$USER_FILE" ] || return 1
+  if have_python; then python3 -c "$PY_CORE" root-get "$1" "$USER_FILE"; else awk_root_get "$1" "$USER_FILE"; fi
+}
+root_map_set() { # cwd repo
+  mkdir -p "$DATA_DIR"
+  if have_python; then python3 -c "$PY_CORE" root-set "$1" "$2" "$USER_FILE"; else awk_root_set "$1" "$2" "$USER_FILE"; fi
+}
+root_map_del() { # cwd
+  if have_python; then python3 -c "$PY_CORE" root-del "$1" "$USER_FILE"; else awk_root_del "$1" "$USER_FILE"; fi
+}
+
+# ---------------------------------------------------------------- root resolution
+abs_dir() { # path -> absolute, ~ expanded, relative to CWD; exit 1 if not a directory
+  local p="$1"
+  case "$p" in "~") p="$HOME" ;; "~/"*) p="$HOME/${p#\~/}" ;; esac
+  [ "${p#/}" = "$p" ] && p="$CWD/$p"
+  [ -d "$p" ] || return 1
+  (cd "$p" && pwd -P)
+}
+
+OPT_REPOS=()
+ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --repo)   [ $# -ge 2 ] || die "--repo needs a path"; OPT_REPOS+=("$2"); shift 2 ;;
+    --repo=*) OPT_REPOS+=("${1#--repo=}"); shift ;;
+    *)        ARGS+=("$1"); shift ;;
+  esac
+done
+set -- "${ARGS[@]+"${ARGS[@]}"}"
+
+CWD="$(abs_dir "$CWD" || echo "$CWD")"
+ROOTS=()
+resolve_roots() {
+  local r
+  if [ -n "${HYPERUI_ROOT:-}" ]; then
+    local parts=()
+    IFS=: read -r -a parts <<<"$HYPERUI_ROOT"
+    for r in "${parts[@]+"${parts[@]}"}"; do
+      [ -n "$r" ] && ROOTS+=("$(abs_dir "$r" || die "HYPERUI_ROOT: not a directory: $r")")
+    done
+  elif [ ${#OPT_REPOS[@]} -gt 0 ]; then
+    for r in "${OPT_REPOS[@]}"; do ROOTS+=("$(abs_dir "$r" || die "--repo: not a directory: $r")"); done
+  else
+    while IFS= read -r r; do
+      [ -n "$r" ] || continue
+      if abs_dir "$r" >/dev/null; then ROOTS+=("$(abs_dir "$r")")
+      else echo "profile.sh: remembered root $r no longer exists; skipping it (root-clear to forget it)" >&2; fi
+    done < <(root_map_get "$CWD" 2>/dev/null || true)
+  fi
+  [ ${#ROOTS[@]} -gt 0 ] || ROOTS=("$CWD")
+}
+resolve_roots
+PROJECT_DIR="${ROOTS[0]}"
+HYPERUI_DIR="$PROJECT_DIR/.hyperui"
+PROFILE="$HYPERUI_DIR/profile.md"
+
+cmd_root_set() { # [--replace] path...
+  local replace=0 p t new=() cur=() x seen
+  for p in "$@"; do
+    case "$p" in --replace) replace=1 ;; *) t="$(abs_dir "$p")" || die "not a directory: $p"; new+=("$t") ;; esac
+  done
+  [ ${#new[@]} -gt 0 ] || die "usage: root-set [--replace] <path>..."
+  if [ ${#new[@]} -eq 1 ] && [ "${new[0]}" = "$CWD" ]; then
+    root_map_del "$CWD"; echo "$CWD"; return 0
+  fi
+  if [ $replace -eq 0 ]; then
+    while IFS= read -r x; do [ -n "$x" ] && [ -d "$x" ] && cur+=("$x"); done < <(root_map_get "$CWD" 2>/dev/null || true)
+  fi
+  for t in "${new[@]}"; do
+    seen=0; for x in "${cur[@]+"${cur[@]}"}"; do [ "$x" = "$t" ] && seen=1; done
+    [ $seen -eq 1 ] || cur+=("$t")
+  done
+  root_map_set "$CWD" "$(printf '%s\n' "${cur[@]}")"
+  printf '%s\n' "${cur[@]}"
+}
+
+cmd_root_clear() { root_map_del "$CWD"; echo "$CWD"; }
+
+cmd_inspect() { # [root] — read-only summary so skills can infer the stack without leaving cwd
+  local r="${1:-$PROJECT_DIR}" f found=()
+  r="$(abs_dir "$r")" || die "not a directory: ${1:-$PROJECT_DIR}"
+  echo "root: $r"
+  [ -d "$r/.git" ] && echo "git: yes" || echo "git: no"
+  echo "files: $(ls -1A "$r" 2>/dev/null | grep -v '^\.DS_Store$' | head -40 | tr '\n' ' ')"
+  for f in package.json pnpm-lock.yaml yarn.lock bun.lock bun.lockb package-lock.json next.config.js next.config.mjs next.config.ts \
+           angular.json vite.config.ts vite.config.js astro.config.mjs nuxt.config.ts svelte.config.js app.json app.config.ts \
+           tailwind.config.js tailwind.config.ts postcss.config.js tsconfig.json pubspec.yaml Package.swift Cargo.toml go.mod \
+           pyproject.toml requirements.txt pom.xml build.gradle build.gradle.kts Gemfile composer.json tauri.conf.json \
+           Dockerfile docker-compose.yml compose.yaml Makefile .github/workflows .gitlab-ci.yml terraform main.tf infra; do
+    [ -e "$r/$f" ] && found+=("$f")
+  done
+  ls -d "$r"/*.xcodeproj "$r"/*.xcworkspace >/dev/null 2>&1 && found+=("xcodeproj")
+  echo "markers: ${found[*]:-none}"
+  if [ -f "$r/package.json" ]; then
+    if have_python; then
+      python3 - "$r/package.json" <<'PYI'
+import json, sys
+try:
+    d = json.load(open(sys.argv[1], encoding="utf-8"))
+except Exception as e:
+    print("package.json: unreadable (%s)" % e); sys.exit(0)
+print("package.json name:", d.get("name", ""))
+for k in ("dependencies", "devDependencies"):
+    v = d.get(k) or {}
+    if v: print("%s: %s" % (k, " ".join("%s@%s" % (a, b) for a, b in sorted(v.items()))))
+sc = d.get("scripts") or {}
+if sc: print("scripts:", " ".join(sorted(sc)))
+PYI
+    else
+      echo "package.json: $(grep -E '^\s*"[^"]+"\s*:\s*"[~^]?[0-9]' "$r/package.json" | tr -d ' ",' | tr '\n' ' ')"
+    fi
+  fi
+  [ -f "$r/pubspec.yaml" ] && echo "pubspec: $(grep -E '^\s{2}[a-z_]+:' "$r/pubspec.yaml" | tr -d ' ' | tr '\n' ' ' | cut -c1-300)"
+  [ -f "$r/pyproject.toml" ] && echo "pyproject: $(grep -E '^(name|requires-python|dependencies)' "$r/pyproject.toml" | tr '\n' ' ' | cut -c1-300)"
+  [ -f "$r/go.mod" ] && echo "go.mod: $(head -1 "$r/go.mod")"
+  [ -f "$r/Cargo.toml" ] && echo "Cargo.toml: $(grep -E '^(name|edition)' "$r/Cargo.toml" | tr '\n' ' ')"
+  return 0
+}
+
 # ---------------------------------------------------------------- commands
 cmd_init() {
   local private=0
@@ -393,6 +670,11 @@ case "$cmd" in
   user-get) [ $# -eq 1 ] || die "usage: user-get <key>"; ensure_user_file; fm_get "$1" "$USER_FILE" ;;
   user-set) [ $# -eq 2 ] || die "usage: user-set <key> <value>"; ensure_user_file; fm_set "$1" "$2" "$USER_FILE" ;;
   path)     echo "$HYPERUI_DIR" ;;
+  root)     echo "$PROJECT_DIR" ;;
+  roots)    printf '%s\n' "${ROOTS[@]}" ;;
+  root-set) cmd_root_set "$@" ;;
+  root-clear) cmd_root_clear ;;
+  inspect)  cmd_inspect "$@" ;;
   -h|--help|help|"") usage ;;
   *)        die "unknown command: $cmd (try --help)" ;;
 esac

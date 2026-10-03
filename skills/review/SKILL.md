@@ -3,6 +3,7 @@ name: review
 description: "Review code the plugin or the user wrote before calling it done: security (OWASP Top 10:2025, ASVS, cheat sheets), algorithmic and cyclomatic complexity, and the safety rules for risky actions. Use after any build task, on request ('revisa', 'review this', 'is this safe', 'check my code'), or before a PR — any language. Fixes blocking findings in hyperui's own output; proposes fixes for the user's code."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -15,7 +16,7 @@ does not matter: a clean change gets zero findings.
 
 ## 0. Read memory first
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
 2. Read `.hyperui/profile.md` (`archetype`, `conversation_language`, `stack`, `providers`,
    `purpose`) and `.hyperui/state.md`; skim `.hyperui/decisions.md` for risks already accepted
    — an accepted risk is not re-flagged.

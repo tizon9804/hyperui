@@ -24,6 +24,17 @@ claude plugin install hyperui@tizonai
 `/hyperui` greets once, asks at most three things, then designs, plans, builds, reviews and
 ships with you, in your language. Say `/hyperui --private` if `.hyperui/` must not be committed.
 
+```
+/hyperui --repo ~/path/to/project …  # work on a repo from any directory: that path becomes the project root
+                                     # (.hyperui/, specs, code, ship files); remembered per directory, so say it once
+/hyperui --repo .                    # forget it and work on the current directory again
+```
+
+You can also just say it ("el repo está en ~/x"), or give several repos (`--repo ~/web --repo ~/mobile`,
+"the web is in ../web and the api in ../api") for one workspace with its own `.hyperui/` per repo.
+hyperui reads that repo and writes its `.hyperui/` without prompts; to let it run shell commands there
+(tests, builds) start Claude in the repo or run `/add-dir <path>` once (Claude Code's own rule).
+
 Setup options:
 
 ```
@@ -73,10 +84,14 @@ After setup the installed third-party skills are available too: `/hyperframes`,
 
 ## How it remembers
 
-Project memory lives in `.hyperui/` (profile, brief, design, spec, decisions, state, ship) and is
-committed by default, so the next session — or a teammate — picks up the thread.
-`/hyperui --private` adds `.hyperui/` to `.gitignore` instead.
-A small per-machine profile (`${CLAUDE_PLUGIN_DATA}/user.md`) means you are not profiled again in a new project.
+Project memory lives in `<root>/.hyperui/` (profile, brief, design, spec, decisions, state, ship)
+and is committed by default, so the next session — or a teammate — picks up the thread.
+`/hyperui --private` adds `.hyperui/` to `.gitignore` instead. The root is the current directory
+unless you said `--repo <path>` (or named the path in words): that mapping is stored per
+directory in the per-machine file `~/.claude/plugins/data/hyperui/user.md` (`roots:`), which also keeps a
+small profile (level, language, country) so you are not profiled again in a new project.
+With several repos, each keeps its own `.hyperui/` and the first one holds `.hyperui/workspace.md`
+(the repos, one role each, the cross-repo next step).
 
 ## Grounding
 
@@ -86,8 +101,39 @@ When an official MCP would help, hyperui shows the exact `claude mcp add` line a
 
 ## Requirements
 
-Node ≥ 18 and npm. `python3` for UI UX Pro Max's search scripts. The `claude` CLI for
-the frontend-design and Impeccable plugins and the 21st MCP registration.
+### You need before installing
+
+hyperui does not install these. Each line ends with how to check.
+
+| | Why | Check |
+|---|---|---|
+| **Claude Code CLI**, signed in to a Claude account (hyperui runs on your own Claude; no hyperui account, no telemetry). No documented minimum for the `"skills": ["./"]` manifest form hyperui uses (only the `"."` spelling needs v2.1.221+); **tested on 2.1.288** — stay current. | runs everything | `claude --version` |
+| **macOS** (tested: 15+, Apple Silicon and Intel). Linux should work (bash + python3; untested). Windows only via WSL2 — the hooks and scripts are bash (untested). | hooks, scripts | `uname -s` |
+| **git** | `git` specialist, plugin updates | `git --version` |
+| **Node 24 LTS recommended, ≥ 20 required** (+ npm; `nvm` is the easiest way to manage versions) | `/hyperui:setup` components, `motion` | `node --version` |
+| **python3** (macOS ships it) | `scripts/profile.sh` and `scripts/permit.sh`; without it profile.sh falls back to awk but permit.sh stays silent, so permission prompts appear; UI UX Pro Max search needs it too | `python3 --version` |
+
+Node or python3 missing (or Node < 20)? `/hyperui:setup` prints the install line for your OS
+(Node 24 via `brew install node@24` / `nvm install 24` / NodeSource 24.x) and offers to run it
+(`--install-prereqs`, Homebrew on macOS; on Linux/WSL2 you run the printed line).
+
+### hyperui installs for you when missing (nothing to do)
+
+- **Via `/hyperui:setup`:** HyperFrames skills, UI UX Pro Max skill, Anthropic `frontend-design`
+  plugin, Impeccable plugin, the `motion` npm package in the project.
+- **Via `infra`, on first use:** Terraform — asks once, then `brew install hashicorp/tap/terraform`
+  on macOS; on Linux it prints the official install line for you to run.
+- **Optional, only if you want them:** the 21st.dev components MCP (free key you create at
+  https://21st.dev/mcp; hyperui registers it when you pass `--21st-key`), provider MCPs (Vercel,
+  Supabase, Stripe, Terraform MCP…: hyperui shows the exact `claude mcp add` line and asks before
+  adding).
+
+### Network and permissions
+
+Outbound HTTPS to the official docs and provider pages the skills cite (`WebFetch` prompts for
+permission in default mode — expected). The plugin pre-approves only its own skills, its
+reference reads, `scripts/profile.sh` and writes under `<root>/.hyperui/`; everything else
+follows your normal Claude Code permissions.
 
 ## Local development
 

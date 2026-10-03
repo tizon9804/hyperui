@@ -1,12 +1,27 @@
 ---
 name: design
-description: "Build standout, production-grade frontends end to end: brief → visual direction → design tokens → components → motion → QA. Use when asked to design or build a landing page, marketing site, dashboard, app UI, component or redesign, or to make an existing UI look premium. Orchestrates ui-ux-pro-max, frontend-design, 21st.dev and motion when they are installed."
+description: "Build standout, production-grade frontends end to end: brief → visual direction → design tokens → components → motion → QA. Use when asked to design or build a landing page, marketing site, dashboard, app UI, component or redesign, or to make an existing UI look premium. Orchestrates ui-ux-pro-max, frontend-design, 21st.dev, motion and Impeccable when they are installed."
+user-invocable: false
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:design — standout frontends, end to end
 
 Work as the design lead who owns the result, not as a template filler. Every page gets a point
 of view, a typographic identity and one thing people remember.
+
+## 0. Before anything
+
+- If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+  Profile fields used: archetype, `conversation_language`, `product_languages`, `i18n`,
+  `platform`, `design.*`; also `.hyperui/brief.md` / `design.md` if present — build on the
+  picked direction if there is one.
+- Reply in the conversation language; keep internal reasoning, code and files in English.
+- Tone per archetype: non-tech → one or two plain sentences per step, one question with a
+  recommended answer; dev → the fact + one line of why; senior → the fact, ~12 lines max.
 
 ## 1. Preflight
 
@@ -17,13 +32,24 @@ Check which helpers exist and adapt — never block on a missing one:
 
 ## 2. Process
 
-1. **Brief (5 lines, write it down before any code).** Product and what it does · audience · the ONE job
-   of this page (sign up, download, understand, decide) · 3 tone words · constraints (stack, brand
-   assets, i18n, existing tokens). If the brief lacks the product, infer it from the repo and confirm.
-2. **Direction (the only mandatory checkpoint).** Use `frontend-design` for the point of view and
-   `ui-ux-pro-max` to search styles, palettes and font pairings for the product category. Propose
-   2–3 directions as short cards: name · type pairing · palette (3 colors + accent) · signature move
-   (the one memorable element). Ask the user to pick. Do not build before the pick.
+1. **Brief (5 lines, write it to `.hyperui/brief.md` before any code).** Product and what it
+   does · audience · the ONE job of this page (sign up, download, understand, decide) · 3 tone
+   words · constraints (stack, brand assets, existing tokens). If the brief lacks the product,
+   infer it from the repo and confirm. **Product language(s) / i18n:** if `product_languages`
+   is empty, ask once which language(s) the product ships in and whether it needs i18n (several
+   locales, default locale, RTL); store `product_languages` + `i18n` in the profile. Never infer
+   it from the conversation language; never ask again once stored.
+2. **Direction (the only mandatory checkpoint — show before build).** Use `frontend-design` for
+   the point of view and `ui-ux-pro-max` to search styles, palettes and font pairings for the
+   product category. Produce 2–3 directions, each distinct in type pairing, palette (3 colors +
+   accent) and signature move (the one memorable element).
+   **Artifact contract:** each direction is ONE HTML page — the real copy in the product
+   language, the direction's tokens and display type, a visible entrance animation, light and
+   dark. Publish each with the Artifact tool (load the `artifact-design` skill first when it is
+   available); when the session offers `/design` (Claude Design artboards), use it instead.
+   No Artifact tool in the session → write `.hyperui/directions/<name>.html` and give the paths.
+   Record every URL/path in `.hyperui/design.md`. Present them as one line per direction (name ·
+   type pairing · palette · signature · link) plus the pick question; the user picks before any build.
 3. **Tokens before components.** Write CSS custom properties on `:root`: color *roles*
    (`--bg`, `--surface`, `--text`, `--muted`, `--accent`, `--border`), type scale, spacing, radius,
    elevation, motion durations and easings. Dark mode under `@media (prefers-color-scheme: dark)`
@@ -37,10 +63,14 @@ Check which helpers exist and adapt — never block on a missing one:
 5. **Motion.** Hand off to the `motion` skill. Defaults: entrance stagger on the hero, hover and tap
    micro-feedback on interactive elements, scroll reveal only where it aids reading. Always honor
    `prefers-reduced-motion`.
-6. **QA before declaring done.** Responsive at 360 / 768 / 1280 / 1920; 16px side gutters on
+6. **QA.** Responsive at 360 / 768 / 1280 / 1920; 16px side gutters on
    phone; no horizontal scroll; contrast AA; visible focus states; full keyboard navigation;
    every image has width/height; fonts cause no layout shift; Lighthouse ≥ 90 in all four
    categories (run it when a build is available and report the numbers).
+7. **Impeccable gate (before declaring any UI done).** Check `claude plugin list`. If Impeccable
+   is installed: run `/impeccable audit`, address the findings, then `/impeccable polish`. If
+   not: say once that it is not installed and suggest `/hyperui:setup` (note it in `state.md`
+   so the hint is not repeated). No UI is "done" without one of the two.
 
 ## 3. Rules of taste
 
@@ -78,16 +108,19 @@ Lighthouse numbers if measured · open decisions for the user. Keep it short; th
 
 ## 6. Redesigns and existing UIs
 
-- Audit first: list the current tokens (or their absence), the fonts actually loaded, the number of
-  distinct grays/radii/shadows in use. The count is the diagnosis; the fix is consolidation.
-- Keep information architecture unless the brief asks otherwise; change the skin, type and
-  rhythm. Users forgive a new look, not a lost page.
+- Audit first, the live site and the repo: tokens present or absent, the fonts actually loaded,
+  the count of distinct grays / radii / shadows in use. The count is the diagnosis; the fix is
+  consolidation. Put the numbers in the reply in one line.
+- Directions keep the information architecture unless the brief asks otherwise and are visibly
+  a step up: new skin, type and rhythm. Users forgive a new look, not a lost page. They go
+  through the same artifact contract (step 2) before any code changes.
 - Migrate incrementally: tokens → global type → shared primitives (button, card, input) → pages.
   Each step ships and keeps Lighthouse ≥ 90.
 - Delete dead CSS as you go; the redesign is not done while two systems coexist.
 
 ## 7. i18n and content
 
+- Ship every locale in `product_languages`; with `i18n: true`, route per locale and set `lang`.
 - Design with the longest language first (Spanish and German run ~25–30% longer than English);
   no fixed-width labels, no truncation of CTAs.
 - Dates, numbers and currencies through `Intl.*`, never hand-formatted.
@@ -118,3 +151,15 @@ Lighthouse numbers if measured · open decisions for the user. Keep it short; th
 }
 body { background: var(--bg); color: var(--text); font: var(--fs-body)/1.6 var(--font-body); }
 ```
+
+## 9. Close the turn
+
+Write what you decided: picked direction, tokens, fonts, palette, signature element, artifact
+URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
+one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
+
+## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
+
+Open the source before stating. Canonical references: [`references/sources.md`](references/sources.md).

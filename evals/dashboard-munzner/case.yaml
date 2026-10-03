@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: dashboard-munzner
+description: "Developer, Spanish, asks for a sales dashboard from a CSV: the Munzner what–why–how table must precede any chart code; key comparison on aligned position/length; no pie as key comparison, no 3D, no rainbow; sources named; design.md gets a Visualization section (REQ-015, REQ-018)."
+tags: [wave3, viz, es]
+expected_outcome: "What–why–how table before chart code; bars/columns for the key comparison, pie rejected or absent; no 3D, no rainbow; Munzner slides and/or the 2009/2013 papers named; .hyperui/design.md has a ## Visualization section."
+context:
+  scaffold_script: fixture.sh

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: expert-redesign-next
+description: "Senior user, profile already filled, Next.js app with hard-coded colors: redesign request must skip onboarding and the product-language question, audit the CSS, promise/produce 2–3 distinct directions and ask for the pick (REQ-002, REQ-005, REQ-017)."
+tags: [wave1, design, es]
+expected_outcome: "Spanish, ≤ 12 lines, no onboarding, no product-language question, CSS audit numbers mentioned, 2–3 directions with distinct type/palette (as .hyperui/directions/*.html or promised), asks for the pick, Impeccable/setup mentioned at most once."
+context:
+  scaffold_script: fixture.sh

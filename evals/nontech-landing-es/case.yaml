@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: nontech-landing-es
+description: "First contact in an empty project, non-technical user writing in Spanish: onboarding intro + ≤ 3 numbered questions, business/personal asked, next step proposed, .hyperui/profile.md created (REQ-001, REQ-002, REQ-017)."
+tags: [wave1, onboarding, es]
+expected_outcome: "Spanish reply: ≤ 8-line intro, ≤ 3 numbered questions in one message incl. business vs personal, no product-language question, a stated next step (2–3 visual proposals), .hyperui/profile.md initialised, no specialist names."
+context:
+  scaffold_script: fixture.sh

@@ -1,0 +1,29 @@
+{
+  "description": "hyperui: introduce hyperui on the first session in a project without .hyperui/; pre-approve the plugin's own skills, reference reads and profile.sh (see scripts/permit.sh)",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/welcome.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Skill|Read|Glob|Grep|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/permit.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

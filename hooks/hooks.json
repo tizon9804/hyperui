@@ -1,0 +1,17 @@
+{
+  "description": "hyperui: introduce hyperui on the first session in a project without .hyperui/",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}/scripts/welcome.sh\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

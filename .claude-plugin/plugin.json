@@ -3,6 +3,7 @@
   "name": "hyperui",
   "version": "0.2.0",
   "description": "Frontend craft kit: one command installs HyperFrames, Motion, UI UX Pro Max, Impeccable, 21st.dev MCP and Anthropic's frontend-design skill; plus opinionated skills for design, motion and promo videos.",
+  "skills": ["./"],
   "author": {
     "name": "Stevenson Contreras",
     "url": "https://tizonai.com"

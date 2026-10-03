@@ -1,0 +1,2 @@
+# Quality gate mode for scripts/check.sh: lenient | strict (see the header of scripts/check.sh)
+lenient

@@ -1,6 +1,7 @@
 ---
 name: video
 description: "Make a short promo/demo video of a web product with HyperFrames (HTML → MP4), reusing the project's real brand tokens and components. Use when asked for a promo, teaser, product video, launch clip, social clip."
+user-invocable: false
 ---
 
 # hyperui:video — promo clip with HyperFrames
@@ -8,6 +9,16 @@ description: "Make a short promo/demo video of a web product with HyperFrames (H
 HyperFrames renders HTML/CSS/JS compositions to deterministic MP4. This skill owns the
 *brief and the brand*; the installed `/hyperframes` skills own the framework. Never
 reimplement their API or project layout — hand the composition to them.
+
+## 0. Before anything
+
+- Read `.hyperui/profile.md` (archetype, `conversation_language`, `product_languages`,
+  `design.*`), `.hyperui/state.md` and `.hyperui/design.md`. Never re-ask what is there: the
+  picked direction's fonts, palette and motion register are the clip's brand.
+- Clip copy language = `product_languages[0]` unless the user says otherwise.
+- Reply in the conversation language; keep internal reasoning, code and files in English.
+- Tone per archetype: non-tech → one or two plain sentences per step; dev → the fact + one
+  line of why; senior → the fact.
 
 ## 1. Preflight
 
@@ -61,6 +72,7 @@ Check that the HyperFrames skills exist in `.claude/skills/hyperframes` (project
    ```
 
 4. Report: output path, duration, aspect, file size, and which tokens/assets were used.
+   Record the render path (and the preview command) in `.hyperui/state.md`.
 
 ## 5. QA checklist (before reporting done)
 
@@ -73,3 +85,14 @@ Check that the HyperFrames skills exist in `.claude/skills/hyperframes` (project
 - [ ] Audio, if any, does not clip and ends clean.
 
 If any item fails, fix it in the composition and re-render; do not ship with a known miss.
+
+## 6. Close the turn
+
+Write the render path and the next step to `.hyperui/state.md`, and one ADR-lite line per
+settled decision (message, duration, aspect, copy language) to `decisions.md`
+(`date · decision · why · source`).
+
+## Sources
+
+HyperFrames API and layout come from its docs and skills. Canonical references:
+[`references/sources.md`](references/sources.md).

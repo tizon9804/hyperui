@@ -10,8 +10,8 @@
     {
       "name": "hyperui",
       "source": "./",
-      "description": "Frontend craft kit: installs HyperFrames, Motion, UI UX Pro Max, 21st.dev MCP and frontend-design, plus skills for design, motion and promo videos.",
-      "version": "0.1.0",
+      "description": "Frontend craft kit: installs HyperFrames, Motion, UI UX Pro Max, Impeccable, 21st.dev MCP and frontend-design, plus skills for design, motion and promo videos.",
+      "version": "0.2.0",
       "category": "design"
     }
   ]

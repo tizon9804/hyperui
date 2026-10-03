@@ -46,6 +46,11 @@ if command -v claude >/dev/null 2>&1; then
   else
     row "frontend-design plugin" "missing" "claude plugin install frontend-design@claude-plugins-official"
   fi
+  if claude plugin list 2>/dev/null | grep -q 'impeccable'; then
+    row "Impeccable plugin" "installed" "claude plugins (impeccable)"
+  else
+    row "Impeccable plugin" "missing" "run /hyperui:setup (pbakaus/impeccable)"
+  fi
   if claude mcp list 2>/dev/null | grep -Eq '^21st[: ]'; then
     row "21st.dev MCP" "installed" "claude mcp (user scope)"
   else
@@ -53,6 +58,7 @@ if command -v claude >/dev/null 2>&1; then
   fi
 else
   row "frontend-design plugin" "unknown" "claude CLI not found"
+  row "Impeccable plugin" "unknown" "claude CLI not found"
   row "21st.dev MCP" "unknown" "claude CLI not found"
 fi
 

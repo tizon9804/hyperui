@@ -11,6 +11,7 @@ plugin's own skills tell Claude how to use them well.
 | **UI UX Pro Max** | Searchable design intelligence: styles, palettes, font pairings, UX rules. | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | **21st.dev MCP** | 10k+ React/Tailwind components, searchable and generated from the editor. | https://21st.dev/mcp |
 | **frontend-design** | Anthropic's official design-direction skill. | `frontend-design@claude-plugins-official` |
+| **Impeccable** | Design vocabulary for agents: `/impeccable audit`, `polish`, `typeset`, `critique`… anti-pattern detection. | https://impeccable.style · `pbakaus/impeccable` |
 
 ## Install on any machine
 
@@ -25,7 +26,7 @@ Then, inside the project you are working on:
 /hyperui:setup                       # project scope: skills → ./.claude/skills, motion → package.json
 /hyperui:setup --global              # skills → ~/.claude/skills (once per machine)
 /hyperui:setup --21st-key <key>      # also register the 21st.dev MCP (user scope, key never committed)
-/hyperui:setup --skip-motion         # any of: --skip-hyperframes --skip-uipro --skip-motion --skip-21st --skip-frontend-design
+/hyperui:setup --skip-motion         # any of: --skip-hyperframes --skip-uipro --skip-motion --skip-21st --skip-frontend-design --skip-impeccable
 /hyperui:setup --dry-run             # print the commands, install nothing
 ```
 
@@ -43,12 +44,12 @@ before running setup.
 | `/hyperui:video` | Promo/demo clip with HyperFrames from the project's real tokens and assets. |
 
 After setup the installed third-party skills are available too: `/hyperframes`,
-`/ui-ux-pro-max`, `/frontend-design`.
+`/ui-ux-pro-max`, `/frontend-design`, `/impeccable <command>`.
 
 ## Requirements
 
 Node ≥ 18 and npm. `python3` for UI UX Pro Max's search scripts. The `claude` CLI for
-the frontend-design plugin and the 21st MCP registration.
+the frontend-design and Impeccable plugins and the 21st MCP registration.
 
 ## Local development
 

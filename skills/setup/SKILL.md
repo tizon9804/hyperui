@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Install the hyperui stack (HyperFrames, Motion, UI UX Pro Max, 21st.dev MCP, frontend-design) into the current project. Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--dry-run]"
+description: "Install the hyperui stack (HyperFrames, Motion, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable) into the current project. Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--dry-run]"
 disable-model-invocation: true
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh *)
@@ -31,11 +31,11 @@ checks each component before touching anything.
    ```
 
 5. Close with one line on what to try next: `/hyperui:design` for a design brief, `/hyperframes`
-   for a video, `/ui-ux-pro-max`, `/frontend-design`.
+   for a video, `/ui-ux-pro-max`, `/frontend-design`, `/impeccable audit`.
 
 ## Rules
 
 - Never improvise extra installs or fixes beyond what the script does. If a step fails,
   relay the `[hyperui] ✗` line and the script's own hint; the user decides.
 - Flags pass straight through: `--global`, `--21st-key <key>`, `--skip-hyperframes`,
-  `--skip-uipro`, `--skip-motion`, `--skip-21st`, `--skip-frontend-design`, `--dry-run`.
+  `--skip-uipro`, `--skip-motion`, `--skip-21st`, `--skip-frontend-design`, `--skip-impeccable`, `--dry-run`.

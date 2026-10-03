@@ -10,6 +10,7 @@ SKIP_UIPRO=0
 SKIP_MOTION=0
 SKIP_21ST=0
 SKIP_FD=0
+SKIP_IMP=0
 KEY_21ST="${TWENTY_FIRST_API_KEY:-}"
 
 usage() {
@@ -18,12 +19,12 @@ Usage: setup.sh [options]
 
 Installs into the current project (cwd):
   Motion (npm)            HyperFrames skills        UI UX Pro Max skill
-  frontend-design plugin  21st.dev MCP (user scope, needs a key)
+  frontend-design plugin  Impeccable plugin        21st.dev MCP (user scope, needs a key)
 
 Options:
   --global              Install the skills to ~/.claude/skills instead of ./.claude/skills
   --21st-key <key>      21st.dev API key (or export TWENTY_FIRST_API_KEY)
-  --skip-hyperframes    --skip-uipro    --skip-motion    --skip-21st    --skip-frontend-design
+  --skip-hyperframes    --skip-uipro    --skip-motion    --skip-21st    --skip-frontend-design    --skip-impeccable
   --dry-run             Print every command instead of running it
   -h, --help            This help
 USAGE
@@ -38,6 +39,7 @@ while [[ $# -gt 0 ]]; do
     --skip-motion) SKIP_MOTION=1 ;;
     --skip-21st) SKIP_21ST=1 ;;
     --skip-frontend-design) SKIP_FD=1 ;;
+    --skip-impeccable) SKIP_IMP=1 ;;
     --21st-key) shift; KEY_21ST="${1:-}" ;;
     --21st-key=*) KEY_21ST="${1#*=}" ;;
     -h|--help) usage; exit 0 ;;
@@ -100,7 +102,7 @@ if command -v claude >/dev/null 2>&1; then
   ok "claude CLI $(claude --version 2>/dev/null | head -1)"
   HAS_CLAUDE=1
 else
-  warn "claude CLI not found — frontend-design plugin and 21st MCP steps will be skipped"
+  warn "claude CLI not found — frontend-design, Impeccable and 21st MCP steps will be skipped"
   HAS_CLAUDE=0
 fi
 if [[ $PREFLIGHT_OK -eq 0 ]]; then
@@ -172,6 +174,25 @@ else
   fi
 fi
 
+# ---------------------------------------------------------------- e2. impeccable plugin
+if [[ $SKIP_IMP -eq 1 ]]; then
+  skip "impeccable (--skip-impeccable)"; record "Impeccable plugin" "skipped" "-"
+elif [[ $HAS_CLAUDE -eq 0 ]]; then
+  skip "impeccable: claude CLI not found"; record "Impeccable plugin" "skipped (no claude)" "-"
+elif [[ $DRY -eq 0 ]] && claude plugin list 2>/dev/null | grep -q 'impeccable'; then
+  ok "impeccable plugin already installed"; record "Impeccable plugin" "present" "claude plugins"
+else
+  IMP_OK=1
+  if [[ $DRY -eq 1 ]] || ! claude plugin marketplace list 2>/dev/null | grep -q 'impeccable'; then
+    run "add Impeccable marketplace" claude plugin marketplace add pbakaus/impeccable || IMP_OK=0
+  fi
+  if [[ $IMP_OK -eq 1 ]] && run "install Impeccable plugin" claude plugin install impeccable@impeccable; then
+    did "impeccable plugin installed"; record "Impeccable plugin" "$(status_installed)" "claude plugins (impeccable)"
+  else
+    fail "impeccable plugin install failed"; FAILURES+=("impeccable"); record "Impeccable plugin" "FAILED" "-"
+  fi
+fi
+
 # ---------------------------------------------------------------- f. 21st.dev MCP
 if [[ $SKIP_21ST -eq 1 ]]; then
   skip "21st MCP (--skip-21st)"; record "21st.dev MCP" "skipped" "-"
@@ -202,7 +223,7 @@ for row in "${SUMMARY[@]}"; do
   printf '  %-24s %-24s %s\n' "$c" "$s" "$w"
 done
 echo
-echo "[hyperui] Try: /hyperui:design (design brief), /hyperframes (video), /ui-ux-pro-max, /frontend-design"
+echo "[hyperui] Try: /hyperui:design (design brief), /hyperframes (video), /ui-ux-pro-max, /frontend-design, /impeccable audit"
 
 if [[ ${#FAILURES[@]} -gt 0 ]]; then
   echo "[hyperui] ✗ failed steps: ${FAILURES[*]}"

@@ -2,6 +2,9 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.4.2 — 2026-10-03
+- npm package renamed to `@tizonai/hyperui` (scoped under the tizonai org); the binary stays `hyperui`: `npx @tizonai/hyperui install`.
+
 ## 0.4.1 — 2026-10-03
 - License changed from MIT to Apache License 2.0; `NOTICE` added (attribution must be preserved).
 

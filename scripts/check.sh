@@ -120,7 +120,7 @@ done
 [[ $gated_count -eq 0 ]] && ok "specialists: user-invocable: false + ## Sources + allowed-tools (Read + profile.sh) + root preamble (gate: $GATE)"
 
 # (e) company-agnostic grep
-if hits="$(grep -rniE '\bolo\b|ubits|ololabs|engage-specs|OLO-[0-9]' \
+if hits="$(grep -rnIiE '\bolo\b|ubits|ololabs|engage-specs|OLO-[0-9]' \
       --exclude-dir=.git --exclude-dir=node_modules --exclude=check.sh . 2>/dev/null)"; then
   bad "company-agnostic grep found hits:"
   printf '%s\n' "$hits" | sed 's/^/        /'

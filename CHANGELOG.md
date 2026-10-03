@@ -2,6 +2,10 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.4.4 — 2026-10-03
+- README: animated hero demo (`docs/assets/demo.webp`, 9 s) recorded from a real page built in the hyperui style (`docs/assets/demo/`, interactive when opened).
+- `scripts/check.sh`: company-agnostic grep skips binary files (`-I`).
+
 ## 0.4.3 — 2026-10-03
 - Repository moved to the `tizonai` GitHub organization: `claude plugin marketplace add tizonai/hyperui` (the old `tizon9804/hyperui` keeps working through GitHub redirects).
 

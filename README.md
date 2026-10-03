@@ -16,6 +16,9 @@
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20(WSL2)-lightgrey" alt="macOS | Linux (WSL2)">
 </p>
 
+<p align="center"><img src="docs/assets/demo.webp" width="880" alt="hyperui demo: staggered hero, 3D card, parallax, spring interactions"></p>
+<p align="center"><i>A landing built with <code>/hyperui:design</code> + <code>/hyperui:motion</code> — recorded from the real page in <a href="docs/assets/demo/">docs/assets/demo/</a> (open it to feel the interactions live).</i></p>
+
 **hyperui** is a [Claude Code](https://code.claude.com) plugin: one visible command, `/hyperui`, takes a product with a UI — web, mobile, macOS, Windows — from idea to shipped. It profiles you in at most three questions, shows design directions before writing any code, plans with gated specs, builds with per-language rules and TDD, reviews security and complexity, and guides shipping (domain, hosting, payments by seller country) and infra.
 It remembers everything per project in a `.hyperui/` folder, so you never answer twice — and it works from any directory with `--repo`, including several repos at once.
 

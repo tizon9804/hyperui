@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Notes — hyperui motion demo</title>
+<meta name="description" content="A fictional landing page built in the hyperui brand to show what /hyperui:design + /hyperui:motion produce: staggered entrances, a 3D tilt card, parallax depth layers, scroll-linked reveals and spring interactions. Deterministic timeline for recording, live interactions afterwards.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<div class="stage" id="stage" aria-label="Acme Notes landing page demo">
+
+  <!-- depth layers: parallax at different speeds, blurred, transform-only -->
+  <div class="depth" aria-hidden="true">
+    <div class="grid"></div>
+    <div class="blob blob-a" data-depth="0.18"></div>
+    <div class="blob blob-b" data-depth="0.55"></div>
+    <div class="blob blob-c" data-depth="0.32"></div>
+  </div>
+
+  <div class="world" id="world">
+
+    <!-- ===== hero ===== -->
+    <header class="nav">
+      <div class="brand"><span class="brand-mark"></span>Acme Notes</div>
+      <nav class="nav-links"><a href="#">Product</a><a href="#">Pricing</a><a href="#">Changelog</a><a href="#">Docs</a></nav>
+      <a href="#" class="nav-cta">Sign in</a>
+    </header>
+
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow stagger" data-i="0"><span class="dot"></span>Acme Notes 2.0 is out</p>
+        <h1 class="headline" id="headline">
+          <span class="word">Notes</span>
+          <span class="word">that</span>
+          <span class="word">think</span>
+          <span class="word">ahead</span>
+          <span class="word">of</span>
+          <span class="word accent">you.</span>
+        </h1>
+        <p class="sub stagger" data-i="1">Capture in one keystroke, link ideas without filing, and let the page suggest the next step. Local-first, synced in milliseconds, yours forever.</p>
+        <div class="actions stagger" data-i="2">
+          <a href="#" class="btn btn-primary">Start free</a>
+          <a href="#" class="btn btn-ghost">See how it works<span class="arrow">→</span></a>
+        </div>
+        <p class="proof stagger" data-i="3">Trusted by 42,000 writers, founders and research teams.</p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="card-scene">
+          <div class="glow" id="glow"></div>
+          <article class="product-card" id="product-card">
+            <div class="pc-sheen" aria-hidden="true"><i id="sheen"></i></div>
+            <div class="pc-head">
+              <span class="pc-swatch"></span>
+              <h2>Launch plan — Q4</h2>
+              <span class="chip chip-ok"><span class="dot"></span>Synced · just now</span>
+            </div>
+            <ul class="pc-list">
+              <li class="done"><span class="check"></span>Write the announcement draft</li>
+              <li class="done"><span class="check"></span>Record a 90-second walkthrough</li>
+              <li><span class="check"></span>Review the pricing page with Mara</li>
+              <li><span class="check"></span>Schedule the changelog post</li>
+            </ul>
+            <div class="pc-tags"><span>#launch</span><span>#marketing</span><span>#q4</span></div>
+            <div class="pc-foot">
+              <div class="avatars"><span>MA</span><span>JS</span><span>TK</span></div>
+              <span class="muted">Edited by Mara · 2 min ago</span>
+            </div>
+            <div class="pc-float">
+              <span class="spark"></span>
+              <div><b>Suggested next step</b><br>Add the pricing review to Thursday's agenda.</div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== features (revealed by the scroll) ===== -->
+    <section class="features">
+      <div class="features-head">
+        <div>
+          <p class="kicker reveal" data-r="0">Everything in its place</p>
+          <h2 class="reveal" data-r="0">One notebook that keeps up with how you think.</h2>
+        </div>
+        <div class="tabs reveal" data-r="1" role="tablist" aria-label="Audience" id="tabs">
+          <span class="tab-indicator" id="tab-indicator"></span>
+          <button role="tab" aria-selected="true" class="tab is-active">Writers</button>
+          <button role="tab" aria-selected="false" class="tab">Teams</button>
+          <button role="tab" aria-selected="false" class="tab">Developers</button>
+        </div>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature reveal" data-r="0">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8z"/></svg></div>
+          <h3>Capture anywhere</h3>
+          <p>Clip a page, dictate on the go, paste a screenshot. It lands in the right notebook, already tagged.</p>
+        </article>
+        <article class="feature reveal" data-r="1">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></div>
+          <h3>Linked thinking</h3>
+          <p>Backlinks and a graph that fill in as you write. Nothing gets lost in a folder again.</p>
+        </article>
+        <article class="feature reveal" data-r="2">
+          <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3>Ship together</h3>
+          <p>Comments, tasks and reviews live in the note itself. Decide where the work is, not in a chat.</p>
+        </article>
+      </div>
+
+      <div class="cta reveal" data-r="0">
+        <div>
+          <h3>Start writing in 30 seconds.</h3>
+          <p>Free for personal use. No card, no setup, your data stays on your device.</p>
+        </div>
+        <a href="#" class="btn btn-primary btn-lg" id="cta-btn">Start free</a>
+      </div>
+
+      <p class="platforms reveal" data-r="1"><span class="muted">Available on</span><span>macOS</span><span>Windows</span><span>iOS</span><span>Android</span><span>Web</span></p>
+    </section>
+  </div>
+
+  <!-- simulated pointer (recording) -->
+  <div class="pointer" id="pointer" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="22" height="22"><path d="M5 3l14 8.5-6.2 1.3L9.6 19 5 3z" fill="#f4f6f8" stroke="#0b0d12" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    <span class="pointer-ring"></span>
+  </div>
+
+  <!-- wordmark -->
+  <a class="wordmark" id="wordmark" href="https://github.com/tizonai/hyperui" title="Replay the demo">
+    <svg viewBox="0 0 88 88" width="18" height="18" aria-hidden="true"><rect x="3" y="3" width="82" height="82" rx="22" fill="none" stroke="#3ecf8e" stroke-width="6"/><rect x="20" y="22" width="48" height="10" rx="5" fill="#3ecf8e"/><rect x="20" y="39" width="34" height="10" rx="5" fill="#3ecf8e" opacity=".4"/><rect x="20" y="56" width="22" height="10" rx="5" fill="#3ecf8e" opacity=".4"/></svg>
+    <span>built with <b>hyperui</b></span>
+  </a>
+</div>
+<script src="demo.js"></script>
+</body>
+</html>

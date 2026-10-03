@@ -13,10 +13,12 @@
 #   profile.sh path                    print the .hyperui directory of the resolved root
 #   profile.sh root                    print the primary project root (absolute)
 #   profile.sh roots                   print every root, one per line (primary first)
-#   profile.sh root-set [--replace] <path>...
+#   profile.sh root-set [--replace] [--move] <path>...
 #                                      remember <path>(s) as the root(s) for the current
 #                                      directory; appends unless --replace; `root-set .`
-#                                      forgets the mapping (= work on cwd)
+#                                      forgets the mapping (= work on cwd); --move carries an
+#                                      existing <cwd>/.hyperui/ into the first new root when
+#                                      that root has none (onboarding started before the path)
 #   profile.sh root-clear              forget the mapping for the current directory
 #   profile.sh inspect [<root>]        print the repo's top-level files, stack markers and
 #                                      manifest dependencies (works for a root outside cwd)
@@ -555,10 +557,10 @@ PROJECT_DIR="${ROOTS[0]}"
 HYPERUI_DIR="$PROJECT_DIR/.hyperui"
 PROFILE="$HYPERUI_DIR/profile.md"
 
-cmd_root_set() { # [--replace] path...
-  local replace=0 p t new=() cur=() x seen
+cmd_root_set() { # [--replace] [--move] path...
+  local replace=0 move=0 p t new=() cur=() x seen
   for p in "$@"; do
-    case "$p" in --replace) replace=1 ;; *) t="$(abs_dir "$p")" || die "not a directory: $p"; new+=("$t") ;; esac
+    case "$p" in --replace) replace=1 ;; --move) move=1 ;; *) t="$(abs_dir "$p")" || die "not a directory: $p"; new+=("$t") ;; esac
   done
   [ ${#new[@]} -gt 0 ] || die "usage: root-set [--replace] <path>..."
   if [ ${#new[@]} -eq 1 ] && [ "${new[0]}" = "$CWD" ]; then
@@ -572,6 +574,13 @@ cmd_root_set() { # [--replace] path...
     [ $seen -eq 1 ] || cur+=("$t")
   done
   root_map_set "$CWD" "$(printf '%s\n' "${cur[@]}")"
+  if [ $move -eq 1 ] && [ -d "$CWD/.hyperui" ] && [ "${new[0]}" != "$CWD" ]; then
+    if [ -e "${new[0]}/.hyperui" ]; then
+      echo "profile.sh: ${new[0]}/.hyperui already exists; $CWD/.hyperui left in place" >&2
+    else
+      mv "$CWD/.hyperui" "${new[0]}/.hyperui" && echo "moved $CWD/.hyperui -> ${new[0]}/.hyperui" >&2
+    fi
+  fi
   printf '%s\n' "${cur[@]}"
 }
 

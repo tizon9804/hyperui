@@ -19,7 +19,7 @@ Arguments: `$ARGUMENTS` — `--private` → §2, `--repo <path>` → §0; the re
 Memory helper — always its full quoted path, never after a `cd` (the current directory is its
 key) nor behind an env assignment (use `--repo`, or the allow rule will not match): `"${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh"` → `init [--private]` · `get <key>` ·
 `set <key> <value>` · `private` · `user-get <key>` · `user-set <key> <value>` · `path` · `root` ·
-`roots` · `root-set [--replace] <path>...` · `root-clear` · `inspect`. Dotted keys (`stack.framework`). It
+`roots` · `root-set [--replace|--move] <path>...` · `root-clear` · `inspect`. Dotted keys (`stack.framework`). It
 edits `<root>/.hyperui/profile.md` and the per-machine `~/.claude/plugins/data/hyperui/user.md`; `state.md`, `brief.md`,
 `decisions.md` are plain markdown you edit directly, by absolute path under the root.
 
@@ -87,15 +87,15 @@ Trigger: `<root>/.hyperui/profile.md` does not exist. Do these in order:
    3. Anything already decided? (stack, provider, brand, deadline — free text) — **skip** when
       the repo already answers it.
    0. **Where is the repo?** — **only** when the root does not look like a project (no `.git/`,
-      no package manifest, no `src/`) **and** no mapping exists: "Where is the repo? (path) — or
-      I create the project here". Takes one of the three slots (drop 3 first). A path →
-      `root-set` and continue there; "here" → stay and scaffold here. Never when the current
-      directory is clearly a project.
+      no package manifest, no `src/`) **and** no mapping exists: "Is there already a repo for
+      this? Give me the path — or I create the project here". Takes one of the three slots (drop
+      3 first). Memory is still created here now (step 1); a path in the answer → `root-set
+      --move <path>` (moves `.hyperui/` there) and continue in that root; "here" or no answer →
+      stay and scaffold here. Never when the current directory is clearly a project.
 4. **End the same message with the request itself**, not with the questions: one line naming
    the next step, tied to the request ("Next: as soon as you answer 2, I show you 2–3 looks of
    the landing as HTML pages to pick one"). The only tool calls of this turn: `profile.sh
-   init`/`set` (init only once the root is settled — question 0 answered or not needed) and
-   reading the repo; the specialist starts next turn. A skipped question → proceed next turn
+   init`/`set` and reading the repo; the specialist starts next turn. A skipped question → proceed next turn
    with a stated assumption ("I'll assume personal; tell me if it's a business") in the profile.
 5. Write what you already know now, and each answer when it arrives, with `profile.sh set
    <key> <value>` (`conversation_language` = the message's language; `platform`; `archetype`;

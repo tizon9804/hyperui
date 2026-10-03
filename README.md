@@ -10,7 +10,7 @@
   <a href="https://www.npmjs.com/package/hyperui"><img src="https://img.shields.io/npm/v/hyperui" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/hyperui"><img src="https://img.shields.io/npm/dm/hyperui" alt="npm downloads"></a>
   <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftizon9804%2Fhyperui%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=plugin" alt="plugin version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue" alt="MIT"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-%E2%89%A5%202.1.221-black" alt="Claude Code >= 2.1.221">
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-brightgreen" alt="node >= 20">
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20(WSL2)-lightgrey" alt="macOS | Linux (WSL2)">
@@ -221,4 +221,4 @@ claude plugin update hyperui@tizonai
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE). Third-party components keep their own licenses: [HyperFrames](https://github.com/heygen-com/hyperframes) (Apache-2.0), [Impeccable](https://github.com/pbakaus/impeccable), [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), [21st.dev](https://21st.dev), [frontend-design](https://github.com/anthropics/claude-plugins-official).
+Apache License 2.0 — see [`LICENSE`](LICENSE); keep [`NOTICE`](NOTICE) (author attribution) in any redistribution. Third-party components keep their own licenses: [HyperFrames](https://github.com/heygen-com/hyperframes) (Apache-2.0), [Impeccable](https://github.com/pbakaus/impeccable), [UI UX Pro Max](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), [21st.dev](https://21st.dev), [frontend-design](https://github.com/anthropics/claude-plugins-official).

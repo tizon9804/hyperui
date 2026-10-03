@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # hyperui:setup — install the frontend craft stack into the current project.
 # Idempotent: every step checks before acting; failures never abort the others.
+# Steps: preflight → Motion (npm) → Motion AI Kit (official /motion skill + motion-reviewer
+# agent from the motion-ai npm package, and the hosted `motion` MCP; `motion-plus` only with
+# --motion-plus) → HyperFrames → UI UX Pro Max → frontend-design → Impeccable → 21st.dev MCP.
 set -euo pipefail
 
 GLOBAL=0
@@ -11,6 +14,8 @@ SKIP_MOTION=0
 SKIP_21ST=0
 SKIP_FD=0
 SKIP_IMP=0
+SKIP_MKIT=0
+MOTION_PLUS=0
 INSTALL_PREREQS=0
 KEY_21ST="${TWENTY_FIRST_API_KEY:-}"
 
@@ -19,13 +24,15 @@ usage() {
 Usage: setup.sh [options]
 
 Installs into the current project (cwd):
-  Motion (npm)            HyperFrames skills        UI UX Pro Max skill
-  frontend-design plugin  Impeccable plugin        21st.dev MCP (user scope, needs a key)
+  Motion (npm)            Motion AI Kit (/motion skill + motion MCP)    HyperFrames skills
+  UI UX Pro Max skill     frontend-design plugin    Impeccable plugin    21st.dev MCP (user scope, needs a key)
 
 Options:
   --global              Install the skills to ~/.claude/skills instead of ./.claude/skills
   --21st-key <key>      21st.dev API key (or export TWENTY_FIRST_API_KEY)
-  --skip-hyperframes    --skip-uipro    --skip-motion    --skip-21st    --skip-frontend-design    --skip-impeccable
+  --skip-hyperframes    --skip-uipro    --skip-motion    --skip-motion-kit    --skip-21st
+  --skip-frontend-design    --skip-impeccable
+  --motion-plus         Also register the motion-plus MCP (Motion+ subscribers; sign in from the MCP settings)
   --install-prereqs     Install missing node (24 LTS) / python3 with Homebrew on macOS (non-interactive;
                         only after the user said yes). On Linux/WSL2 it prints the distro lines.
   --dry-run             Print every command instead of running it
@@ -46,6 +53,8 @@ while [[ $# -gt 0 ]]; do
     --skip-21st) SKIP_21ST=1 ;;
     --skip-frontend-design) SKIP_FD=1 ;;
     --skip-impeccable) SKIP_IMP=1 ;;
+    --skip-motion-kit) SKIP_MKIT=1 ;;
+    --motion-plus) MOTION_PLUS=1 ;;
     --install-prereqs) INSTALL_PREREQS=1 ;;
     --21st-key) shift; KEY_21ST="${1:-}" ;;
     --21st-key=*) KEY_21ST="${1#*=}" ;;
@@ -78,9 +87,13 @@ run() {
 
 if [[ $GLOBAL -eq 1 ]]; then
   SKILLS_DIR="$HOME/.claude/skills"
+  AGENTS_DIR="$HOME/.claude/agents"
+  MCP_SCOPE=user
   SCOPE_LABEL="global (~/.claude/skills)"
 else
   SKILLS_DIR="$PWD/.claude/skills"
+  AGENTS_DIR="$PWD/.claude/agents"
+  MCP_SCOPE=local
   SCOPE_LABEL="project (./.claude/skills)"
 fi
 
@@ -140,7 +153,7 @@ preflight() {
     ok "claude CLI $(claude --version 2>/dev/null | head -1)"
     HAS_CLAUDE=1
   else
-    warn "claude CLI not found — frontend-design, Impeccable and 21st MCP steps will be skipped"
+    warn "claude CLI not found — Motion MCP, frontend-design, Impeccable and 21st MCP steps will be skipped"
     HAS_CLAUDE=0
   fi
 }
@@ -183,6 +196,71 @@ else
     did "motion installed ($PM)"; record "Motion" "$(status_installed)" "package.json ($PM)"
   else
     fail "motion install failed ($PM)"; FAILURES+=("motion"); record "Motion" "FAILED" "-"
+  fi
+fi
+
+# ---------------------------------------------------------------- b2. motion ai kit
+# Official kit (MIT, https://github.com/motiondivision/ai-kit). Its installer (`npx motion-ai`)
+# is interactive-only, so we replicate what it does for Claude Code: copy the package's
+# content/skills/motion and content/agents/motion-reviewer.md, then register the hosted MCP.
+if [[ $SKIP_MKIT -eq 1 ]]; then
+  skip "motion ai kit (--skip-motion-kit)"
+  record "Motion AI Kit skill" "skipped" "-"; record "Motion MCP" "skipped" "-"
+else
+  if [[ -d "$SKILLS_DIR/motion" ]]; then
+    ok "motion skill already at $SKILLS_DIR/motion"; record "Motion AI Kit skill" "present" "$SKILLS_DIR/motion"
+  elif [[ $DRY -eq 1 ]]; then
+    run "download the Motion AI Kit" npm pack motion-ai@latest --pack-destination "<tmpdir>" --silent
+    run "unpack it" tar xzf "<tmpdir>/motion-ai-<version>.tgz" -C "<tmpdir>"
+    run "copy the /motion skill" cp -R "<tmpdir>/package/content/skills/motion" "$SKILLS_DIR/motion"
+    run "copy the motion-reviewer agent" cp "<tmpdir>/package/content/agents/motion-reviewer.md" "$AGENTS_DIR/"
+    did "motion ai kit skill → $SKILLS_DIR/motion, agent → $AGENTS_DIR"
+    record "Motion AI Kit skill" "$(status_installed)" "$SKILLS_DIR/motion"
+  else
+    MK_TMP="$(mktemp -d 2>/dev/null || mktemp -d -t hyperui-motion)"
+    MK_OK=0
+    if (cd "$MK_TMP" && npm pack motion-ai@latest --pack-destination "$MK_TMP" --silent >/dev/null) \
+       && tar xzf "$MK_TMP"/motion-ai-*.tgz -C "$MK_TMP" \
+       && [[ -f "$MK_TMP/package/content/skills/motion/SKILL.md" ]] \
+       && mkdir -p "$SKILLS_DIR" "$AGENTS_DIR" \
+       && cp -R "$MK_TMP/package/content/skills/motion" "$SKILLS_DIR/motion"; then
+      MK_OK=1
+      if [[ -f "$MK_TMP/package/content/agents/motion-reviewer.md" ]]; then
+        cp "$MK_TMP/package/content/agents/motion-reviewer.md" "$AGENTS_DIR/" || warn "motion-reviewer agent copy failed"
+      fi
+    fi
+    MK_VER="$(node -e 'try{console.log(require(process.argv[1]).version)}catch(e){}' "$MK_TMP/package/package.json" 2>/dev/null || true)"
+    rm -rf "$MK_TMP"
+    if [[ $MK_OK -eq 1 ]]; then
+      did "motion ai kit${MK_VER:+ $MK_VER} skill → $SKILLS_DIR/motion, agent → $AGENTS_DIR"
+      record "Motion AI Kit skill" "installed${MK_VER:+ ($MK_VER)}" "$SKILLS_DIR/motion"
+    else
+      fail "motion ai kit install failed (npm pack motion-ai)"; FAILURES+=("motion-kit"); record "Motion AI Kit skill" "FAILED" "-"
+    fi
+  fi
+
+  # MCP: local scope = this project only, stored in ~/.claude.json (never committed); user with --global.
+  if [[ $HAS_CLAUDE -eq 0 ]]; then
+    skip "motion MCP: claude CLI not found"; record "Motion MCP" "skipped (no claude)" "-"
+  else
+    MCP_LIST=""; [[ $DRY -eq 0 ]] && MCP_LIST="$(claude mcp list 2>/dev/null || true)"
+    MCP_NAMES=(motion); [[ $MOTION_PLUS -eq 1 ]] && MCP_NAMES+=(motion-plus)
+    MCP_STATUS=""; MCP_ADDED=0; MCP_FAILED=0
+    for name in "${MCP_NAMES[@]}"; do
+      url="https://mcp.motion.dev"; [[ "$name" == motion-plus ]] && url="https://mcp.motion.dev/plus"
+      if grep -Eq "^$name:" <<<"$MCP_LIST"; then
+        ok "$name MCP already registered"
+      elif run "register $name MCP ($MCP_SCOPE scope)" claude mcp add --transport http --scope "$MCP_SCOPE" "$name" "$url"; then
+        did "$name MCP registered ($MCP_SCOPE scope)"; MCP_ADDED=1
+      else
+        fail "$name MCP registration failed"; FAILURES+=("$name-mcp"); MCP_FAILED=1
+      fi
+    done
+    if   [[ $MCP_FAILED -eq 1 ]]; then MCP_STATUS="FAILED"
+    elif [[ $MCP_ADDED -eq 1 ]];  then MCP_STATUS="$(status_installed)"
+    else MCP_STATUS="present"; fi
+    record "Motion MCP" "$MCP_STATUS" "claude mcp: ${MCP_NAMES[*]} ($MCP_SCOPE scope)"
+    [[ $MOTION_PLUS -eq 0 ]] && echo "[hyperui] Motion+ subscriber? rerun with --motion-plus to add the motion-plus MCP (sign in from the MCP settings)"
   fi
 fi
 
@@ -280,7 +358,7 @@ for row in "${SUMMARY[@]}"; do
   printf '  %-24s %-24s %s\n' "$c" "$s" "$w"
 done
 echo
-echo "[hyperui] Try: /hyperui:design (design brief), /hyperframes (video), /ui-ux-pro-max, /frontend-design, /impeccable audit"
+echo "[hyperui] Try: /hyperui:design (design brief), /motion (Motion docs, springs, audits), /hyperframes (video), /ui-ux-pro-max, /frontend-design, /impeccable audit"
 
 if [[ ${#FAILURES[@]} -gt 0 ]]; then
   echo "[hyperui] ✗ failed steps: ${FAILURES[*]}"

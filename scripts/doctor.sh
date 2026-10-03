@@ -22,6 +22,11 @@ else
   row "Motion" "n/a" "no package.json in cwd"
 fi
 
+# Motion AI Kit (official /motion skill)
+if   [[ -f "$PROJECT_SKILLS/motion/SKILL.md" ]]; then row "Motion AI Kit skill" "installed" "project .claude/skills/motion"
+elif [[ -f "$GLOBAL_SKILLS/motion/SKILL.md" ]];  then row "Motion AI Kit skill" "installed" "global ~/.claude/skills/motion"
+else row "Motion AI Kit skill" "missing" "run /hyperui:setup (motion-ai package)"; fi
+
 # HyperFrames skills
 hf_report() {
   local dir="$1" label="$2"
@@ -51,7 +56,14 @@ if command -v claude >/dev/null 2>&1; then
   else
     row "Impeccable plugin" "missing" "run /hyperui:setup (pbakaus/impeccable)"
   fi
-  if claude mcp list 2>/dev/null | grep -Eq '^21st[: ]'; then
+  MCP_LIST="$(claude mcp list 2>/dev/null || true)"
+  if grep -Eq '^motion:' <<<"$MCP_LIST"; then
+    MP=""; grep -Eq '^motion-plus:' <<<"$MCP_LIST" && MP=" + motion-plus"
+    row "Motion MCP" "installed" "claude mcp: motion$MP (https://mcp.motion.dev)"
+  else
+    row "Motion MCP" "missing" "run /hyperui:setup (or claude mcp add --transport http motion https://mcp.motion.dev)"
+  fi
+  if grep -Eq '^21st[: ]' <<<"$MCP_LIST"; then
     row "21st.dev MCP" "installed" "claude mcp (user scope)"
   else
     row "21st.dev MCP" "missing" "key at https://21st.dev/mcp → /hyperui:setup --21st-key <key>"
@@ -59,6 +71,7 @@ if command -v claude >/dev/null 2>&1; then
 else
   row "frontend-design plugin" "unknown" "claude CLI not found"
   row "Impeccable plugin" "unknown" "claude CLI not found"
+  row "Motion MCP" "unknown" "claude CLI not found"
   row "21st.dev MCP" "unknown" "claude CLI not found"
 fi
 

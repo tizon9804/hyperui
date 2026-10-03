@@ -40,7 +40,7 @@ claude plugin install hyperui@tizonai
 Then restart Claude Code, open your project, run `/hyperui:setup` once, and describe what you want:
 
 ```
-/hyperui:setup                       # install the stack (HyperFrames, Motion, UI UX Pro Max, Impeccable…) into this project
+/hyperui:setup                       # install the stack (HyperFrames, Motion, Motion AI Kit, UI UX Pro Max, Impeccable…) into this project
 /hyperui quiero una app para mi gimnasio
 ```
 
@@ -59,25 +59,28 @@ para que elijas una, y a partir de ahí planificamos y construimos.
 <summary>Setup options</summary>
 
 ```
-/hyperui:setup                       # project scope: skills → ./.claude/skills, motion → package.json
-/hyperui:setup --global              # skills → ~/.claude/skills (once per machine)
+/hyperui:setup                       # project scope: skills → ./.claude/skills, motion → package.json, motion MCP → local scope
+/hyperui:setup --global              # skills → ~/.claude/skills, motion MCP → user scope (once per machine)
 /hyperui:setup --21st-key <key>      # also register the 21st.dev MCP (user scope, key never committed)
-/hyperui:setup --skip-motion         # any of: --skip-hyperframes --skip-uipro --skip-motion --skip-21st --skip-frontend-design --skip-impeccable
+/hyperui:setup --motion-plus         # also register the motion-plus MCP (Motion+ subscribers; sign in from the MCP settings)
+/hyperui:setup --skip-motion-kit     # no Motion AI Kit (/motion skill, motion-reviewer agent, motion MCP)
+/hyperui:setup --skip-motion         # any of: --skip-hyperframes --skip-uipro --skip-motion --skip-motion-kit --skip-21st --skip-frontend-design --skip-impeccable
 /hyperui:setup --dry-run             # print the commands, install nothing
 ```
 
-The 21st.dev key is free at https://21st.dev/mcp. You can also `export TWENTY_FIRST_API_KEY=...` before running setup.
+The 21st.dev key is free at https://21st.dev/mcp. You can also `export TWENTY_FIRST_API_KEY=...` before running setup. The `motion` MCP is registered at project (local) scope by setup — stored in your `~/.claude.json` for this project, never committed — and at user scope with `--global`.
 
 | Component | What it is | Source |
 |---|---|---|
 | **HyperFrames** | Write HTML/CSS, render deterministic MP4s. Promo clips from your real components. | https://github.com/heygen-com/hyperframes |
 | **Motion** | Framer Motion's current package (`motion`), animations for React and vanilla JS. | https://motion.dev |
+| **Motion AI Kit** | Official `/motion` skill + hosted `motion` MCP (docs & examples; Motion+ unlocks springs/audits/editor) | https://motion.dev/docs/ai-kit |
 | **UI UX Pro Max** | Searchable design intelligence: styles, palettes, font pairings, UX rules. | https://github.com/nextlevelbuilder/ui-ux-pro-max-skill |
 | **21st.dev MCP** | 10k+ React/Tailwind components, searchable and generated from the editor. | https://21st.dev/mcp |
 | **frontend-design** | Anthropic's official design-direction skill. | `frontend-design@claude-plugins-official` |
 | **Impeccable** | Design vocabulary for agents: `/impeccable audit`, `polish`, `typeset`, `critique`… anti-pattern detection. | https://impeccable.style · `pbakaus/impeccable` |
 
-After setup the installed third-party skills are available too: `/hyperframes`, `/ui-ux-pro-max`, `/frontend-design`, `/impeccable <command>`.
+After setup the installed third-party skills are available too: `/motion`, `/hyperframes`, `/ui-ux-pro-max`, `/frontend-design`, `/impeccable <command>`.
 </details>
 
 ## How it works
@@ -197,7 +200,7 @@ Node or python3 missing (or Node < 20)? `/hyperui:setup` prints the install line
 
 ### hyperui installs for you when missing (nothing to do)
 
-- **Via `/hyperui:setup`:** HyperFrames skills, UI UX Pro Max skill, Anthropic `frontend-design` plugin, Impeccable plugin, the `motion` npm package in the project.
+- **Via `/hyperui:setup`:** HyperFrames skills, Motion AI Kit (`/motion` skill, `motion-reviewer` agent, `motion` MCP), UI UX Pro Max skill, Anthropic `frontend-design` plugin, Impeccable plugin, the `motion` npm package in the project.
 - **Via `infra`, on first use:** Terraform — asks once, then `brew install hashicorp/tap/terraform` on macOS; on Linux it prints the official install line for you to run.
 - **Optional, only if you want them:** the 21st.dev components MCP (free key you create at https://21st.dev/mcp; hyperui registers it when you pass `--21st-key`), provider MCPs (Vercel, Supabase, Stripe, Terraform MCP…: hyperui shows the exact `claude mcp add` line and asks before adding).
 

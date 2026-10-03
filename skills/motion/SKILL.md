@@ -13,16 +13,17 @@ allowed-tools:
 ## 0. Before anything
 
 - Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
-  Profile fields used: archetype, `conversation_language`, `design.*`, `tone_notes`; also
-  `.hyperui/design.md`.
-- `design.motion` sets the register: `restrained` → only the hero sequence and micro-feedback;
-  `expressive` → add scroll reveals and shared-element transitions. Unset → `restrained`.
+  Profile fields used: archetype, `conversation_language`, `design.*`, `tone_notes`; also `.hyperui/design.md`.
+- `design.motion` sets the register: `restrained` → only the hero sequence and micro-feedback; `expressive` → add scroll reveals and shared-element transitions. Unset → `restrained`.
   `prefers-reduced-motion` is honored by default (recipe H) — never ask whether to.
-- Use the durations and easings already in the tokens (`--dur-*`, `--ease-*`) before the
-  defaults below.
+- Use the durations and easings already in the tokens (`--dur-*`, `--ease-*`) before the defaults below.
 - Reply in the conversation language; keep internal reasoning, code and files in English.
-- Tone per archetype: non-tech → one or two plain sentences per step; dev → the fact + one
-  line of why; senior → the fact.
+- Tone per archetype: non-tech → one or two plain sentences per step; dev → the fact + one line of why; senior → the fact.
+
+**Use the Motion AI Kit when present.** If the official `/motion` skill exists (`<root>/.claude/skills/motion` or
+`~/.claude/skills/motion`) or the `motion` MCP is connected, use it for docs and example search, CSS springs and
+MotionScore audits (springs and audits need Motion+). This skill stays the taste and choreography layer: the language,
+recipes and QA below decide what moves and why. If neither is present, say once that `/hyperui:setup` installs it.
 
 ## 1. Install and import
 
@@ -35,13 +36,10 @@ npm install motion
 import { motion, AnimatePresence, MotionConfig, useReducedMotion, useScroll, useTransform, useInView } from "motion/react";
 ```
 
-- `motion/react` is the current import path. The legacy `framer-motion` package still works and
-  exposes the same API; prefer `motion/react` in new code and do not mix both in one project.
+- `motion/react` is the current import path. The legacy `framer-motion` package still works and exposes the same API; prefer `motion/react` in new code and do not mix both in one project.
 - Vanilla / non-React code: `import { animate, scroll, inView, stagger } from "motion"`.
-- `stagger()` from `"motion"` is the standalone helper; inside React variants use
-  `transition: { staggerChildren }` (see recipe A).
-- Before using an API not listed here, check https://motion.dev/docs with WebFetch. Do not guess
-  prop names.
+- `stagger()` from `"motion"` is the standalone helper; inside React variants use `transition: { staggerChildren }` (see recipe A).
+- Before using an API not listed here, check https://motion.dev/docs with WebFetch (or the Motion MCP). Do not guess prop names.
 
 ## 2. Motion language
 
@@ -150,8 +148,7 @@ export function useMotionSafe() {
   {children}
 </MotionConfig>
 ```
-`reducedMotion="user"` makes Motion skip transform/layout animations automatically when the OS
-setting is on; recipe G is for cases where you want explicit control of the fallback.
+`reducedMotion="user"` makes Motion skip transform/layout animations automatically when the OS setting is on; recipe G is for cases where you want explicit control of the fallback.
 
 ## 4. Performance and pitfalls
 
@@ -168,10 +165,8 @@ setting is on; recipe G is for cases where you want explicit control of the fall
   never run.
 - `layout` animations inside scroll containers: mark the scroller with `layoutScroll`; for
   independent layout groups use `LayoutGroup` (verify on motion.dev).
-- Images and video inside `layout` elements distort during the transition; put `layout` on a
-  wrapper and keep the media `layout="position"`.
-- Test with CPU throttling 4× and on a real phone; if anything drops frames, remove the
-  animation rather than tuning it for an hour.
+- Images and video inside `layout` elements distort during the transition; put `layout` on a wrapper and keep the media `layout="position"`.
+- Test with CPU throttling 4× and on a real phone; if anything drops frames, remove the animation rather than tuning it for an hour.
 
 ## 5. QA checklist
 
@@ -183,12 +178,12 @@ setting is on; recipe G is for cases where you want explicit control of the fall
 
 ## 6. Close the turn
 
-When a choreography is settled (what moves, durations, easings), write it to
-`.hyperui/design.md` (motion section), the next step to `state.md`, and one ADR-lite line to
-`decisions.md` (`date · decision · why · source`).
+When a choreography is settled (what moves, durations, easings), write it to `.hyperui/design.md` (motion section),
+the next step to `state.md`, and one ADR-lite line to `decisions.md` (`date · decision · why · source`).
 
 ## Sources
 
 Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 Verify API names before use. Canonical references: [`references/sources.md`](references/sources.md).
+Motion AI Kit (skill + MCP, free vs Motion+): https://motion.dev/docs/ai-kit · install: https://motion.dev/docs/ai-kit-install

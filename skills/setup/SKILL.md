@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Install the hyperui stack (HyperFrames, Motion, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable) into the current project, and help install missing prerequisites (node, python3). Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--install-prereqs] [--dry-run]"
+description: "Install the hyperui stack (HyperFrames, Motion, Motion AI Kit, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable) into the current project, and help install missing prerequisites (node, python3). Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--motion-plus] [--install-prereqs] [--dry-run]"
 disable-model-invocation: true
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh *)
@@ -38,13 +38,14 @@ checks each component before touching anything.
    ${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh
    ```
 
-6. Close with one line on what to try next: `/hyperui:design` for a design brief, `/hyperframes`
-   for a video, `/ui-ux-pro-max`, `/frontend-design`, `/impeccable audit`.
+6. Close with one line on what to try next: `/hyperui:design` for a design brief, `/motion` for
+   Motion docs, springs and audits, `/hyperframes` for a video, `/ui-ux-pro-max`, `/frontend-design`, `/impeccable audit`.
 
 ## Rules
 
 - Never improvise extra installs or fixes beyond what the script does. If a step fails,
   relay the `[hyperui] ✗` line and the script's own hint; the user decides.
 - Flags pass straight through: `--global`, `--21st-key <key>`, `--skip-hyperframes`,
-  `--skip-uipro`, `--skip-motion`, `--skip-21st`, `--skip-frontend-design`, `--skip-impeccable`,
+  `--skip-uipro`, `--skip-motion`, `--skip-motion-kit`, `--skip-21st`, `--skip-frontend-design`, `--skip-impeccable`,
+  `--motion-plus` (also registers the `motion-plus` MCP for Motion+ subscribers),
   `--install-prereqs`, `--dry-run`. `--dry-run` prints every command, including the prerequisite ones.

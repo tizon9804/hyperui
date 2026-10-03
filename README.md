@@ -30,7 +30,7 @@ npx @tizonai/hyperui install
 Or the two plugin lines it runs for you:
 
 ```
-claude plugin marketplace add tizon9804/hyperui
+claude plugin marketplace add tizonai/hyperui
 claude plugin install hyperui@tizonai
 ```
 
@@ -201,7 +201,7 @@ Outbound HTTPS to the official docs and provider pages the skills cite (`WebFetc
 ## Local development
 
 ```
-git clone git@github.com:tizon9804/hyperui.git
+git clone git@github.com:tizonai/hyperui.git
 cd hyperui
 bash scripts/check.sh           # validate + lint + company-agnostic grep (strict gate)
 claude --plugin-dir .           # load this checkout for one session

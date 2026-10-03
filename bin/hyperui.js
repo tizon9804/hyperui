@@ -9,7 +9,7 @@ import { dirname, join } from 'node:path';
 import os from 'node:os';
 
 const MARKETPLACE = 'tizonai';
-const MARKETPLACE_SOURCE = 'tizon9804/hyperui';
+const MARKETPLACE_SOURCE = 'tizonai/hyperui';
 const PLUGIN = `hyperui@${MARKETPLACE}`;
 const CLAUDE_INSTALL_URL = 'https://code.claude.com/docs/en/quickstart';
 

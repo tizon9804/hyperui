@@ -2,6 +2,9 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.4.3 — 2026-10-03
+- Repository moved to the `tizonai` GitHub organization: `claude plugin marketplace add tizonai/hyperui` (the old `tizon9804/hyperui` keeps working through GitHub redirects).
+
 ## 0.4.2 — 2026-10-03
 - npm package renamed to `@tizonai/hyperui` (scoped under the tizonai org); the binary stays `hyperui`: `npx @tizonai/hyperui install`.
 

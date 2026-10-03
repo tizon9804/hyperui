@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Notes — Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..800;1,9..144,300..800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f0e8; --surface:#fbf9f4; --raised:#ffffff;
+  --text:#171511; --muted:#6a6358; --border:#e1dacc;
+  --accent:#b23a2a; --accent-ink:#ffffff; --rule:#d5cdbe;
+  --font-display:"Fraunces",Georgia,serif; --font-body:"Inter",system-ui,sans-serif;
+  --fs-display:clamp(2.75rem,7vw,5.5rem); --fs-h2:clamp(1.75rem,3.2vw,2.75rem);
+  --fs-body:1.0625rem; --fs-small:.875rem;
+  --s1:.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--s6:7rem;
+  --radius-s:4px;--radius-m:10px;
+  --shadow-2:0 24px 48px -24px rgb(23 21 17 / .25);
+  --dur-fast:150ms;--dur-base:300ms;--dur-slow:700ms;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15130f;--surface:#1d1a15;--raised:#26221c;--text:#efe9df;--muted:#a39b8d;--border:#342f27;--accent:#e0634f;--accent-ink:#1a0c09;--rule:#3a342b;--shadow-2:0 24px 48px -24px rgb(0 0 0 / .6);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#15130f;--surface:#1d1a15;--raised:#26221c;--text:#efe9df;--muted:#a39b8d;--border:#342f27;--accent:#e0634f;--accent-ink:#1a0c09;--rule:#3a342b;--shadow-2:0 24px 48px -24px rgb(0 0 0 / .6);color-scheme:dark}
+
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font:var(--fs-body)/1.6 var(--font-body);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1200px;margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
+h1,h2,h3{font-family:var(--font-display);font-weight:400;letter-spacing:-.02em;line-height:1.02;text-wrap:balance}
+h1{font-size:var(--fs-display);font-variation-settings:"opsz" 144,"SOFT" 40}
+h2{font-size:var(--fs-h2);font-variation-settings:"opsz" 96}
+h3{font-size:1.5rem;font-variation-settings:"opsz" 48}
+em{font-style:italic;font-weight:300}
+p.lead{font-size:1.25rem;color:var(--muted);max-width:52ch;text-wrap:pretty}
+.eyebrow{font:500 .8125rem/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;padding-block:var(--s3);border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--font-display);font-size:1.375rem;text-decoration:none;font-variation-settings:"opsz" 48}
+.nav ul{display:flex;gap:var(--s3);list-style:none;padding:0}
+.nav ul a{text-decoration:none;color:var(--muted);font-size:.9375rem}
+.nav ul a:hover{color:var(--text)}
+.tools{display:flex;gap:var(--s1)}
+.chip{font:500 .8125rem/1 var(--font-body);padding:.5rem .75rem;border:1px solid var(--border);border-radius:999px;background:transparent;color:var(--muted);cursor:pointer;min-height:36px}
+.chip:hover{color:var(--text);border-color:var(--text)}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;min-height:48px;padding:0 1.375rem;border-radius:var(--radius-s);text-decoration:none;font:500 1rem var(--font-body);transition:transform var(--dur-fast) var(--ease-out),background var(--dur-fast)}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--text);color:var(--bg)}
+.btn-primary:hover{background:var(--accent);color:var(--accent-ink)}
+.btn-ghost{color:var(--text);text-decoration:underline;text-underline-offset:.3em;text-decoration-color:var(--rule);padding-inline:.25rem}
+.btn-ghost:hover{text-decoration-color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--s5);align-items:center;padding-block:var(--s6) var(--s5)}
+.hero .copy>*+*{margin-top:var(--s3)}
+.cta{display:flex;gap:var(--s3);align-items:center;flex-wrap:wrap}
+.note{position:relative;background:var(--raised);border:1px solid var(--border);border-radius:var(--radius-m);box-shadow:var(--shadow-2);padding:var(--s4) var(--s4) var(--s4) 4.5rem;min-height:420px;
+  background-image:repeating-linear-gradient(to bottom,transparent 0 31px,var(--rule) 31px 32px);background-position:0 1.4rem}
+.note::before{content:"";position:absolute;inset:0 auto 0 3.5rem;width:1px;background:var(--accent);opacity:.5}
+.note ol{list-style:none;padding:0;font-family:var(--font-display);font-size:1.25rem;line-height:32px;font-variation-settings:"opsz" 24}
+.note li{position:relative;min-height:32px}
+.note li::before{content:attr(data-n);position:absolute;left:-3.4rem;width:2rem;text-align:right;font:400 .75rem/32px var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.note li.h{font-weight:600;font-size:1.5rem}
+.note li.done{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--accent)}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-.15em;margin-left:1px;animation:blink 1s steps(2) infinite}
+.presence{position:absolute;right:var(--s3);top:var(--s3);display:flex}
+.av{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:600 .6875rem var(--font-body);color:#fff;border:2px solid var(--raised);margin-left:-8px}
+.av:nth-child(1){background:#2f5d50}.av:nth-child(2){background:#7a3e9d}.av:nth-child(3){background:var(--accent)}
+.typing{position:absolute;right:var(--s3);bottom:var(--s3);font-size:.8125rem;color:var(--muted)}
+.typing b{color:var(--text);font-weight:500}
+
+/* sections */
+section{padding-block:var(--s5);border-top:1px solid var(--rule)}
+.split{display:grid;grid-template-columns:1fr 2fr;gap:var(--s4)}
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.feature{padding:var(--s3) var(--s3) var(--s3) 0;border-left:1px solid var(--rule);padding-left:var(--s3)}
+.feature:first-child{border-left:0;padding-left:0}
+.feature .n{font:400 .8125rem var(--font-body);color:var(--muted);font-variant-numeric:tabular-nums}
+.feature h3{margin:var(--s2) 0 var(--s1)}
+.feature p{color:var(--muted);text-wrap:pretty}
+.steps{counter-reset:s;display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s4)}
+.steps li{list-style:none;counter-increment:s;position:relative;padding-top:var(--s3)}
+.steps li::before{content:counter(s,decimal-leading-zero);position:absolute;top:0;left:0;font:400 .75rem var(--font-body);letter-spacing:.1em;color:var(--accent)}
+.steps strong{display:block;font-family:var(--font-display);font-weight:400;font-size:1.375rem;margin-bottom:.25rem}
+.steps li p{color:var(--muted)}
+.band{text-align:left;display:grid;grid-template-columns:2fr 1fr;align-items:end;gap:var(--s4)}
+.band h2{font-size:clamp(2.25rem,5vw,4rem)}
+footer{padding-block:var(--s4);border-top:1px solid var(--rule);display:flex;justify-content:space-between;color:var(--muted);font-size:var(--fs-small)}
+
+/* motion */
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes blink{to{visibility:hidden}}
+.rise{animation:rise var(--dur-slow) var(--ease-out) both}
+.rise:nth-child(1){animation-delay:.05s}.rise:nth-child(2){animation-delay:.15s}.rise:nth-child(3){animation-delay:.25s}.rise:nth-child(4){animation-delay:.35s}
+.note.rise{animation-delay:.3s;animation-duration:.9s}
+@media (prefers-reduced-motion:reduce){.rise,.caret{animation:none!important}}
+
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;padding-block:var(--s5) var(--s4)}
+  .split,.band{grid-template-columns:1fr}
+  .features,.steps{grid-template-columns:1fr}
+  .feature{border-left:0;padding-left:0;border-top:1px solid var(--rule)}
+  .feature:first-child{border-top:0}
+  .nav ul{display:none}
+  .note{padding-left:3.5rem;min-height:360px}
+  .note::before{left:2.75rem}
+  .note ol{font-size:1.125rem}
+  .note li::before{left:-2.6rem}
+  .note li.h{font-size:1.375rem}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="/">Acme Notes</a>
+  <ul>
+    <li><a href="#product" data-i18n="nav.product">Product</a></li>
+    <li><a href="#how" data-i18n="nav.how">How it works</a></li>
+    <li><a href="#pricing" data-i18n="nav.pricing">Pricing</a></li>
+  </ul>
+  <div class="tools">
+    <button class="chip" id="lang" aria-label="Switch language">ES</button>
+    <button class="chip" id="theme" aria-label="Toggle theme">◐</button>
+    <a class="chip" href="/login" data-i18n="nav.login" style="text-decoration:none;display:inline-flex;align-items:center">Log in</a>
+  </div>
+</header>
+
+<main>
+<section class="hero" style="border-top:0">
+  <div class="copy">
+    <p class="eyebrow rise" data-i18n="hero.eyebrow">Shared notes for teams</p>
+    <h1 class="rise" data-i18n-html="hero.h1">Notes that keep up <em>with the conversation.</em></h1>
+    <p class="lead rise" data-i18n="hero.lead">One page per idea. Everyone writes, nobody waits. Acme Notes syncs every keystroke before you lift your finger.</p>
+    <div class="cta rise">
+      <a class="btn btn-primary" href="/signup" data-i18n="cta.primary">Start writing — it's free</a>
+      <a class="btn btn-ghost" href="#product" data-i18n="cta.secondary">See a live note</a>
+    </div>
+  </div>
+  <figure class="note rise" id="product" aria-label="Live note demo">
+    <div class="presence" aria-hidden="true"><span class="av">MR</span><span class="av">JT</span><span class="av">AL</span></div>
+    <ol id="lines">
+      <li class="h" data-n="1" data-i18n="note.l1">Launch checklist — Thursday</li>
+      <li data-n="2"></li>
+      <li class="done" data-n="3" data-i18n="note.l3">Freeze the release branch</li>
+      <li class="done" data-n="4" data-i18n="note.l4">Draft the changelog</li>
+      <li data-n="5" data-i18n="note.l5">Ping legal about the new terms</li>
+      <li data-n="6" id="typed" data-n="6"></li>
+      <li data-n="7"></li>
+      <li data-n="8"></li>
+      <li data-n="9"></li>
+    </ol>
+    <figcaption class="typing"><b>Ana</b> <span data-i18n="note.typing">is typing…</span></figcaption>
+  </figure>
+</section>
+
+<section>
+  <div class="features">
+    <article class="feature">
+      <span class="n">01</span>
+      <h3 data-i18n="f1.h">Instant, everywhere</h3>
+      <p data-i18n="f1.p">Edits appear on every screen as you type. No save button, no refresh, no "who has the latest version".</p>
+    </article>
+    <article class="feature">
+      <span class="n">02</span>
+      <h3 data-i18n="f2.h">Keyboard first</h3>
+      <p data-i18n="f2.p">Create, link and search from a single shortcut. Your hands never leave the home row.</p>
+    </article>
+    <article class="feature">
+      <span class="n">03</span>
+      <h3 data-i18n="f3.h">Offline, then merged</h3>
+      <p data-i18n="f3.p">Write on the plane. Land, reconnect, and your notes merge cleanly with everyone else's.</p>
+    </article>
+  </div>
+</section>
+
+<section id="how">
+  <div class="split">
+    <div>
+      <p class="eyebrow" data-i18n="how.eyebrow">How it works</p>
+      <h2 data-i18n="how.h2">Three steps. Then you forget it's there.</h2>
+    </div>
+    <ol class="steps">
+      <li><strong data-i18n="how.s1h">Open a page</strong><p data-i18n="how.s1p">One shortcut creates a page with a title and a share link.</p></li>
+      <li><strong data-i18n="how.s2h">Invite by link</strong><p data-i18n="how.s2p">Paste the link in chat. Teammates land in the page, already editing.</p></li>
+      <li><strong data-i18n="how.s3h">Write together</strong><p data-i18n="how.s3p">Everyone sees everyone. History is kept, line by line, forever.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="band">
+    <h2 data-i18n-html="band.h2">Free for teams up to five.<br><em>Flat price after that.</em></h2>
+    <div>
+      <p class="lead" style="margin-bottom:var(--s3)" data-i18n="band.p">No per-seat surprises. Cancel in one click.</p>
+      <a class="btn btn-primary" href="/signup" data-i18n="cta.primary">Start writing — it's free</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <span>© 2026 Acme Notes</span>
+  <span data-i18n="footer.tag">Made for people who think in writing.</span>
+</footer>
+</div>
+
+<script>
+const I18N={
+ en:{"nav.product":"Product","nav.how":"How it works","nav.pricing":"Pricing","nav.login":"Log in",
+  "hero.eyebrow":"Shared notes for teams","hero.h1":"Notes that keep up <em>with the conversation.</em>",
+  "hero.lead":"One page per idea. Everyone writes, nobody waits. Acme Notes syncs every keystroke before you lift your finger.",
+  "cta.primary":"Start writing — it's free","cta.secondary":"See a live note",
+  "note.l1":"Launch checklist — Thursday","note.l3":"Freeze the release branch","note.l4":"Draft the changelog","note.l5":"Ping legal about the new terms","note.typing":"is typing…","note.typed":"Schedule the retro for Friday 10:00",
+  "f1.h":"Instant, everywhere","f1.p":"Edits appear on every screen as you type. No save button, no refresh, no \"who has the latest version\".",
+  "f2.h":"Keyboard first","f2.p":"Create, link and search from a single shortcut. Your hands never leave the home row.",
+  "f3.h":"Offline, then merged","f3.p":"Write on the plane. Land, reconnect, and your notes merge cleanly with everyone else's.",
+  "how.eyebrow":"How it works","how.h2":"Three steps. Then you forget it's there.",
+  "how.s1h":"Open a page","how.s1p":"One shortcut creates a page with a title and a share link.",
+  "how.s2h":"Invite by link","how.s2p":"Paste the link in chat. Teammates land in the page, already editing.",
+  "how.s3h":"Write together","how.s3p":"Everyone sees everyone. History is kept, line by line, forever.",
+  "band.h2":"Free for teams up to five.<br><em>Flat price after that.</em>","band.p":"No per-seat surprises. Cancel in one click.",
+  "footer.tag":"Made for people who think in writing."},
+ es:{"nav.product":"Producto","nav.how":"Cómo funciona","nav.pricing":"Precios","nav.login":"Entrar",
+  "hero.eyebrow":"Notas compartidas para equipos","hero.h1":"Notas que siguen el ritmo <em>de la conversación.</em>",
+  "hero.lead":"Una página por idea. Todos escriben, nadie espera. Acme Notes sincroniza cada pulsación antes de que levantes el dedo.",
+  "cta.primary":"Empieza a escribir — es gratis","cta.secondary":"Ver una nota en vivo",
+  "note.l1":"Checklist de lanzamiento — jueves","note.l3":"Congelar la rama de release","note.l4":"Redactar el changelog","note.l5":"Avisar a legal sobre los nuevos términos","note.typing":"está escribiendo…","note.typed":"Agendar la retro para el viernes a las 10:00",
+  "f1.h":"Instantáneo, en todas partes","f1.p":"Los cambios aparecen en todas las pantallas mientras escribes. Sin botón de guardar, sin recargar, sin \"¿quién tiene la última versión?\".",
+  "f2.h":"Primero el teclado","f2.p":"Crea, enlaza y busca desde un solo atajo. Tus manos nunca dejan la fila central.",
+  "f3.h":"Sin conexión, luego fusionado","f3.p":"Escribe en el avión. Aterriza, reconecta y tus notas se fusionan limpiamente con las de los demás.",
+  "how.eyebrow":"Cómo funciona","how.h2":"Tres pasos. Después olvidas que está ahí.",
+  "how.s1h":"Abre una página","how.s1p":"Un atajo crea una página con título y enlace para compartir.",
+  "how.s2h":"Invita con un enlace","how.s2p":"Pega el enlace en el chat. Tu equipo aterriza en la página, ya editando.",
+  "how.s3h":"Escriban juntos","how.s3p":"Todos ven a todos. El historial se conserva, línea a línea, para siempre.",
+  "band.h2":"Gratis para equipos de hasta cinco.<br><em>Precio fijo después.</em>","band.p":"Sin sorpresas por asiento. Cancela con un clic.",
+  "footer.tag":"Hecho para quienes piensan escribiendo."}
+};
+let lang="en";
+function apply(){document.documentElement.lang=lang;
+ document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=I18N[lang][e.dataset.i18n]);
+ document.querySelectorAll("[data-i18n-html]").forEach(e=>e.innerHTML=I18N[lang][e.dataset.i18nHtml]);
+ document.getElementById("lang").textContent=lang==="en"?"ES":"EN";type(true)}
+document.getElementById("lang").onclick=()=>{lang=lang==="en"?"es":"en";apply()};
+document.getElementById("theme").onclick=()=>{const r=document.documentElement;const dark=getComputedStyle(r).colorScheme.includes("dark");r.dataset.theme=dark?"light":"dark"};
+let timer;const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function type(reset){clearTimeout(timer);const el=document.getElementById("typed");const txt=I18N[lang]["note.typed"];
+ if(reduce){el.textContent=txt;return}
+ let i=0;el.innerHTML='<span class="caret"></span>';
+ const step=()=>{i++;el.innerHTML=txt.slice(0,i)+'<span class="caret"></span>';if(i<txt.length)timer=setTimeout(step,40+Math.random()*60)};
+ timer=setTimeout(step,900)}
+apply();
+</script>
+</body>
+</html>

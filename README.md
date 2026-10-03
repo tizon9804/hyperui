@@ -94,19 +94,30 @@ Three languages, kept apart: skill content and everything in `.hyperui/` in Engl
 
 ## Examples
 
-All images below are from the plugin's test runs.
+The three clips below are recordings of the plugin's own test runs — nothing staged, nothing retouched.
 
-<p align="center"><img src="docs/assets/examples/directions-strip.png" width="100%" alt="Ledger · Monolith · Atelier"></p>
-<p align="center"><i>Three directions for the same brief — Ledger · Monolith · Atelier — generated before any code. Pick one, then it builds.</i> Full size: <a href="docs/assets/examples/ledger-1280.png">Ledger</a> · <a href="docs/assets/examples/monolith-1280.png">Monolith</a> · <a href="docs/assets/examples/atelier-1280.png">Atelier</a> (mobile: <a href="docs/assets/examples/ledger-390.png">390px</a>).</p>
+<p align="center"><img src="docs/assets/examples/directions.webp" width="100%" alt="Ledger, Monolith and Atelier: three design directions for the same brief, each loading with its entrance motion, a hover on the primary button and a scroll"></p>
+<p align="center"><b>Three directions, one brief.</b> Generated before any code — real copy, distinct type and palette, light/dark, entrance motion. You pick one, then it builds.</p>
 
 <table>
 <tr>
 <td width="50%" valign="top">
-<a href="docs/assets/examples/dashboard-ventas.html"><img src="docs/assets/examples/dashboard-ventas.png" alt="Sales dashboard (Spanish UI)"></a>
-<p><i>Spanish-language example: a sales dashboard from <code>viz</code>. It wrote the Munzner what–why–how table first, then chose bars over a pie and cited its sources. <a href="docs/assets/examples/dashboard-ventas.html">HTML</a> · <a href="docs/assets/examples/ventas.csv">data</a>.</i></p>
+<img src="docs/assets/examples/dashboard.webp" alt="Sales dashboard: the what–why–how table first, then KPIs, bar charts and live tooltips">
+<p><b>Data: the table first, then the chart.</b> <code>viz</code> writes Munzner's what–why–how table before drawing; bars, not pie; sources cited.</p>
 </td>
 <td width="50%" valign="top">
-<p><i><code>ship</code> answering "how do I charge by card?" for a seller in Colombia — a test run, unedited:</i></p>
+<img src="docs/assets/examples/ship.webp" alt="Terminal: /hyperui asked how to charge by card from Colombia; ship recommends Polar, offers Mercado Pago and warns about Lemon Squeezy">
+<p><b>Ship: payments for a seller in Colombia.</b> Stripe isn't available there; <code>ship</code> recommends Polar with a source and flags Lemon Squeezy — unedited test run.</p>
+</td>
+</tr>
+</table>
+
+<details>
+<summary>Stills and sources</summary>
+
+- **Directions** — the pages themselves, interactive (theme and language toggles work): [Ledger](docs/assets/examples/directions/ledger.html) · [Monolith](docs/assets/examples/directions/monolith.html) · [Atelier](docs/assets/examples/directions/atelier.html). Stills: [strip](docs/assets/examples/directions-strip.png); desktop [Ledger](docs/assets/examples/ledger-1280.png) · [Monolith](docs/assets/examples/monolith-1280.png) · [Atelier](docs/assets/examples/atelier-1280.png); mobile [Ledger](docs/assets/examples/ledger-390.png) · [Monolith](docs/assets/examples/monolith-390.png) · [Atelier](docs/assets/examples/atelier-390.png).
+- **Dashboard** — [HTML](docs/assets/examples/dashboard-ventas.html) · [data](docs/assets/examples/ventas.csv) · [still](docs/assets/examples/dashboard-ventas.png). The UI is in Spanish because that was the user's language in the run; the what–why–how card in the clip is in English.
+- **Ship** — the answer as text (a test run, unedited), and the [terminal page](docs/assets/examples/ship-terminal.html) the clip was rendered from:
 
 ```
 Respuesta corta: con Polar. Como vendes desde Colombia,
@@ -124,9 +135,9 @@ Evita Lemon Squeezy: se está integrando en un producto de
 Stripe que excluye Latinoamérica.
 ```
 
-</td>
-</tr>
-</table>
+How the clips were made: [`docs/assets/README.md`](docs/assets/README.md).
+
+</details>
 
 ## Specialists
 
@@ -199,7 +210,7 @@ Outbound HTTPS to the official docs and provider pages the skills cite (`WebFetc
 - [`docs/architecture.md`](docs/architecture.md) — how it fits together: component tree, flow, hooks, memory, the company-agnostic gate, evals, how to add a specialist. The spec lives in the author's workshop; its Addendum of as-built findings is summarized here.
 - [`docs/research/`](docs/research/README.md) — the source snapshots the skills are grounded in (providers and MCPs, engineering sources, Munzner).
 - [`CHANGELOG.md`](CHANGELOG.md) — Keep a Changelog, SemVer.
-- [`docs/assets/README.md`](docs/assets/README.md) — how the logo, diagram and example images were produced.
+- [`docs/assets/README.md`](docs/assets/README.md) — how the logo, diagram, demo and example clips were produced.
 
 ## Local development
 

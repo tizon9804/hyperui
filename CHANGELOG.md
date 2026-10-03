@@ -2,6 +2,10 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.4.5 — 2026-10-03
+- README Examples: three animated clips replace the static strip and the dashboard PNG — `docs/assets/examples/directions.webp` (Ledger · Monolith · Atelier loading with their entrance motion, CTA hover, scroll, caption chip with the type pairing; 9.7 s), `dashboard.webp` (the `viz` what–why–how card first, then KPIs and two live tooltips; 8 s), `ship.webp` (the question typed, the unedited answer line by line; 8 s). Stills and HTML sources stay under a "Stills and sources" fold.
+- New sources: `docs/assets/examples/directions/` (the three direction pages from the test run, interactive), `examples/ship-terminal.html` (time-driven terminal page, `?record` + `window.__seek(t)`), `examples/record/` (Playwright recorders + `encode.sh`); how-to in `docs/assets/README.md`. Docs-only release.
+
 ## 0.4.4 — 2026-10-03
 - README: animated hero demo (`docs/assets/demo.webp`, 9 s) recorded from a real page built in the hyperui style (`docs/assets/demo/`, interactive when opened).
 - `scripts/check.sh`: company-agnostic grep skips binary files (`-I`).

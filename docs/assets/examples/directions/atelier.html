@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Notes — Atelier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8f7f3; --surface:#ffffff; --raised:#f0efe9;
+  --text:#1a1a1e; --muted:#6d6d78; --border:#e5e3db;
+  --accent:#2448ff; --accent-ink:#ffffff;
+  --c1:#e2552f; --c2:#1f9d6b; --c3:#8a3ffc;
+  --font-display:"Instrument Serif",Georgia,serif; --font-body:"Manrope",system-ui,sans-serif;
+  --fs-display:clamp(3rem,7.5vw,6rem); --fs-h2:clamp(2rem,4vw,3.25rem);
+  --fs-body:1.0625rem; --fs-small:.875rem;
+  --s1:.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--s6:7rem;
+  --radius-s:10px;--radius-m:16px;--radius-l:28px;
+  --shadow-1:0 1px 2px rgb(26 26 30 / .06),0 0 0 1px var(--border);
+  --shadow-2:0 30px 60px -30px rgb(26 26 30 / .28),0 0 0 1px var(--border);
+  --dur-fast:150ms;--dur-base:260ms;--dur-slow:800ms;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121216;--surface:#1a1a20;--raised:#24242c;--text:#f1f0ec;--muted:#9c9ca8;--border:#2e2e38;--accent:#7b93ff;--accent-ink:#0b1140;--c1:#ff7a55;--c2:#3ccf93;--c3:#b48cff;--shadow-1:0 1px 2px rgb(0 0 0 / .4),0 0 0 1px var(--border);--shadow-2:0 30px 60px -30px rgb(0 0 0 / .7),0 0 0 1px var(--border);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121216;--surface:#1a1a20;--raised:#24242c;--text:#f1f0ec;--muted:#9c9ca8;--border:#2e2e38;--accent:#7b93ff;--accent-ink:#0b1140;--c1:#ff7a55;--c2:#3ccf93;--c3:#b48cff;--shadow-1:0 1px 2px rgb(0 0 0 / .4),0 0 0 1px var(--border);--shadow-2:0 30px 60px -30px rgb(0 0 0 / .7),0 0 0 1px var(--border);color-scheme:dark}
+
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:var(--fs-body)/1.6 var(--font-body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1180px;margin-inline:auto;padding-inline:clamp(16px,4vw,40px)}
+h1,h2{font-family:var(--font-display);font-weight:400;letter-spacing:-.015em;line-height:1;text-wrap:balance}
+h1{font-size:var(--fs-display)}h2{font-size:var(--fs-h2)}
+h3{font:700 1.125rem/1.3 var(--font-body);letter-spacing:-.01em}
+i,em{font-style:italic;color:var(--accent)}
+.lead{font-size:1.25rem;color:var(--muted);max-width:50ch;text-wrap:pretty}
+.eyebrow{font:700 .75rem/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding-block:var(--s3)}
+.brand{font:400 1.5rem var(--font-display);text-decoration:none;color:var(--text)}
+.nav ul{display:flex;gap:var(--s3);list-style:none;padding:0}
+.nav ul a{text-decoration:none;color:var(--muted);font-weight:500;font-size:.9375rem}
+.nav ul a:hover{color:var(--text)}
+.tools{display:flex;gap:var(--s1)}
+.chip{font:700 .75rem/1 var(--font-body);padding:.55rem .8rem;border:0;border-radius:999px;background:var(--raised);color:var(--muted);cursor:pointer;min-height:36px;text-decoration:none;display:inline-flex;align-items:center}
+.chip:hover{color:var(--text)}
+.btn{display:inline-flex;align-items:center;gap:.5rem;min-height:50px;padding:0 1.5rem;border-radius:999px;text-decoration:none;font:700 .9375rem var(--font-body);transition:transform var(--dur-fast) var(--ease-out),box-shadow var(--dur-fast)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 10px 24px -12px var(--accent)}
+.btn-secondary{background:var(--surface);color:var(--text);box-shadow:var(--shadow-1)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:999px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);align-items:center;padding-block:var(--s6) var(--s5)}
+.copy{display:grid;gap:var(--s3)}
+.cta{display:flex;gap:var(--s2);flex-wrap:wrap}
+.proof{display:flex;align-items:center;gap:.75rem;color:var(--muted);font-size:var(--fs-small);font-weight:500}
+.faces{display:flex}
+.face{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 .6875rem var(--font-body);color:#fff;border:2px solid var(--bg);margin-left:-8px}
+.face:first-child{margin-left:0}
+
+/* card stack */
+.stack{position:relative;height:520px;perspective:1200px}
+.card{position:absolute;inset:auto 0 0 0;margin-inline:auto;width:min(100%,440px);background:var(--surface);border-radius:var(--radius-l);box-shadow:var(--shadow-2);padding:var(--s4);transform-origin:50% 100%;display:grid;gap:var(--s2);align-content:start}
+.card .title{font:400 1.75rem/1.1 var(--font-display)}
+.card .meta{display:flex;justify-content:space-between;color:var(--muted);font-size:.8125rem;font-weight:500}
+.card p{color:var(--text);text-wrap:pretty;line-height:1.55}
+.card .todo{display:grid;gap:.5rem;list-style:none;padding:0}
+.card .todo li{display:flex;gap:.6rem;align-items:center}
+.card .todo .box{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);display:grid;place-items:center;font-size:.7rem}
+.card .todo .box.ok{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.card.c1{z-index:3;bottom:0}
+.card.c2{z-index:2;bottom:36px;transform:scale(.94) rotate(-3deg);opacity:.9}
+.card.c3{z-index:1;bottom:72px;transform:scale(.88) rotate(3deg);opacity:.75}
+.cursor{position:absolute;display:flex;align-items:flex-start;gap:0;z-index:5;pointer-events:none}
+.cursor svg{width:16px;height:20px}
+.cursor span{font:700 .6875rem/1 var(--font-body);color:#fff;padding:.35rem .5rem;border-radius:4px 10px 10px 10px;margin-top:12px;white-space:nowrap}
+.cur1{left:58%;top:38%;color:var(--c2)}.cur1 span{background:var(--c2)}
+.cur2{left:22%;top:66%;color:var(--c3)}.cur2 span{background:var(--c3)}
+.sel{background:color-mix(in srgb,var(--c2) 22%,transparent);border-radius:3px;padding:0 .1em}
+
+/* sections */
+section{padding-block:var(--s5)}
+.features{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:var(--s2)}
+.f{background:var(--surface);border-radius:var(--radius-l);padding:var(--s4);box-shadow:var(--shadow-1);display:grid;gap:var(--s2);align-content:start}
+.f.wide{grid-column:span 2}
+.f.first{background:var(--text);color:var(--bg);grid-row:span 2}
+.f.first h3{font:400 clamp(1.75rem,3vw,2.5rem)/1.05 var(--font-display)}
+.f.first p{color:color-mix(in srgb,var(--bg) 70%,transparent)}
+.f p{color:var(--muted);text-wrap:pretty}
+.f .ico{width:36px;height:36px;border-radius:10px;background:var(--raised);display:grid;place-items:center;color:var(--accent)}
+.f.first .ico{background:color-mix(in srgb,var(--bg) 12%,transparent);color:var(--bg)}
+.f svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round}
+
+.how{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s5);align-items:start}
+.how ol{list-style:none;padding:0;display:grid;gap:var(--s2);counter-reset:s}
+.how li{counter-increment:s;display:grid;grid-template-columns:2.5rem 1fr;gap:var(--s2);padding:var(--s3);background:var(--surface);border-radius:var(--radius-m);box-shadow:var(--shadow-1)}
+.how li::before{content:counter(s);font:400 1.5rem var(--font-display);color:var(--accent)}
+.how li strong{display:block;font:700 1.0625rem var(--font-body)}
+.how li p{color:var(--muted)}
+
+.band{text-align:center;display:grid;gap:var(--s3);justify-items:center;padding-block:var(--s6)}
+.band h2{font-size:clamp(2.5rem,6vw,5rem)}
+footer{padding-block:var(--s4);display:flex;justify-content:space-between;color:var(--muted);font-size:var(--fs-small);border-top:1px solid var(--border)}
+
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes settle1{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
+@keyframes settle2{from{opacity:0;transform:translateY(80px) scale(.94) rotate(-3deg)}to{opacity:.9;transform:scale(.94) rotate(-3deg)}}
+@keyframes settle3{from{opacity:0;transform:translateY(100px) scale(.88) rotate(3deg)}to{opacity:.75;transform:scale(.88) rotate(3deg)}}
+@keyframes drift{0%,100%{translate:0 0}50%{translate:8px -6px}}
+@keyframes pop{from{opacity:0;scale:.8}to{opacity:1;scale:1}}
+.rise{animation:rise var(--dur-slow) var(--ease-out) both}
+.copy>.rise:nth-child(1){animation-delay:.05s}.copy>.rise:nth-child(2){animation-delay:.12s}.copy>.rise:nth-child(3){animation-delay:.2s}.copy>.rise:nth-child(4){animation-delay:.28s}.copy>.rise:nth-child(5){animation-delay:.36s}
+.card.c1{animation:settle1 .9s var(--ease-out) .35s both}
+.card.c2{animation:settle2 .9s var(--ease-out) .25s both}
+.card.c3{animation:settle3 .9s var(--ease-out) .15s both}
+.cursor{animation:pop .5s var(--ease-out) 1.1s both,drift 4s ease-in-out 1.6s infinite}
+.cur2{animation-delay:1.3s,2s}
+@media (prefers-reduced-motion:reduce){.rise,.card,.cursor{animation:none!important}}
+
+@media (max-width:900px){
+  .nav ul{display:none}
+  .hero{grid-template-columns:1fr;padding-block:var(--s5) var(--s4)}
+  .stack{height:460px}
+  .features{grid-template-columns:1fr}.f.first{grid-row:auto}.f.wide{grid-column:auto}
+  .how{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="/">Acme Notes</a>
+  <ul>
+    <li><a href="#product" data-i18n="nav.product">Product</a></li>
+    <li><a href="#how" data-i18n="nav.how">How it works</a></li>
+    <li><a href="#pricing" data-i18n="nav.pricing">Pricing</a></li>
+  </ul>
+  <div class="tools">
+    <button class="chip" id="lang" aria-label="Switch language">ES</button>
+    <button class="chip" id="theme" aria-label="Toggle theme">◐</button>
+    <a class="chip" href="/login" data-i18n="nav.login">Log in</a>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="copy">
+    <p class="eyebrow rise" data-i18n="hero.eyebrow">Acme Notes · for teams</p>
+    <h1 class="rise" data-i18n-html="hero.h1">Where your team <i>thinks out loud.</i></h1>
+    <p class="lead rise" data-i18n="hero.lead">Fast, shared notes with everyone's cursor on the page. Write a thought, see it land on your teammates' screens before you finish the sentence.</p>
+    <div class="cta rise">
+      <a class="btn btn-primary" href="/signup" data-i18n="cta.primary">Start for free</a>
+      <a class="btn btn-secondary" href="#how" data-i18n="cta.secondary">How it works</a>
+    </div>
+    <div class="proof rise">
+      <div class="faces" aria-hidden="true"><span class="face" style="background:var(--c1)">MR</span><span class="face" style="background:var(--c2)">JT</span><span class="face" style="background:var(--c3)">AL</span></div>
+      <span data-i18n="hero.proof">Free for teams up to five. No card required.</span>
+    </div>
+  </div>
+
+  <div class="stack" id="product" role="img" aria-label="Three shared notes with teammates' cursors">
+    <article class="card c3"><div class="title" data-i18n="c3.t">Onboarding notes</div></article>
+    <article class="card c2"><div class="title" data-i18n="c2.t">Q4 roadmap — draft</div></article>
+    <article class="card c1">
+      <div class="meta"><span data-i18n="c1.meta">Edited just now · 3 people</span><span>#launch</span></div>
+      <div class="title" data-i18n="c1.t">Launch checklist — Thursday</div>
+      <p data-i18n-html="c1.p">We ship after legal signs off on the new terms. <span class="sel">Marta owns the changelog</span>, Jon reviews the release branch.</p>
+      <ul class="todo">
+        <li><span class="box ok">✓</span><span data-i18n="c1.l1">Freeze the release branch</span></li>
+        <li><span class="box ok">✓</span><span data-i18n="c1.l2">Draft the changelog</span></li>
+        <li><span class="box"></span><span data-i18n="c1.l3">Schedule the retro for Friday</span></li>
+      </ul>
+    </article>
+    <div class="cursor cur1" aria-hidden="true"><svg viewBox="0 0 16 20"><path d="M1 1l14 8-6 1.5L5.5 19z" fill="currentColor"/></svg><span>Jon</span></div>
+    <div class="cursor cur2" aria-hidden="true"><svg viewBox="0 0 16 20"><path d="M1 1l14 8-6 1.5L5.5 19z" fill="currentColor"/></svg><span>Ana</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="features">
+    <article class="f first">
+      <div class="ico"><svg viewBox="0 0 24 24"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></div>
+      <h3 data-i18n-html="f1.h">Instant sync, <i style="color:inherit;opacity:.7">no save button.</i></h3>
+      <p data-i18n="f1.p">Every keystroke lands on every screen as you type. Line-by-line history is kept, so nothing is ever lost and nobody asks who has the latest version.</p>
+    </article>
+    <article class="f">
+      <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8"/></svg></div>
+      <h3 data-i18n="f2.h">Keyboard first</h3>
+      <p data-i18n="f2.p">Create, link and search from a single shortcut.</p>
+    </article>
+    <article class="f">
+      <div class="ico"><svg viewBox="0 0 24 24"><path d="M5 12a7 7 0 0 1 12.5-4.3M19 12a7 7 0 0 1-12.5 4.3"/><path d="M17 4v4h-4M7 20v-4h4"/></svg></div>
+      <h3 data-i18n="f3.h">Offline, then merged</h3>
+      <p data-i18n="f3.p">Write on the plane. Land and everything merges cleanly.</p>
+    </article>
+    <article class="f wide">
+      <div class="ico"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></div>
+      <h3 data-i18n="f4.h">Share with a link, see who is there</h3>
+      <p data-i18n="f4.p">Paste a link in chat. Teammates land already editing, their cursor visible to everyone, no invitation flow.</p>
+    </article>
+  </div>
+</section>
+
+<section id="how">
+  <div class="how">
+    <div>
+      <p class="eyebrow" data-i18n="how.eyebrow">How it works</p>
+      <h2 data-i18n-html="how.h2">Three steps, <i>then you forget it's there.</i></h2>
+    </div>
+    <ol>
+      <li><div><strong data-i18n="how.s1h">Open a page</strong><p data-i18n="how.s1p">One shortcut creates a page with a title and a share link.</p></div></li>
+      <li><div><strong data-i18n="how.s2h">Invite by link</strong><p data-i18n="how.s2p">Paste it in chat. Teammates land in the page, already editing.</p></div></li>
+      <li><div><strong data-i18n="how.s3h">Write together</strong><p data-i18n="how.s3p">Everyone sees everyone. History is kept, line by line.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section id="pricing" class="band">
+  <h2 data-i18n-html="band.h2">Free for teams up to five.<br><i>Flat price after that.</i></h2>
+  <p class="lead" data-i18n="band.p">No per-seat surprises. Cancel in one click.</p>
+  <a class="btn btn-primary" href="/signup" data-i18n="cta.primary">Start for free</a>
+</section>
+</main>
+<footer><span>© 2026 Acme Notes</span><span data-i18n="footer.tag">Made for people who think in writing.</span></footer>
+</div>
+
+<script>
+const I18N={
+ en:{"nav.product":"Product","nav.how":"How it works","nav.pricing":"Pricing","nav.login":"Log in",
+  "hero.eyebrow":"Acme Notes · for teams","hero.h1":"Where your team <i>thinks out loud.</i>",
+  "hero.lead":"Fast, shared notes with everyone's cursor on the page. Write a thought, see it land on your teammates' screens before you finish the sentence.",
+  "cta.primary":"Start for free","cta.secondary":"How it works","hero.proof":"Free for teams up to five. No card required.",
+  "c3.t":"Onboarding notes","c2.t":"Q4 roadmap — draft","c1.meta":"Edited just now · 3 people","c1.t":"Launch checklist — Thursday",
+  "c1.p":"We ship after legal signs off on the new terms. <span class=\"sel\">Marta owns the changelog</span>, Jon reviews the release branch.",
+  "c1.l1":"Freeze the release branch","c1.l2":"Draft the changelog","c1.l3":"Schedule the retro for Friday",
+  "f1.h":"Instant sync, <i style=\"color:inherit;opacity:.7\">no save button.</i>","f1.p":"Every keystroke lands on every screen as you type. Line-by-line history is kept, so nothing is ever lost and nobody asks who has the latest version.",
+  "f2.h":"Keyboard first","f2.p":"Create, link and search from a single shortcut.","f3.h":"Offline, then merged","f3.p":"Write on the plane. Land and everything merges cleanly.",
+  "f4.h":"Share with a link, see who is there","f4.p":"Paste a link in chat. Teammates land already editing, their cursor visible to everyone, no invitation flow.",
+  "how.eyebrow":"How it works","how.h2":"Three steps, <i>then you forget it's there.</i>",
+  "how.s1h":"Open a page","how.s1p":"One shortcut creates a page with a title and a share link.","how.s2h":"Invite by link","how.s2p":"Paste it in chat. Teammates land in the page, already editing.","how.s3h":"Write together","how.s3p":"Everyone sees everyone. History is kept, line by line.",
+  "band.h2":"Free for teams up to five.<br><i>Flat price after that.</i>","band.p":"No per-seat surprises. Cancel in one click.","footer.tag":"Made for people who think in writing."},
+ es:{"nav.product":"Producto","nav.how":"Cómo funciona","nav.pricing":"Precios","nav.login":"Entrar",
+  "hero.eyebrow":"Acme Notes · para equipos","hero.h1":"Donde tu equipo <i>piensa en voz alta.</i>",
+  "hero.lead":"Notas rápidas y compartidas con el cursor de todos en la página. Escribe una idea y mírala llegar a las pantallas de tu equipo antes de terminar la frase.",
+  "cta.primary":"Empieza gratis","cta.secondary":"Cómo funciona","hero.proof":"Gratis para equipos de hasta cinco. Sin tarjeta.",
+  "c3.t":"Notas de onboarding","c2.t":"Roadmap Q4 — borrador","c1.meta":"Editado ahora mismo · 3 personas","c1.t":"Checklist de lanzamiento — jueves",
+  "c1.p":"Lanzamos cuando legal apruebe los nuevos términos. <span class=\"sel\">Marta se encarga del changelog</span>, Jon revisa la rama de release.",
+  "c1.l1":"Congelar la rama de release","c1.l2":"Redactar el changelog","c1.l3":"Agendar la retro para el viernes",
+  "f1.h":"Sincronización instantánea, <i style=\"color:inherit;opacity:.7\">sin botón de guardar.</i>","f1.p":"Cada pulsación llega a todas las pantallas mientras escribes. El historial se conserva línea a línea: nada se pierde y nadie pregunta quién tiene la última versión.",
+  "f2.h":"Primero el teclado","f2.p":"Crea, enlaza y busca desde un solo atajo.","f3.h":"Sin conexión, luego fusionado","f3.p":"Escribe en el avión. Aterriza y todo se fusiona limpiamente.",
+  "f4.h":"Comparte con un enlace, ve quién está","f4.p":"Pega un enlace en el chat. Tu equipo aterriza ya editando, con su cursor visible para todos, sin flujo de invitación.",
+  "how.eyebrow":"Cómo funciona","how.h2":"Tres pasos, <i>después olvidas que está ahí.</i>",
+  "how.s1h":"Abre una página","how.s1p":"Un atajo crea una página con título y enlace para compartir.","how.s2h":"Invita con un enlace","how.s2p":"Pégalo en el chat. Tu equipo aterriza en la página, ya editando.","how.s3h":"Escriban juntos","how.s3p":"Todos ven a todos. El historial se conserva, línea a línea.",
+  "band.h2":"Gratis para equipos de hasta cinco.<br><i>Precio fijo después.</i>","band.p":"Sin sorpresas por asiento. Cancela con un clic.","footer.tag":"Hecho para quienes piensan escribiendo."}
+};
+let lang="en";
+function apply(){document.documentElement.lang=lang;
+ document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=I18N[lang][e.dataset.i18n]);
+ document.querySelectorAll("[data-i18n-html]").forEach(e=>e.innerHTML=I18N[lang][e.dataset.i18nHtml]);
+ document.getElementById("lang").textContent=lang==="en"?"ES":"EN"}
+document.getElementById("lang").onclick=()=>{lang=lang==="en"?"es":"en";apply()};
+document.getElementById("theme").onclick=()=>{const r=document.documentElement;const dark=getComputedStyle(r).colorScheme.includes("dark");r.dataset.theme=dark?"light":"dark"};
+apply();
+</script>
+</body>
+</html>

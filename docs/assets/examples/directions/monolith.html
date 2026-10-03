@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Acme Notes — Monolith</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090c; --surface:#0f1116; --raised:#171a21;
+  --text:#f0f2f6; --muted:#8b93a5; --border:#22262f;
+  --accent:#d4ff4a; --accent-ink:#0b0d05;
+  --font-display:"Syne",system-ui,sans-serif; --font-body:"IBM Plex Sans",system-ui,sans-serif; --font-mono:"IBM Plex Mono",ui-monospace,monospace;
+  --fs-display:clamp(2rem,8.5vw,7rem); --fs-h2:clamp(1.75rem,3.5vw,3rem);
+  --fs-body:1.0625rem; --fs-small:.875rem;
+  --s1:.5rem;--s2:1rem;--s3:1.5rem;--s4:2.5rem;--s5:4rem;--s6:7rem;
+  --radius-s:6px;--radius-m:12px;--radius-l:20px;
+  --shadow-2:0 30px 80px -30px rgb(0 0 0 / .8), 0 0 0 1px var(--border);
+  --dur-fast:120ms;--dur-base:240ms;--dur-slow:600ms;
+  --ease-out:cubic-bezier(.16,1,.3,1);
+  color-scheme:dark;
+}
+:root[data-theme="light"]{--bg:#f2f3f5;--surface:#ffffff;--raised:#e8eaee;--text:#0b0d12;--muted:#5a6273;--border:#d6dae2;--accent:#3d5c00;--accent-ink:#ffffff;--shadow-2:0 30px 80px -40px rgb(11 13 18 / .35),0 0 0 1px var(--border);color-scheme:light}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f2f3f5;--surface:#ffffff;--raised:#e8eaee;--text:#0b0d12;--muted:#5a6273;--border:#d6dae2;--accent:#3d5c00;--accent-ink:#ffffff;--shadow-2:0 30px 80px -40px rgb(11 13 18 / .35),0 0 0 1px var(--border);color-scheme:light}}
+
+*{box-sizing:border-box;margin:0}
+body{background:var(--bg);color:var(--text);font:var(--fs-body)/1.6 var(--font-body);-webkit-font-smoothing:antialiased;overflow-x:clip}
+.hero>*,.grid>*,.how>*,.band>*{min-width:0}
+.brand,.chip{white-space:nowrap}
+.wrap{max-width:1240px;margin-inline:auto;padding-inline:clamp(16px,4vw,48px)}
+h1,h2,h3{font-family:var(--font-display);font-weight:800;letter-spacing:-.035em;line-height:.95;text-wrap:balance}
+h1{font-size:var(--fs-display);text-transform:uppercase}
+h2{font-size:var(--fs-h2)}
+h3{font-size:1.25rem;letter-spacing:-.01em;font-weight:700}
+.lead{font-size:1.25rem;color:var(--muted);max-width:50ch;text-wrap:pretty}
+.mono{font-family:var(--font-mono);font-size:.8125rem;letter-spacing:.02em;color:var(--muted)}
+kbd{font:500 .75rem/1 var(--font-mono);padding:.3rem .45rem;border-radius:5px;background:var(--raised);border:1px solid var(--border);border-bottom-width:2px;color:var(--text)}
+
+.nav{display:flex;align-items:center;justify-content:space-between;padding-block:var(--s3)}
+.brand{font:800 1.125rem var(--font-display);letter-spacing:-.02em;text-decoration:none;color:var(--text);text-transform:uppercase}
+.nav ul{display:flex;gap:var(--s3);list-style:none;padding:0}
+.nav ul a{text-decoration:none;color:var(--muted);font-size:.9375rem}
+.nav ul a:hover{color:var(--text)}
+.tools{display:flex;gap:var(--s1)}
+.chip{font:500 .8125rem/1 var(--font-mono);padding:.5rem .7rem;border:1px solid var(--border);border-radius:var(--radius-s);background:transparent;color:var(--muted);cursor:pointer;min-height:36px;text-decoration:none;display:inline-flex;align-items:center}
+.chip:hover{color:var(--text);border-color:var(--muted)}
+.btn{display:inline-flex;align-items:center;gap:.6rem;min-height:50px;padding:0 1.5rem;border-radius:var(--radius-s);text-decoration:none;font:500 1rem var(--font-body);transition:transform var(--dur-fast) var(--ease-out),filter var(--dur-fast)}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-secondary{border:1px solid var(--border);color:var(--text)}
+.btn-secondary:hover{border-color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+/* hero */
+.hero{padding-block:var(--s6) var(--s5);display:grid;gap:var(--s4)}
+.hero .copy{display:grid;gap:var(--s3);max-width:1000px}
+.cta{display:flex;gap:var(--s2);flex-wrap:wrap;align-items:center}
+.hint{display:flex;gap:.5rem;align-items:center;color:var(--muted);font-size:var(--fs-small)}
+.hl{color:var(--accent)}
+
+/* command palette */
+.palette{margin-top:var(--s2);background:var(--surface);border-radius:var(--radius-l);box-shadow:var(--shadow-2);overflow:hidden;max-width:880px;justify-self:center;width:100%}
+.palette .input{display:flex;align-items:center;gap:.75rem;padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);font-size:1.125rem}
+.palette .input .q{flex:1;min-height:1.6em}
+.palette .input .q .caret{display:inline-block;width:2px;height:1.1em;background:var(--accent);vertical-align:-.15em;animation:blink 1s steps(2) infinite}
+.rows{list-style:none;padding:.5rem;margin:0;display:grid}
+.rows li{display:grid;grid-template-columns:28px 1fr auto;gap:.9rem;align-items:center;padding:.8rem .9rem;border-radius:var(--radius-m);color:var(--muted);transition:background var(--dur-fast),color var(--dur-fast)}
+.rows li.on{background:var(--raised);color:var(--text)}
+.rows li .ic{width:28px;height:28px;border-radius:8px;border:1px solid var(--border);display:grid;place-items:center;font-family:var(--font-mono);font-size:.75rem}
+.rows li.on .ic{border-color:var(--accent);color:var(--accent)}
+.rows li .k{display:flex;gap:.3rem}
+.rows li small{display:block;color:var(--muted);font-size:.8125rem}
+.pfoot{display:flex;justify-content:space-between;padding:.75rem 1.25rem;border-top:1px solid var(--border)}
+
+/* bento */
+section{padding-block:var(--s5)}
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:var(--s2)}
+.cell{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-l);padding:var(--s4);display:grid;align-content:space-between;gap:var(--s3);min-height:260px}
+.cell p{color:var(--muted);text-wrap:pretty}
+.c7{grid-column:span 7}.c5{grid-column:span 5}.c4{grid-column:span 4}.c8{grid-column:span 8}
+.cell .big{font:800 clamp(2.5rem,6vw,4.5rem)/1 var(--font-display);letter-spacing:-.04em}
+.cell .big span{color:var(--accent)}
+.diff{font-family:var(--font-mono);font-size:.875rem;line-height:1.7;background:var(--bg);border-radius:var(--radius-m);padding:var(--s2) var(--s3);border:1px solid var(--border)}
+.diff .a{color:var(--accent)}.diff .d{color:var(--muted);text-decoration:line-through}
+.sync{display:flex;gap:.5rem;align-items:center;font-family:var(--font-mono);font-size:.8125rem;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent);animation:pulse 1.6s ease-in-out infinite}
+
+.how{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);align-items:start}
+.how ol{list-style:none;padding:0;display:grid;gap:var(--s3);counter-reset:s}
+.how li{counter-increment:s;display:grid;grid-template-columns:3rem 1fr;gap:var(--s2);padding-top:var(--s3);border-top:1px solid var(--border)}
+.how li::before{content:"0" counter(s);font:500 .8125rem var(--font-mono);color:var(--accent)}
+.how li strong{display:block;font:700 1.125rem var(--font-display)}
+.how li p{color:var(--muted)}
+
+.band{border:1px solid var(--border);border-radius:var(--radius-l);padding:var(--s5) var(--s4);display:grid;grid-template-columns:1.4fr 1fr;gap:var(--s4);align-items:center;background:linear-gradient(180deg,var(--surface),var(--bg))}
+.band h2{font-size:clamp(2rem,5vw,4rem);text-transform:uppercase}
+footer{padding-block:var(--s4);display:flex;justify-content:space-between;color:var(--muted);font-size:var(--fs-small);border-top:1px solid var(--border)}
+
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes blink{to{visibility:hidden}}
+@keyframes pulse{50%{box-shadow:0 0 0 7px color-mix(in srgb,var(--accent) 8%,transparent)}}
+.rise{animation:rise var(--dur-slow) var(--ease-out) both}
+.copy>.rise:nth-child(1){animation-delay:.05s}.copy>.rise:nth-child(2){animation-delay:.12s}.copy>.rise:nth-child(3){animation-delay:.2s}.copy>.rise:nth-child(4){animation-delay:.28s}
+.palette.rise{animation-delay:.4s;animation-duration:.9s}
+@media (prefers-reduced-motion:reduce){.rise,.caret,.dot{animation:none!important}}
+
+@media (max-width:900px){
+  .nav ul{display:none}
+  .grid{grid-template-columns:1fr}.c7,.c5,.c4,.c8{grid-column:auto}
+  .how,.band{grid-template-columns:1fr}
+  .rows li .k{display:none}
+  .pfoot .mono{display:none}
+  .nav .tools{gap:.35rem}
+  .brand{font-size:.9375rem}
+  .hero{padding-block:var(--s5) var(--s4)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="nav">
+  <a class="brand" href="/">Acme Notes</a>
+  <ul>
+    <li><a href="#product" data-i18n="nav.product">Product</a></li>
+    <li><a href="#how" data-i18n="nav.how">How it works</a></li>
+    <li><a href="#pricing" data-i18n="nav.pricing">Pricing</a></li>
+  </ul>
+  <div class="tools">
+    <button class="chip" id="lang" aria-label="Switch language">ES</button>
+    <button class="chip" id="theme" aria-label="Toggle theme">◐</button>
+    <a class="chip" href="/login" data-i18n="nav.login">Log in</a>
+  </div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="copy">
+    <p class="mono rise" data-i18n="hero.eyebrow">// shared notes · zero latency · keyboard first</p>
+    <h1 class="rise" data-i18n-html="hero.h1">Every note,<br>one <span class="hl">keystroke</span> away.</h1>
+    <p class="lead rise" data-i18n="hero.lead">Acme Notes is the fastest place your team can write together. Open, link and search from one shortcut. Sync is instant. Nothing ever asks you to save.</p>
+    <div class="cta rise">
+      <a class="btn btn-primary" href="/signup" data-i18n="cta.primary">Get started free</a>
+      <a class="btn btn-secondary" href="#product" data-i18n="cta.secondary">Watch the palette</a>
+      <span class="hint"><kbd>⌘</kbd><kbd>K</kbd> <span data-i18n="hero.hint">does everything below</span></span>
+    </div>
+  </div>
+
+  <div class="palette rise" id="product" role="img" aria-label="Command palette demo">
+    <div class="input"><span class="mono">›</span><span class="q" id="q"><span class="caret"></span></span><kbd>esc</kbd></div>
+    <ul class="rows" id="rows">
+      <li class="on"><span class="ic">+</span><span><span data-i18n="p1.h">New page</span><small data-i18n="p1.s">Create a page and copy its share link</small></span><span class="k"><kbd>⌘</kbd><kbd>N</kbd></span></li>
+      <li><span class="ic">#</span><span><span data-i18n="p2.h">Link to “Q4 roadmap”</span><small data-i18n="p2.s">Insert a live backlink</small></span><span class="k"><kbd>[[</kbd></span></li>
+      <li><span class="ic">@</span><span><span data-i18n="p3.h">Mention Marta</span><small data-i18n="p3.s">She gets a ping, not an email</small></span><span class="k"><kbd>@</kbd></span></li>
+      <li><span class="ic">⌕</span><span><span data-i18n="p4.h">Search everything</span><small data-i18n="p4.s">Across every page, including history</small></span><span class="k"><kbd>⌘</kbd><kbd>/</kbd></span></li>
+    </ul>
+    <div class="pfoot"><span class="sync"><span class="dot"></span><span data-i18n="p.sync">3 teammates online · synced</span></span><span class="mono" data-i18n="p.nav">↑↓ navigate · ↵ run</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="grid">
+    <article class="cell c7">
+      <h3 data-i18n="f1.h">Instant sync, no save button</h3>
+      <div class="diff">
+        <div><span class="a">+ </span><span data-i18n="f1.d1">Ship on Thursday after the legal review</span></div>
+        <div><span class="d" data-i18n="f1.d2">- Ship on Wednesday</span></div>
+        <div><span class="a">+ </span><span data-i18n="f1.d3">Owner: Marta · Reviewer: Jon</span></div>
+      </div>
+      <p data-i18n="f1.p">Every edit lands on every screen as you type, with a line-by-line history you can always walk back.</p>
+    </article>
+    <article class="cell c5">
+      <div class="big"><span>0</span> <span data-i18n="f2.big" style="color:var(--text)">conflicts</span></div>
+      <h3 data-i18n="f2.h">Offline is a first-class mode</h3>
+      <p data-i18n="f2.p">Write on a plane. Reconnect. Everything merges automatically, nothing is overwritten.</p>
+    </article>
+    <article class="cell c4">
+      <div class="k" style="display:flex;gap:.3rem"><kbd>⌘</kbd><kbd>K</kbd></div>
+      <h3 data-i18n="f3.h">One shortcut, every action</h3>
+      <p data-i18n="f3.p">Create, link, mention, search. Your hands stay on the keyboard.</p>
+    </article>
+    <article class="cell c8">
+      <div class="sync"><span class="dot"></span><span data-i18n="f4.live">Marta, Jon and Ana are in “Launch checklist”</span></div>
+      <h3 data-i18n="f4.h">Share with a link, see who is there</h3>
+      <p data-i18n="f4.p">Paste a link in chat. Teammates land already editing, with their cursor visible to everyone.</p>
+    </article>
+  </div>
+</section>
+
+<section id="how">
+  <div class="how">
+    <div>
+      <p class="mono" data-i18n="how.eyebrow">// how it works</p>
+      <h2 data-i18n="how.h2">Three steps. Then it disappears into your day.</h2>
+    </div>
+    <ol>
+      <li><div><strong data-i18n="how.s1h">Open a page</strong><p data-i18n="how.s1p">One shortcut creates a page with a title and a share link.</p></div></li>
+      <li><div><strong data-i18n="how.s2h">Invite by link</strong><p data-i18n="how.s2p">Paste it in chat. Teammates land in the page, already editing.</p></div></li>
+      <li><div><strong data-i18n="how.s3h">Write together</strong><p data-i18n="how.s3p">Everyone sees everyone. History is kept, line by line.</p></div></li>
+    </ol>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="band">
+    <h2 data-i18n-html="band.h2">Free up to five.<br><span class="hl">Flat</span> after that.</h2>
+    <div style="display:grid;gap:var(--s3)">
+      <p class="lead" data-i18n="band.p">No per-seat surprises. Cancel in one click.</p>
+      <a class="btn btn-primary" href="/signup" data-i18n="cta.primary">Get started free</a>
+    </div>
+  </div>
+</section>
+</main>
+<footer><span>© 2026 Acme Notes</span><span class="mono" data-i18n="footer.tag">built for people who type faster than they talk</span></footer>
+</div>
+
+<script>
+const I18N={
+ en:{"nav.product":"Product","nav.how":"How it works","nav.pricing":"Pricing","nav.login":"Log in",
+  "hero.eyebrow":"// shared notes · zero latency · keyboard first","hero.h1":"Every note,<br>one <span class=\"hl\">keystroke</span> away.",
+  "hero.lead":"Acme Notes is the fastest place your team can write together. Open, link and search from one shortcut. Sync is instant. Nothing ever asks you to save.",
+  "cta.primary":"Get started free","cta.secondary":"Watch the palette","hero.hint":"does everything below",
+  "p1.h":"New page","p1.s":"Create a page and copy its share link","p2.h":"Link to “Q4 roadmap”","p2.s":"Insert a live backlink","p3.h":"Mention Marta","p3.s":"She gets a ping, not an email","p4.h":"Search everything","p4.s":"Across every page, including history",
+  "p.sync":"3 teammates online · synced","p.nav":"↑↓ navigate · ↵ run",
+  "f1.h":"Instant sync, no save button","f1.d1":"Ship on Thursday after the legal review","f1.d2":"- Ship on Wednesday","f1.d3":"Owner: Marta · Reviewer: Jon","f1.p":"Every edit lands on every screen as you type, with a line-by-line history you can always walk back.",
+  "f2.big":"conflicts","f2.h":"Offline is a first-class mode","f2.p":"Write on a plane. Reconnect. Everything merges automatically, nothing is overwritten.",
+  "f3.h":"One shortcut, every action","f3.p":"Create, link, mention, search. Your hands stay on the keyboard.",
+  "f4.live":"Marta, Jon and Ana are in “Launch checklist”","f4.h":"Share with a link, see who is there","f4.p":"Paste a link in chat. Teammates land already editing, with their cursor visible to everyone.",
+  "how.eyebrow":"// how it works","how.h2":"Three steps. Then it disappears into your day.",
+  "how.s1h":"Open a page","how.s1p":"One shortcut creates a page with a title and a share link.","how.s2h":"Invite by link","how.s2p":"Paste it in chat. Teammates land in the page, already editing.","how.s3h":"Write together","how.s3p":"Everyone sees everyone. History is kept, line by line.",
+  "band.h2":"Free up to five.<br><span class=\"hl\">Flat</span> after that.","band.p":"No per-seat surprises. Cancel in one click.",
+  "footer.tag":"built for people who type faster than they talk",
+  "queries":["new page","link q4 roadmap","@marta","search legal review"]},
+ es:{"nav.product":"Producto","nav.how":"Cómo funciona","nav.pricing":"Precios","nav.login":"Entrar",
+  "hero.eyebrow":"// notas compartidas · latencia cero · primero el teclado","hero.h1":"Cada nota,<br>a una <span class=\"hl\">tecla</span> de distancia.",
+  "hero.lead":"Acme Notes es el lugar más rápido donde tu equipo puede escribir junto. Abre, enlaza y busca desde un solo atajo. La sincronización es instantánea. Nada te pide guardar.",
+  "cta.primary":"Empieza gratis","cta.secondary":"Ver la paleta","hero.hint":"hace todo lo de abajo",
+  "p1.h":"Nueva página","p1.s":"Crea una página y copia su enlace","p2.h":"Enlazar a “Roadmap Q4”","p2.s":"Inserta un backlink en vivo","p3.h":"Mencionar a Marta","p3.s":"Recibe un aviso, no un correo","p4.h":"Buscar en todo","p4.s":"En todas las páginas, incluido el historial",
+  "p.sync":"3 compañeros en línea · sincronizado","p.nav":"↑↓ navegar · ↵ ejecutar",
+  "f1.h":"Sincronización instantánea, sin botón de guardar","f1.d1":"Lanzar el jueves tras la revisión legal","f1.d2":"- Lanzar el miércoles","f1.d3":"Responsable: Marta · Revisor: Jon","f1.p":"Cada edición llega a todas las pantallas mientras escribes, con un historial línea a línea al que siempre puedes volver.",
+  "f2.big":"conflictos","f2.h":"Sin conexión es un modo de primera","f2.p":"Escribe en un avión. Reconecta. Todo se fusiona automáticamente, nada se sobrescribe.",
+  "f3.h":"Un atajo, todas las acciones","f3.p":"Crea, enlaza, menciona, busca. Tus manos no dejan el teclado.",
+  "f4.live":"Marta, Jon y Ana están en “Checklist de lanzamiento”","f4.h":"Comparte con un enlace, ve quién está","f4.p":"Pega un enlace en el chat. Tu equipo aterriza ya editando, con su cursor visible para todos.",
+  "how.eyebrow":"// cómo funciona","how.h2":"Tres pasos. Después desaparece en tu día.",
+  "how.s1h":"Abre una página","how.s1p":"Un atajo crea una página con título y enlace para compartir.","how.s2h":"Invita con un enlace","how.s2p":"Pégalo en el chat. Tu equipo aterriza en la página, ya editando.","how.s3h":"Escriban juntos","how.s3p":"Todos ven a todos. El historial se conserva, línea a línea.",
+  "band.h2":"Gratis hasta cinco.<br><span class=\"hl\">Fijo</span> después.","band.p":"Sin sorpresas por asiento. Cancela con un clic.",
+  "footer.tag":"hecho para quienes teclean más rápido de lo que hablan",
+  "queries":["nueva página","enlazar roadmap q4","@marta","buscar revisión legal"]}
+};
+let lang="en",timer;const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+function apply(){document.documentElement.lang=lang;
+ document.querySelectorAll("[data-i18n]").forEach(e=>e.textContent=I18N[lang][e.dataset.i18n]);
+ document.querySelectorAll("[data-i18n-html]").forEach(e=>e.innerHTML=I18N[lang][e.dataset.i18nHtml]);
+ document.getElementById("lang").textContent=lang==="en"?"ES":"EN";cycle()}
+document.getElementById("lang").onclick=()=>{lang=lang==="en"?"es":"en";apply()};
+document.getElementById("theme").onclick=()=>{const r=document.documentElement;const dark=getComputedStyle(r).colorScheme.includes("dark");r.dataset.theme=dark?"light":"dark"};
+function cycle(){clearTimeout(timer);const q=document.getElementById("q"),rows=[...document.querySelectorAll("#rows li")],qs=I18N[lang].queries;let idx=0;
+ const show=(i)=>{rows.forEach((r,j)=>r.classList.toggle("on",j===i))};
+ if(reduce){q.textContent=qs[0];show(0);return}
+ const run=()=>{const t=qs[idx];let c=0;show(idx);const st=()=>{c++;q.innerHTML=t.slice(0,c)+'<span class="caret"></span>';if(c<t.length)timer=setTimeout(st,55);else timer=setTimeout(()=>{idx=(idx+1)%qs.length;run()},1600)};st()};
+ timer=setTimeout(run,800)}
+apply();
+</script>
+</body>
+</html>

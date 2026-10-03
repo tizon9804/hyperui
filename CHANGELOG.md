@@ -2,6 +2,11 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.5.0 — 2026-10-03
+- **Motion AI Kit in `/hyperui:setup`:** new step after the Motion npm package installs the official kit (MIT, https://motion.dev/docs/ai-kit) the way `npx motion-ai` does for Claude Code (that installer is interactive-only): `npm pack motion-ai@latest`, then `content/skills/motion` → `.claude/skills/motion` and `content/agents/motion-reviewer.md` → `.claude/agents/` (project, or `~` with `--global`), and registers the hosted `motion` MCP (`https://mcp.motion.dev`, docs + example search) at local scope (user with `--global`). Idempotent; `--skip-motion-kit` skips it; `--motion-plus` also registers `motion-plus` (`https://mcp.motion.dev/plus`, Motion+ springs, MotionScore audits, transition editor; sign in from the MCP settings).
+- `/hyperui:doctor`: `Motion AI Kit skill` and `Motion MCP` rows.
+- `motion` specialist: uses the kit's `/motion` skill or `motion` MCP when present for docs/examples, CSS springs and audits; hyperui's recipes stay the taste and choreography layer.
+
 ## 0.4.5 — 2026-10-03
 - README Examples: three animated clips replace the static strip and the dashboard PNG — `docs/assets/examples/directions.webp` (Ledger · Monolith · Atelier loading with their entrance motion, CTA hover, scroll, caption chip with the type pairing; 9.7 s), `dashboard.webp` (the `viz` what–why–how card first, then KPIs and two live tooltips; 8 s), `ship.webp` (the question typed, the unedited answer line by line; 8 s). Stills and HTML sources stay under a "Stills and sources" fold.
 - New sources: `docs/assets/examples/directions/` (the three direction pages from the test run, interactive), `examples/ship-terminal.html` (time-driven terminal page, `?record` + `window.__seek(t)`), `examples/record/` (Playwright recorders + `encode.sh`); how-to in `docs/assets/README.md`. Docs-only release.

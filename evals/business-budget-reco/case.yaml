@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: business-budget-reco
+description: "Turn 2 of the payments journey. Same Colombian non-tech business owner, budget already stored ($0) after being asked once, and a friend suggested Lemon Squeezy: the reply must not ask the budget again, must recommend a non-Stripe-direct path with a URL, warn that Lemon Squeezy is the wrong choice for a Colombian seller, execute no purchase/deploy/`claude mcp add`, and write .hyperui/ship.md (REQ-011, REQ-012, REQ-017, REQ-018)."
+tags: [wave1, ship, es]
+expected_outcome: "Spanish; budget NOT re-asked; recommends an MoR (Polar/Paddle/Creem) or Mercado Pago/PayPal, never Stripe direct; includes a URL; warns about Lemon Squeezy; at most one question; no side effects; .hyperui/ship.md written."
+context:
+  scaffold_script: fixture.sh

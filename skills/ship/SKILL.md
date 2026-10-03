@@ -54,8 +54,9 @@ Rules that override the matrix:
 - Paid product on a $0 budget → Cloudflare Workers, not Vercel Hobby (Hobby is non-commercial).
 - Seller in Colombia or any LatAm country except BR/MX → no direct Stripe. Default to Paddle,
   Polar or Creem (merchant of record); Mercado Pago when the buyers are in LatAm; PayPal as a
-  fallback; Stripe only through a US/EU entity (Stripe Atlas, $500). Always add the Lemon Squeezy
-  warning when it comes up: it is being folded into Stripe Managed Payments, which excludes LatAm.
+  fallback; Stripe only through a US/EU entity (Stripe Atlas, $500). ALWAYS add the Lemon Squeezy
+  warning, unprompted, whenever recommending payments to a LatAm seller: it is being folded into
+  Stripe Managed Payments, which excludes LatAm (so it is not a safe default even if a friend suggests it).
 - "$0 forever" database → Neon (no pausing) over Supabase free (pauses after 7 idle days);
   never Fly.io (no free tier) or Render free Postgres (deleted after 30 days); PlanetScale has no free tier.
 - Non-tech user → the provider with a dashboard and git-push deploy (Vercel/Netlify + Supabase),

@@ -38,7 +38,10 @@ duplicate them here. Nothing is drawn until the what–why–how table exists.
 2. **What** — dataset type; per attribute: categorical / ordinal / quantitative, key or value,
    cardinality; what to **derive** (rates, deltas, index to baseline, ranks, bins, totals).
 3. **Why** — jargon removed; `{action, target}` pairs; a task chain for dashboards.
-4. **The what–why–how table** — one row per subtask (§3). **This comes before any chart code.**
+4. **The what–why–how table** — one row per subtask (§3). **Hard gate: externalise it first** —
+   write the `## Visualization` table into `.hyperui/design.md` (and show it in the reply) BEFORE
+   creating or editing ANY chart file (.html/.svg/.js/.tsx/.py). Chart code written before that
+   write is a defect; if it happened, delete the file and start again from this step.
 5. **How** — spatial position first; arrangement by number of keys (0 scatter · 1 bar/line ·
    2 heatmap · many → small multiples); check mark constraints; Reduce/Facet before more channels.
 6. **Validate** — expressiveness, effectiveness, discriminability, separability, rules of thumb,

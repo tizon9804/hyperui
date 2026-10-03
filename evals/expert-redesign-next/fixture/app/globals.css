@@ -1,0 +1,63 @@
+/* Legacy styles: hard-coded colors, no design tokens. */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: #333333;
+}
+
+.nav {
+  display: flex;
+  gap: 24px;
+  padding: 16px 32px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #dddddd;
+}
+.logo { font-weight: bold; color: #222222; }
+.nav-link { color: #555555; text-decoration: none; }
+.nav-link:hover { color: #0066cc; }
+
+.hero-body {
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+  color: #ffffff;
+}
+.hero-body h1 { font-size: 40px; margin-bottom: 12px; }
+.lead { font-size: 18px; color: #eeeeee; margin-bottom: 24px; }
+
+.btn {
+  display: inline-block;
+  padding: 12px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin: 0 6px;
+}
+.btn-primary { background: #ff6600; color: #ffffff; }
+.btn-secondary { background: #ffffff; color: #2575fc; border: 1px solid #2575fc; border-radius: 6px; }
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 60px 32px;
+}
+.card {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+.card h3 { color: #444444; margin-bottom: 8px; }
+.card p { color: #666666; }
+
+.footer {
+  padding: 24px;
+  text-align: center;
+  color: #999999;
+  background: #f0f0f0;
+  border-top: 1px solid #cccccc;
+  font-size: 14px;
+}

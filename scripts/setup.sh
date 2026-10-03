@@ -11,6 +11,7 @@ SKIP_MOTION=0
 SKIP_21ST=0
 SKIP_FD=0
 SKIP_IMP=0
+INSTALL_PREREQS=0
 KEY_21ST="${TWENTY_FIRST_API_KEY:-}"
 
 usage() {
@@ -25,8 +26,13 @@ Options:
   --global              Install the skills to ~/.claude/skills instead of ./.claude/skills
   --21st-key <key>      21st.dev API key (or export TWENTY_FIRST_API_KEY)
   --skip-hyperframes    --skip-uipro    --skip-motion    --skip-21st    --skip-frontend-design    --skip-impeccable
+  --install-prereqs     Install missing node (24 LTS) / python3 with Homebrew on macOS (non-interactive;
+                        only after the user said yes). On Linux/WSL2 it prints the distro lines.
   --dry-run             Print every command instead of running it
   -h, --help            This help
+
+Prerequisites (you install these; setup only helps): Claude Code CLI signed in, git,
+Node 24 LTS recommended (>= 20 required) + npm, python3. Terraform is NOT installed here: the infra specialist offers it on first use.
 USAGE
 }
 
@@ -40,6 +46,7 @@ while [[ $# -gt 0 ]]; do
     --skip-21st) SKIP_21ST=1 ;;
     --skip-frontend-design) SKIP_FD=1 ;;
     --skip-impeccable) SKIP_IMP=1 ;;
+    --install-prereqs) INSTALL_PREREQS=1 ;;
     --21st-key) shift; KEY_21ST="${1:-}" ;;
     --21st-key=*) KEY_21ST="${1#*=}" ;;
     -h|--help) usage; exit 0 ;;
@@ -81,33 +88,83 @@ echo "[hyperui] setup — scope: $SCOPE_LABEL — cwd: $PWD"
 [[ $DRY -eq 1 ]] && echo "[hyperui] DRY RUN: nothing will be installed"
 
 # ---------------------------------------------------------------- a. preflight
-PREFLIGHT_OK=1
-if command -v node >/dev/null 2>&1; then
-  NODE_MAJOR="$(node --version | sed -E 's/^v([0-9]+).*/\1/')"
-  if [[ "$NODE_MAJOR" -ge 18 ]]; then
-    ok "node $(node --version)"
+# Install hints per OS (official sources: https://brew.sh, https://nodejs.org/en/download,
+# https://github.com/nodesource/distributions, https://www.python.org/downloads/).
+OS="$(uname -s 2>/dev/null || echo unknown)"
+HAS_BREW=0; command -v brew >/dev/null 2>&1 && HAS_BREW=1
+BREW_LINE='/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"'
+hint() { # <tool> -> prints the install line(s) for this OS
+  case "$OS" in
+    Darwin)
+      if [[ $HAS_BREW -eq 1 ]]; then
+        case "$1" in node) echo "brew install node@24 && brew link --overwrite node@24   (Node 24 LTS; or nvm: nvm install 24)" ;; python3) echo "brew install python" ;; esac
+      else
+        echo "install Homebrew first (https://brew.sh): $BREW_LINE"
+        case "$1" in node) echo "then: brew install node@24 && brew link --overwrite node@24   (or nvm: nvm install 24)" ;; python3) echo "then: brew install python" ;; esac
+      fi ;;
+    Linux)
+      case "$1" in
+        node)    echo "recommended, no sudo: nvm (https://github.com/nvm-sh/nvm) then: nvm install 24"
+                 echo "Debian/Ubuntu (NodeSource 24.x): curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash - && sudo apt-get install -y nodejs"
+                 echo "Fedora/RHEL: sudo dnf install -y nodejs npm   — or any method at https://nodejs.org/en/download" ;;
+        python3) echo "Debian/Ubuntu: sudo apt-get install -y python3   Fedora/RHEL: sudo dnf install -y python3" ;;
+      esac ;;
+    *) echo "Windows: use WSL2 (https://learn.microsoft.com/windows/wsl/install) and follow the Linux lines; or https://nodejs.org/en/download" ;;
+  esac
+}
+
+preflight() {
+  PREFLIGHT_OK=1; MISSING=()
+  if command -v node >/dev/null 2>&1; then
+    NODE_MAJOR="$(node --version | sed -E 's/^v([0-9]+).*/\1/')"
+    if [[ "$NODE_MAJOR" -ge 22 ]]; then
+      ok "node $(node --version) (24 LTS recommended)"
+    elif [[ "$NODE_MAJOR" -ge 20 ]]; then
+      warn "node $(node --version) works but is end-of-life; recommended Node 24 LTS — $(hint node | head -1)"
+    else
+      fail "node >= 20 required, 24 LTS recommended (found $(node --version)) — $(hint node | head -1)"; PREFLIGHT_OK=0; MISSING+=(node)
+    fi
   else
-    fail "node >= 18 required (found $(node --version))"; PREFLIGHT_OK=0
+    fail "node not found — install: $(hint node | head -1)"; hint node | tail -n +2 | sed 's/^/        /'; PREFLIGHT_OK=0; MISSING+=(node)
   fi
-else
-  fail "node not found (https://nodejs.org)"; PREFLIGHT_OK=0
-fi
-if command -v npm >/dev/null 2>&1; then ok "npm $(npm --version)"; else fail "npm not found"; PREFLIGHT_OK=0; fi
-if command -v python3 >/dev/null 2>&1; then
-  ok "python3 $(python3 --version 2>&1 | awk '{print $2}') (UI UX Pro Max search scripts)"
-else
-  warn "python3 not found — UI UX Pro Max search/design-system scripts need it"
-fi
-if command -v claude >/dev/null 2>&1; then
-  ok "claude CLI $(claude --version 2>/dev/null | head -1)"
-  HAS_CLAUDE=1
-else
-  warn "claude CLI not found — frontend-design, Impeccable and 21st MCP steps will be skipped"
-  HAS_CLAUDE=0
+  if command -v npm >/dev/null 2>&1; then ok "npm $(npm --version)"; else fail "npm not found (comes with node)"; PREFLIGHT_OK=0; fi
+  if command -v python3 >/dev/null 2>&1; then
+    ok "python3 $(python3 --version 2>&1 | awk '{print $2}') (profile.sh, permit.sh, UI UX Pro Max scripts)"
+  else
+    fail "python3 not found — install: $(hint python3 | head -1)"; hint python3 | tail -n +2 | sed 's/^/        /'
+    warn "without python3: profile.sh falls back to awk, permit.sh stays silent (permission prompts appear), UI UX Pro Max search is unavailable"
+    PREFLIGHT_OK=0; MISSING+=(python3)
+  fi
+  if command -v git >/dev/null 2>&1; then ok "git $(git --version | awk '{print $3}')"; else warn "git not found — the git specialist and plugin updates need it"; fi
+  if command -v claude >/dev/null 2>&1; then
+    ok "claude CLI $(claude --version 2>/dev/null | head -1)"
+    HAS_CLAUDE=1
+  else
+    warn "claude CLI not found — frontend-design, Impeccable and 21st MCP steps will be skipped"
+    HAS_CLAUDE=0
+  fi
+}
+preflight
+
+if [[ $PREFLIGHT_OK -eq 0 && $INSTALL_PREREQS -eq 1 && ${#MISSING[@]} -gt 0 ]]; then
+  if [[ "$OS" == "Darwin" && $HAS_BREW -eq 1 ]]; then
+    for m in "${MISSING[@]}"; do
+      case "$m" in node) PKG=node@24 ;; python3) PKG=python ;; *) continue ;; esac
+      if run "install $m with Homebrew" brew install "$PKG"; then
+        did "$m installed (brew install $PKG)"
+        [[ "$PKG" == node@24 ]] && { run "link node@24" brew link --overwrite node@24 || warn "brew link node@24 failed; run it yourself"; }
+      else fail "brew install $PKG failed"; FAILURES+=("prereq-$m"); fi
+    done
+    [[ $DRY -eq 0 ]] && { echo "[hyperui] re-running preflight"; preflight; }
+  elif [[ "$OS" == "Darwin" ]]; then
+    fail "--install-prereqs needs Homebrew; install it first (interactive, asks for your password): $BREW_LINE"
+  else
+    fail "--install-prereqs runs package managers only on macOS; on this OS run the lines above yourself (they need sudo)"
+  fi
 fi
 if [[ $PREFLIGHT_OK -eq 0 ]]; then
   FAILURES+=("preflight")
-  warn "preflight failed; npm-based steps will likely fail too"
+  warn "preflight failed; npm-based steps will likely fail too. Fix the lines above, or ask hyperui to run them: /hyperui:setup --install-prereqs"
 fi
 
 # ---------------------------------------------------------------- b. motion

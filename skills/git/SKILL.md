@@ -3,6 +3,7 @@ name: git
 description: "Commits, branches, pull requests, releases and hotfixes for the user's repo: Conventional Commits, SemVer, changelog, branching model by team size. Use when the user asks to commit, save or upload changes to git, open or describe a PR, cut a release, bump a version, tag, write the changelog, start or finish a hotfix, or pick a branching model — in any language (\"haz commit\", \"súbelo a git\", \"saca una versión\")."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -14,7 +15,7 @@ tools can read, versions that mean something, and nothing irreversible without a
 
 ## 0. Before anything
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
    Profile fields used: `archetype`, `conversation_language`, any ticketing tool in the notes;
    also `.hyperui/decisions.md` (a branching model already chosen is final; none → no decision yet).
 2. Orient (read-only, safe without asking):

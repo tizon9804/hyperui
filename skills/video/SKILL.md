@@ -3,6 +3,7 @@ name: video
 description: "Make a short promo/demo video of a web product with HyperFrames (HTML → MP4), reusing the project's real brand tokens and components. Use when asked for a promo, teaser, product video, launch clip, social clip."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -15,7 +16,7 @@ reimplement their API or project layout — hand the composition to them.
 
 ## 0. Before anything
 
-- If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+- Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
   Profile fields used: archetype, `conversation_language`, `product_languages`, `design.*`; also
   `.hyperui/design.md`: the picked direction's fonts, palette and motion register are the clip's brand.
 - Clip copy language = `product_languages[0]` unless the user says otherwise.

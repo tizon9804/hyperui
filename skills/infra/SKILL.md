@@ -3,6 +3,7 @@ name: infra
 description: "Infrastructure for products that outgrow a PaaS: containers, several services, environments, pipelines — Terraform (Terragrunt for ≥ 2 envs), ECS Fargate by default vs EKS with the trade-off, GitHub Actions OIDC vs CodePipeline, state backend and IAM first. Use when the architecture has containers, multiple services or environments, a pipeline to AWS, or the user asks (in any language) how to set up the infra, IaC, Terraform, Kubernetes, Fargate, EKS or CI/CD for a product. Writes the files and the exact commands; the user runs plan and apply."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -14,7 +15,7 @@ commands. You never apply anything, never add an MCP server, never create a clou
 
 ## 1. Read before asking
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
    Profile fields used: `archetype`, `budget`, `purpose`, `conversation_language`, `providers.host`, `stack.*`.
 2. Read `.hyperui/state.md`, `.hyperui/spec/` (the design: how many services, environments,
    external dependencies) and `.hyperui/decisions.md` (an infra decision already taken is
@@ -85,8 +86,13 @@ Files written: infra/envs/dev/… · infra/modules/ecs_service/…  Run in this 
 If the plan only creates what the cost line says:  terraform apply tf.plan
 ```
 
-Generated Terraform must pass `terraform validate` before hand-over; if `terraform` is missing,
-say so in one line and give `brew install hashicorp/tap/terraform` (or `docker run hashicorp/terraform`) — you do not install tools.
+Generated Terraform must pass `terraform validate` before hand-over. If `terraform` is missing
+(`command -v terraform` fails), **offer to install it, once**: "Terraform isn't installed. Install
+it now? macOS: `brew install hashicorp/tap/terraform` · Linux/WSL2: the official steps at
+https://developer.hashicorp.com/terraform/install". On **yes**: macOS → run the brew line (it
+goes through the normal permission prompt); Linux → print the official line for the user (it
+needs sudo) and wait. On **no** → continue without `validate` and say so in one line. Record the
+answer in `state.md` `open:` so the question is never repeated. Never install silently.
 
 ## 4. MCP policy — show the line, ask, never add
 

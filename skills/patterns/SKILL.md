@@ -3,6 +3,7 @@ name: patterns
 description: "Architecture and design patterns only when the spec calls for them: DDD tactical building blocks, CQRS, hexagonal boundaries, GoF patterns (singleton, strategy, …), resilience (circuit breaker, retry, bulkhead, timeouts, rate limiting). Use for backend/architecture questions, never for a landing page or a static site: aggregates, consistency, external API or database calls, webhooks, read vs write models, 'what architecture/patterns does this need' (any language). Answers 'no pattern needed' when nothing fits. Reads .hyperui/profile.md and .hyperui/spec/, writes the choice into the spec design and .hyperui/decisions.md."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -14,7 +15,7 @@ solves**. Each pick is one line of why plus a source. No problem, no pattern —
 
 ## 1. Read before answering
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
 2. Read `.hyperui/profile.md` (`archetype`, `stack.*`, `providers.*`, `conversation_language`,
    `tone_notes`) and `.hyperui/state.md`. Never ask for a field that has a value.
 3. Read the spec: `.hyperui/spec/<topic>/02-design.md` (full track) or `.hyperui/spec/<topic>.md`

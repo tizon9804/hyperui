@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ventas · jul – sep 2026</title>
+<style>
+  /* ---------- tokens (dataviz palette.md, slot aqua + ink) ---------- */
+  .viz-root {
+    color-scheme: light;
+    --page:           #f9f9f7;
+    --surface-1:      #fcfcfb;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --grid:           #e1e0d9;
+    --baseline:       #c3c2b7;
+    --border:         rgba(11,11,11,0.10);
+    --series-1:       #1baf7a;   /* categorical slot 3 (aqua), light step */
+    --series-dim:     #c9c8c1;   /* de-emphasis gray */
+    --delta-up:       #006300;
+    --delta-down:     #d03b3b;
+    --focus:          #2a78d6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) .viz-root {
+      color-scheme: dark;
+      --page:           #0b0d12;
+      --surface-1:      #12151c;
+      --text-primary:   #ffffff;
+      --text-secondary: #c3c2b7;
+      --text-muted:     #898781;
+      --grid:           #262a33;
+      --baseline:       #383835;
+      --border:         rgba(255,255,255,0.10);
+      --series-1:       #199e70;   /* slot 3 (aqua), dark step */
+      --series-dim:     #3a3f4a;
+      --delta-up:       #0ca30c;
+      --delta-down:     #e66767;
+      --focus:          #3987e5;
+    }
+  }
+  :root[data-theme="dark"] .viz-root {
+    color-scheme: dark;
+    --page:           #0b0d12;
+    --surface-1:      #12151c;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #898781;
+    --grid:           #262a33;
+    --baseline:       #383835;
+    --border:         rgba(255,255,255,0.10);
+    --series-1:       #199e70;
+    --series-dim:     #3a3f4a;
+    --delta-up:       #0ca30c;
+    --delta-down:     #e66767;
+    --focus:          #3987e5;
+  }
+
+  /* ---------- page ---------- */
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body.viz-root {
+    background: var(--page);
+    color: var(--text-primary);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 28px 20px 48px; }
+
+  header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { font-size: 22px; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .sub { color: var(--text-secondary); margin: 4px 0 0; }
+
+  button, select {
+    font: inherit; color: var(--text-primary);
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 8px; padding: 6px 10px; cursor: pointer;
+  }
+  button:focus-visible, select:focus-visible, [tabindex]:focus-visible {
+    outline: 2px solid var(--focus); outline-offset: 2px;
+  }
+
+  /* ---------- filters: one row, above everything they scope ---------- */
+  .filters {
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    margin: 22px 0 18px;
+  }
+  .filters label { display: flex; align-items: center; gap: 6px; color: var(--text-secondary); }
+  .filters .hint { color: var(--text-muted); margin-left: auto; }
+
+  /* ---------- cards ---------- */
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(12, 1fr); }
+  .card {
+    grid-column: span 12;
+    background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px 14px;
+    min-width: 0;
+  }
+  .card.half { grid-column: span 6; }
+  .card.quarter { grid-column: span 3; }
+  @media (max-width: 900px) { .card.half { grid-column: span 12; } .card.quarter { grid-column: span 6; } }
+  @media (max-width: 520px) { .card.quarter { grid-column: span 12; } }
+
+  .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+  .card h2 { font-size: 15px; font-weight: 600; margin: 0; }
+  .card .desc { color: var(--text-secondary); margin: 2px 0 0; font-size: 13px; }
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; padding: 4px 10px; color: var(--text-secondary); background: transparent; }
+  .seg button[aria-pressed="true"] { background: var(--grid); color: var(--text-primary); }
+
+  /* ---------- stat tiles ---------- */
+  .tile .label { color: var(--text-secondary); font-size: 13px; }
+  .tile .value { font-size: 28px; font-weight: 600; margin-top: 4px; line-height: 1.1; }
+  .tile.hero .value { font-size: 48px; }
+  .tile .delta { margin-top: 6px; color: var(--text-secondary); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+  .tile .delta .dir { font-weight: 600; }
+  .tile .delta.up .dir { color: var(--delta-up); }
+  .tile .delta.down .dir { color: var(--delta-down); }
+  .tile .spark { margin-top: 10px; display: block; }
+
+  /* ---------- svg chrome ---------- */
+  svg { display: block; overflow: visible; }
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .axis-line { stroke: var(--baseline); stroke-width: 1; }
+  .tick { fill: var(--text-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .cat { fill: var(--text-secondary); font-size: 12px; }
+  .cat-sub { fill: var(--text-muted); font-size: 11px; }
+  .dlabel { fill: var(--text-primary); font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .mark { fill: var(--series-1); transition: filter .12s; }
+  .mark.dim { fill: var(--series-dim); }
+  .hit { fill: transparent; cursor: default; }
+  g.bar:hover .mark, g.bar:focus-visible .mark { filter: brightness(1.12); }
+  g.bar:focus-visible { outline: none; }
+  g.bar:focus-visible .hit { stroke: var(--focus); stroke-width: 2; rx: 4; }
+  .panel-title { font-size: 13px; font-weight: 600; margin: 0 0 2px; }
+  .panel-sub { font-size: 12px; color: var(--text-muted); margin: 0 0 6px; }
+  .panels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .panels { grid-template-columns: repeat(2, 1fr); } }
+  .panel.dim { opacity: .45; }
+
+  /* ---------- tables ---------- */
+  table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); }
+  th { color: var(--text-secondary); font-weight: 500; font-size: 12px; }
+  td.num, th.num { text-align: right; }
+  tfoot td { font-weight: 600; border-bottom: 0; }
+  .tablewrap { overflow-x: auto; }
+  [hidden] { display: none !important; }
+
+  /* ---------- tooltip ---------- */
+  .tip {
+    position: fixed; z-index: 10; pointer-events: none;
+    background: var(--surface-1); color: var(--text-primary);
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+    min-width: 150px;
+  }
+  .tip .t-title { color: var(--text-secondary); margin-bottom: 4px; }
+  .tip .t-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .tip .t-val { font-weight: 600; font-variant-numeric: tabular-nums; }
+  .tip .t-key { display: inline-block; width: 12px; height: 2px; background: var(--series-1); margin-right: 6px; vertical-align: middle; }
+
+  footer { color: var(--text-muted); font-size: 12px; margin-top: 18px; }
+  footer ul { margin: 6px 0 0; padding-left: 18px; }
+</style>
+</head>
+<body class="viz-root">
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Ventas · julio – septiembre 2026</h1>
+      <p class="sub">Fuente: <code>ventas.csv</code> · 30 ventas · 4 regiones · importes en COP</p>
+    </div>
+    <button id="theme" type="button" aria-label="Cambiar tema">Tema: auto</button>
+  </header>
+
+  <div class="filters" role="group" aria-label="Filtros">
+    <label>Período
+      <select id="f-month">
+        <option value="">Todo el trimestre</option>
+        <option value="2026-07">Julio</option>
+        <option value="2026-08">Agosto</option>
+        <option value="2026-09">Septiembre</option>
+      </select>
+    </label>
+    <label>Región
+      <select id="f-region"><option value="">Todas</option></select>
+    </label>
+    <button id="f-reset" type="button">Restablecer</button>
+    <span class="hint" id="f-hint"></span>
+  </div>
+
+  <div class="grid">
+    <!-- KPI row -->
+    <div class="card quarter tile hero">
+      <div class="label">Ingresos</div>
+      <div class="value" id="k-rev">—</div>
+      <div class="delta" id="k-rev-delta"></div>
+      <svg class="spark" id="k-spark" width="160" height="28" aria-hidden="true"></svg>
+    </div>
+    <div class="card quarter tile">
+      <div class="label">Unidades vendidas</div>
+      <div class="value" id="k-units">—</div>
+      <div class="delta" id="k-units-delta"></div>
+    </div>
+    <div class="card quarter tile">
+      <div class="label">Ventas registradas</div>
+      <div class="value" id="k-count">—</div>
+      <div class="delta" id="k-count-delta"></div>
+    </div>
+    <div class="card quarter tile">
+      <div class="label">Ticket promedio</div>
+      <div class="value" id="k-ticket">—</div>
+      <div class="delta" id="k-ticket-delta"></div>
+    </div>
+
+    <!-- Monthly -->
+    <section class="card half" data-chart="month">
+      <div class="card-head">
+        <div><h2>Ingresos por mes</h2><p class="desc" id="d-month">Total mensual en COP</p></div>
+        <div class="seg" role="group" aria-label="Vista"><button type="button" data-view="chart" aria-pressed="true">Gráfico</button><button type="button" data-view="table" aria-pressed="false">Tabla</button></div>
+      </div>
+      <div class="view-chart" id="c-month"></div>
+      <div class="view-table tablewrap" id="t-month" hidden></div>
+    </section>
+
+    <!-- Region -->
+    <section class="card half" data-chart="region">
+      <div class="card-head">
+        <div><h2>Ingresos por región</h2><p class="desc" id="d-region">Ordenado de mayor a menor · cada región vende un único producto</p></div>
+        <div class="seg" role="group" aria-label="Vista"><button type="button" data-view="chart" aria-pressed="true">Gráfico</button><button type="button" data-view="table" aria-pressed="false">Tabla</button></div>
+      </div>
+      <div class="view-chart" id="c-region"></div>
+      <div class="view-table tablewrap" id="t-region" hidden></div>
+    </section>
+
+    <!-- Small multiples -->
+    <section class="card" data-chart="rxm">
+      <div class="card-head">
+        <div><h2>Ingresos por región y mes</h2><p class="desc">Misma escala en los cuatro paneles</p></div>
+        <div class="seg" role="group" aria-label="Vista"><button type="button" data-view="chart" aria-pressed="true">Gráfico</button><button type="button" data-view="table" aria-pressed="false">Tabla</button></div>
+      </div>
+      <div class="view-chart panels" id="c-rxm"></div>
+      <div class="view-table tablewrap" id="t-rxm" hidden></div>
+    </section>
+
+    <!-- Units by product -->
+    <section class="card half" data-chart="units">
+      <div class="card-head">
+        <div><h2>Unidades por producto</h2><p class="desc" id="d-units">Con precio unitario · ordenado de mayor a menor</p></div>
+        <div class="seg" role="group" aria-label="Vista"><button type="button" data-view="chart" aria-pressed="true">Gráfico</button><button type="button" data-view="table" aria-pressed="false">Tabla</button></div>
+      </div>
+      <div class="view-chart" id="c-units"></div>
+      <div class="view-table tablewrap" id="t-units" hidden></div>
+    </section>
+
+    <!-- Raw table -->
+    <section class="card half">
+      <div class="card-head">
+        <div><h2>Detalle de ventas</h2><p class="desc" id="d-raw">Filas del CSV en el corte actual</p></div>
+      </div>
+      <div class="tablewrap" id="t-raw"></div>
+    </section>
+  </div>
+
+  <footer>
+    Notas
+    <ul>
+      <li>Septiembre cubre hasta el 26; julio y agosto son meses completos (una venta cada 3 días: 11, 10 y 9 registros).</li>
+      <li>Cada región vende un solo producto (Norte · Café 500g, Sur · Miel, Centro · Chocolate, Oriente · Panela) y el precio unitario es constante, así que “región” y “producto” son la misma clave.</li>
+      <li>Los filtros recortan KPIs y tabla; en los gráficos cuya clave coincide con el filtro, la selección se resalta y el resto queda en gris para no perder la vista general.</li>
+    </ul>
+  </footer>
+</div>
+
+<div class="tip" id="tip" role="tooltip" hidden></div>
+
+<script type="text/csv" id="data">date,region,product,units,revenue
+2026-07-01,Norte,Café 500g,31,868000
+2026-07-04,Sur,Miel,6,132000
+2026-07-07,Centro,Chocolate,71,1065000
+2026-07-10,Oriente,Panela,99,594000
+2026-07-13,Norte,Café 500g,9,252000
+2026-07-16,Sur,Miel,25,550000
+2026-07-19,Centro,Chocolate,35,525000
+2026-07-22,Oriente,Panela,7,42000
+2026-07-25,Norte,Café 500g,12,336000
+2026-07-28,Sur,Miel,117,2574000
+2026-07-31,Centro,Chocolate,108,1620000
+2026-08-03,Oriente,Panela,92,552000
+2026-08-06,Norte,Café 500g,23,644000
+2026-08-09,Sur,Miel,114,2508000
+2026-08-12,Centro,Chocolate,93,1395000
+2026-08-15,Oriente,Panela,52,312000
+2026-08-18,Norte,Café 500g,35,980000
+2026-08-21,Sur,Miel,19,418000
+2026-08-24,Centro,Chocolate,48,720000
+2026-08-27,Oriente,Panela,64,384000
+2026-08-30,Norte,Café 500g,95,2660000
+2026-09-02,Sur,Miel,50,1100000
+2026-09-05,Centro,Chocolate,40,600000
+2026-09-08,Oriente,Panela,55,330000
+2026-09-11,Norte,Café 500g,38,1064000
+2026-09-14,Sur,Miel,49,1078000
+2026-09-17,Centro,Chocolate,34,510000
+2026-09-20,Oriente,Panela,114,684000
+2026-09-23,Norte,Café 500g,31,868000
+2026-09-26,Sur,Miel,116,2552000</script>
+
+<script>
+(() => {
+  'use strict';
+
+  /* ---------- data ---------- */
+  const parseCSV = (text) => {
+    const lines = text.trim().split(/\r?\n/);
+    const head = lines.shift().split(',');
+    return lines.map(l => {
+      const c = l.split(',');
+      const o = {};
+      head.forEach((h, i) => o[h] = c[i]);
+      o.units = Number(o.units); o.revenue = Number(o.revenue);
+      o.month = o.date.slice(0, 7);
+      return o;
+    });
+  };
+  const ROWS = parseCSV(document.getElementById('data').textContent);
+  const MONTHS = [...new Set(ROWS.map(r => r.month))].sort();
+  const MONTH_NAME = { '2026-07': 'Julio', '2026-08': 'Agosto', '2026-09': 'Septiembre' };
+  const MONTH_SHORT = { '2026-07': 'jul', '2026-08': 'ago', '2026-09': 'sep' };
+  const REGIONS = [...new Set(ROWS.map(r => r.region))];
+  const PRODUCT_OF = {};
+  ROWS.forEach(r => PRODUCT_OF[r.region] = r.product);
+  const PRICE_OF = {};
+  ROWS.forEach(r => PRICE_OF[r.product] = r.revenue / r.units);
+
+  /* ---------- formatting ---------- */
+  const fmtCOP = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 });
+  const fmtInt = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 0 });
+  const compact = (n) => {
+    if (Math.abs(n) >= 1e6) return (n / 1e6).toLocaleString('es-CO', { maximumFractionDigits: 1 }) + ' M';
+    if (Math.abs(n) >= 1e3) return Math.round(n / 1e3).toLocaleString('es-CO') + ' k';
+    return fmtInt.format(n);
+  };
+  const compactCOP = (n) => '$ ' + compact(n);
+  const sum = (arr, f) => arr.reduce((a, r) => a + f(r), 0);
+  const groupSum = (arr, key, f) => {
+    const m = new Map();
+    arr.forEach(r => m.set(key(r), (m.get(key(r)) || 0) + f(r)));
+    return m;
+  };
+  const niceStep = (max) => {
+    const raw = max / 4;
+    const p = Math.pow(10, Math.floor(Math.log10(raw)));
+    const n = raw / p;
+    const s = n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10;
+    return s * p;
+  };
+  const niceMax = (max) => { const s = niceStep(max); return Math.ceil(max / s) * s; };
+
+  /* ---------- dom helpers ---------- */
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, attrs = {}, ...children) => {
+    const e = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') e.className = v;
+      else if (k === 'text') e.textContent = v;
+      else if (v !== null && v !== undefined) e.setAttribute(k, v);
+    }
+    children.forEach(c => e.append(c));
+    return e;
+  };
+  const SVG_NS = 'http://www.w3.org/2000/svg';
+  const svgEl = (tag, attrs = {}, text) => {
+    const e = document.createElementNS(SVG_NS, tag);
+    for (const [k, v] of Object.entries(attrs)) e.setAttribute(k, v);
+    if (text !== undefined) e.textContent = text;
+    return e;
+  };
+
+  /* ---------- tooltip (one per page, textContent only) ---------- */
+  const tip = $('tip');
+  const showTip = (title, rows, x, y) => {
+    tip.replaceChildren();
+    tip.append(el('div', { class: 't-title', text: title }));
+    rows.forEach(([label, value]) => {
+      const row = el('div', { class: 't-row' });
+      const l = el('span');
+      l.append(el('span', { class: 't-key' }), document.createTextNode(label));
+      row.append(l, el('span', { class: 't-val', text: value }));
+      tip.append(row);
+    });
+    tip.hidden = false;
+    moveTip(x, y);
+  };
+  const moveTip = (x, y) => {
+    const r = tip.getBoundingClientRect();
+    const px = Math.min(x + 14, window.innerWidth - r.width - 8);
+    const py = y - r.height - 14 < 8 ? y + 18 : y - r.height - 14;
+    tip.style.left = px + 'px'; tip.style.top = py + 'px';
+  };
+  const hideTip = () => { tip.hidden = true; };
+  const bindTip = (g, title, rows) => {
+    g.addEventListener('pointerenter', (e) => showTip(title, rows, e.clientX, e.clientY));
+    g.addEventListener('pointermove', (e) => moveTip(e.clientX, e.clientY));
+    g.addEventListener('pointerleave', hideTip);
+    g.addEventListener('focus', () => {
+      const b = g.getBoundingClientRect();
+      showTip(title, rows, b.left + b.width / 2, b.top);
+    });
+    g.addEventListener('blur', hideTip);
+  };
+
+  /* ---------- marks: bar paths (4px rounded data end, square at baseline) ---------- */
+  const columnPath = (x, yTop, w, yBase) => {
+    const h = yBase - yTop;
+    const r = Math.min(4, w / 2, h);
+    if (h <= 0) return '';
+    return `M${x},${yBase} V${yTop + r} Q${x},${yTop} ${x + r},${yTop} H${x + w - r} Q${x + w},${yTop} ${x + w},${yTop + r} V${yBase} Z`;
+  };
+  const barPath = (x0, y, len, h) => {
+    const r = Math.min(4, h / 2, len);
+    if (len <= 0) return '';
+    const x1 = x0 + len;
+    return `M${x0},${y} H${x1 - r} Q${x1},${y} ${x1},${y + r} V${y + h - r} Q${x1},${y + h} ${x1 - r},${y + h} H${x0} Z`;
+  };
+
+  /* ---------- column chart (1 ordinal key) ---------- */
+  // items: [{key, label, value, dim, tipTitle, tipRows}]
+  const columnChart = (container, items, { height = 220, yMax = null, labelMax = true, compactTicks = compactCOP } = {}) => {
+    container.replaceChildren();
+    const width = Math.max(240, container.clientWidth || 320);
+    const m = { top: 22, right: 8, bottom: 26, left: 52 };
+    const iw = width - m.left - m.right, ih = height - m.top - m.bottom;
+    const max = yMax ?? niceMax(Math.max(...items.map(i => i.value), 1));
+    const step = niceStep(max);
+    const y = (v) => m.top + ih - (v / max) * ih;
+    const band = iw / items.length;
+    const bw = Math.min(24, band * 0.6);
+
+    const svg = svgEl('svg', { width, height, role: 'img', 'aria-label': 'Gráfico de columnas' });
+    for (let v = 0; v <= max + 1e-9; v += step) {
+      svg.append(svgEl('line', { class: v === 0 ? 'axis-line' : 'grid-line', x1: m.left, x2: width - m.right, y1: y(v), y2: y(v) }));
+      svg.append(svgEl('text', { class: 'tick', x: m.left - 8, y: y(v) + 4, 'text-anchor': 'end' }, compactTicks(v)));
+    }
+    const maxVal = Math.max(...items.map(i => i.value));
+    const emphasized = items.some(i => i.dim);   // a filter is active: label the highlighted mark instead of the max
+    items.forEach((it, i) => {
+      const cx = m.left + band * i + band / 2;
+      const g = svgEl('g', { class: 'bar', tabindex: 0, role: 'img', 'aria-label': `${it.label}: ${it.tipRows.map(r => r.join(' ')).join(', ')}` });
+      g.append(svgEl('rect', { class: 'hit', x: m.left + band * i, y: m.top, width: band, height: ih }));
+      g.append(svgEl('path', { class: 'mark' + (it.dim ? ' dim' : ''), d: columnPath(cx - bw / 2, y(it.value), bw, y(0)) }));
+      if (labelMax && !it.dim && (emphasized || it.value === maxVal)) {
+        svg.append(svgEl('text', { class: 'dlabel', x: cx, y: y(it.value) - 6, 'text-anchor': 'middle' }, compactTicks(it.value)));
+      }
+      svg.append(svgEl('text', { class: 'cat', x: cx, y: height - 8, 'text-anchor': 'middle' }, it.label));
+      bindTip(g, it.tipTitle, it.tipRows);
+      svg.append(g);
+    });
+    container.append(svg);
+  };
+
+  /* ---------- horizontal bar chart (1 categorical key, sorted) ---------- */
+  // items: [{label, sub, value, dim, tipTitle, tipRows}]
+  const barChart = (container, items, { fmt = compactCOP, labelCol = 150 } = {}) => {
+    container.replaceChildren();
+    const width = Math.max(260, container.clientWidth || 320);
+    const rowH = 40, barH = 18;
+    const m = { top: 6, right: 70, bottom: 24, left: labelCol };
+    const ih = rowH * items.length;
+    const height = m.top + ih + m.bottom;
+    const iw = width - m.left - m.right;
+    const max = niceMax(Math.max(...items.map(i => i.value), 1));
+    const step = niceStep(max);
+    const x = (v) => m.left + (v / max) * iw;
+
+    const svg = svgEl('svg', { width, height, role: 'img', 'aria-label': 'Gráfico de barras' });
+    for (let v = 0; v <= max + 1e-9; v += step) {
+      svg.append(svgEl('line', { class: v === 0 ? 'axis-line' : 'grid-line', x1: x(v), x2: x(v), y1: m.top, y2: m.top + ih }));
+      svg.append(svgEl('text', { class: 'tick', x: x(v), y: height - 6, 'text-anchor': 'middle' }, fmt(v)));
+    }
+    const maxVal = Math.max(...items.map(i => i.value));
+    const emphasized = items.some(i => i.dim);
+    items.forEach((it, i) => {
+      const yRow = m.top + rowH * i;
+      const yBar = yRow + (rowH - barH) / 2;
+      const g = svgEl('g', { class: 'bar', tabindex: 0, role: 'img', 'aria-label': `${it.label}: ${it.tipRows.map(r => r.join(' ')).join(', ')}` });
+      g.append(svgEl('rect', { class: 'hit', x: 0, y: yRow, width, height: rowH }));
+      g.append(svgEl('path', { class: 'mark' + (it.dim ? ' dim' : ''), d: barPath(m.left, yBar, x(it.value) - m.left, barH) }));
+      svg.append(svgEl('text', { class: 'cat', x: m.left - 10, y: yRow + rowH / 2 - (it.sub ? 3 : -4), 'text-anchor': 'end' }, it.label));
+      if (it.sub) svg.append(svgEl('text', { class: 'cat-sub', x: m.left - 10, y: yRow + rowH / 2 + 11, 'text-anchor': 'end' }, it.sub));
+      if (!it.dim && (emphasized || it.value === maxVal)) {
+        svg.append(svgEl('text', { class: 'dlabel', x: x(it.value) + 8, y: yBar + barH / 2 + 4 }, fmt(it.value)));
+      }
+      bindTip(g, it.tipTitle, it.tipRows);
+      svg.append(g);
+    });
+    container.append(svg);
+  };
+
+  /* ---------- sparkline (hero tile) ---------- */
+  const sparkline = (svg, values, highlightIdx) => {
+    svg.replaceChildren();
+    const w = 160, h = 28, pad = 5;
+    const max = Math.max(...values), min = Math.min(...values);
+    const x = (i) => pad + (i / (values.length - 1)) * (w - pad * 2);
+    const y = (v) => max === min ? h / 2 : pad + (1 - (v - min) / (max - min)) * (h - pad * 2);
+    const pts = values.map((v, i) => `${x(i)},${y(v)}`).join(' ');
+    svg.append(svgEl('polyline', { points: pts, fill: 'none', stroke: 'var(--series-dim)', 'stroke-width': 2, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    const idx = highlightIdx ?? values.length - 1;
+    svg.append(svgEl('circle', { cx: x(idx), cy: y(values[idx]), r: 4, fill: 'var(--series-1)', stroke: 'var(--surface-1)', 'stroke-width': 2 }));
+  };
+
+  /* ---------- tables ---------- */
+  const table = (container, cols, rows, foot) => {
+    container.replaceChildren();
+    const t = el('table');
+    const thead = el('thead'); const trh = el('tr');
+    cols.forEach(c => trh.append(el('th', { class: c.num ? 'num' : '', text: c.label })));
+    thead.append(trh); t.append(thead);
+    const tb = el('tbody');
+    rows.forEach(r => {
+      const tr = el('tr');
+      r.forEach((v, i) => tr.append(el('td', { class: cols[i].num ? 'num' : '', text: v })));
+      tb.append(tr);
+    });
+    t.append(tb);
+    if (foot) {
+      const tf = el('tfoot'); const tr = el('tr');
+      foot.forEach((v, i) => tr.append(el('td', { class: cols[i].num ? 'num' : '', text: v })));
+      tf.append(tr); t.append(tf);
+    }
+    container.append(t);
+  };
+
+  /* ---------- state & render ---------- */
+  const state = { month: '', region: '' };
+  const fMonth = $('f-month'), fRegion = $('f-region');
+  REGIONS.forEach(r => fRegion.append(el('option', { value: r, text: `${r} · ${PRODUCT_OF[r]}` })));
+
+  const setDelta = (node, cur, prev, { upIsGood = true, fmt = compact, suffix = '' } = {}) => {
+    node.replaceChildren(); node.className = 'delta';
+    if (!state.month) { node.append(document.createTextNode('3 meses, jul – sep')); return; }
+    if (prev === null) { node.append(document.createTextNode('sin mes anterior')); return; }
+    const pct = prev === 0 ? null : (cur - prev) / prev * 100;
+    const up = cur >= prev;
+    node.classList.add(up === upIsGood ? 'up' : 'down');
+    const dir = el('span', { class: 'dir' });
+    dir.textContent = (up ? '▲ ' : '▼ ') + (pct === null ? fmt(cur - prev) : (pct >= 0 ? '+' : '') + pct.toLocaleString('es-CO', { maximumFractionDigits: 1 }) + ' %');
+    const prevIdx = MONTHS.indexOf(state.month) - 1;
+    node.append(dir, document.createTextNode(`vs ${MONTH_NAME[MONTHS[prevIdx]].toLowerCase()}${suffix}`));
+  };
+
+  const render = () => {
+    const byRegion = state.region ? ROWS.filter(r => r.region === state.region) : ROWS;      // month-keyed charts
+    const byMonth = state.month ? ROWS.filter(r => r.month === state.month) : ROWS;           // region-keyed charts
+    const slice = byRegion.filter(r => !state.month || r.month === state.month);              // KPIs + raw table
+
+    /* hint */
+    const parts = [];
+    if (state.month) parts.push(MONTH_NAME[state.month]);
+    if (state.region) parts.push(`${state.region} · ${PRODUCT_OF[state.region]}`);
+    $('f-hint').textContent = parts.length ? `Corte: ${parts.join(' · ')} · ${slice.length} ventas` : `${ROWS.length} ventas · ${MONTHS.length} meses`;
+
+    /* KPIs */
+    const rev = sum(slice, r => r.revenue), units = sum(slice, r => r.units), count = slice.length;
+    const ticket = count ? rev / count : 0;
+    const monthRev = MONTHS.map(mo => sum(byRegion.filter(r => r.month === mo), r => r.revenue));
+    const monthUnits = MONTHS.map(mo => sum(byRegion.filter(r => r.month === mo), r => r.units));
+    const monthCount = MONTHS.map(mo => byRegion.filter(r => r.month === mo).length);
+    const mi = MONTHS.indexOf(state.month);
+    const prev = (arr) => (mi > 0 ? arr[mi - 1] : null);
+    $('k-rev').textContent = compactCOP(rev);
+    $('k-rev').title = fmtCOP.format(rev);
+    $('k-units').textContent = fmtInt.format(units);
+    $('k-count').textContent = fmtInt.format(count);
+    $('k-ticket').textContent = compactCOP(ticket);
+    $('k-ticket').title = fmtCOP.format(ticket);
+    setDelta($('k-rev-delta'), rev, prev(monthRev));
+    setDelta($('k-units-delta'), units, prev(monthUnits));
+    setDelta($('k-count-delta'), count, prev(monthCount));
+    setDelta($('k-ticket-delta'), ticket, mi > 0 ? (monthCount[mi - 1] ? monthRev[mi - 1] / monthCount[mi - 1] : 0) : null);
+    sparkline($('k-spark'), monthRev, mi >= 0 ? mi : null);
+
+    /* 1. Ingresos por mes — column, emphasis on selected month */
+    $('d-month').textContent = state.region ? `Total mensual · ${state.region} (${PRODUCT_OF[state.region]})` : 'Total mensual en COP · todas las regiones';
+    const monthItems = MONTHS.map((mo, i) => ({
+      key: mo, label: MONTH_SHORT[mo], value: monthRev[i], dim: !!state.month && mo !== state.month,
+      tipTitle: `${MONTH_NAME[mo]} 2026`,
+      tipRows: [['Ingresos', fmtCOP.format(monthRev[i])], ['Unidades', fmtInt.format(monthUnits[i])], ['Ventas', fmtInt.format(monthCount[i])]],
+    }));
+    columnChart($('c-month'), monthItems);
+    table($('t-month'),
+      [{ label: 'Mes' }, { label: 'Ingresos', num: true }, { label: 'Unidades', num: true }, { label: 'Ventas', num: true }],
+      MONTHS.map((mo, i) => [MONTH_NAME[mo], fmtCOP.format(monthRev[i]), fmtInt.format(monthUnits[i]), fmtInt.format(monthCount[i])]),
+      ['Total', fmtCOP.format(sum(monthRev, v => v)), fmtInt.format(sum(monthUnits, v => v)), fmtInt.format(sum(monthCount, v => v))]);
+
+    /* 2. Ingresos por región — sorted bars, emphasis on selected region */
+    const regRev = groupSum(byMonth, r => r.region, r => r.revenue);
+    const regUnits = groupSum(byMonth, r => r.region, r => r.units);
+    const regTotal = sum(byMonth, r => r.revenue);
+    const regSorted = REGIONS.map(r => ({ region: r, value: regRev.get(r) || 0, units: regUnits.get(r) || 0 })).sort((a, b) => b.value - a.value);
+    $('d-region').textContent = (state.month ? `${MONTH_NAME[state.month]} · ` : '') + 'Ordenado de mayor a menor · cada región vende un único producto';
+    barChart($('c-region'), regSorted.map(r => ({
+      label: r.region, sub: PRODUCT_OF[r.region], value: r.value, dim: !!state.region && r.region !== state.region,
+      tipTitle: `${r.region} · ${PRODUCT_OF[r.region]}`,
+      tipRows: [['Ingresos', fmtCOP.format(r.value)], ['Participación', (regTotal ? r.value / regTotal * 100 : 0).toLocaleString('es-CO', { maximumFractionDigits: 1 }) + ' %'], ['Unidades', fmtInt.format(r.units)]],
+    })));
+    table($('t-region'),
+      [{ label: 'Región' }, { label: 'Producto' }, { label: 'Ingresos', num: true }, { label: 'Participación', num: true }, { label: 'Unidades', num: true }],
+      regSorted.map(r => [r.region, PRODUCT_OF[r.region], fmtCOP.format(r.value), (regTotal ? r.value / regTotal * 100 : 0).toLocaleString('es-CO', { maximumFractionDigits: 1 }) + ' %', fmtInt.format(r.units)]),
+      ['Total', '', fmtCOP.format(regTotal), '100 %', fmtInt.format(sum(byMonth, r => r.units))]);
+
+    /* 3. Región × mes — small multiples, shared scale */
+    const rxm = REGIONS.map(reg => MONTHS.map(mo => sum(ROWS.filter(r => r.region === reg && r.month === mo), r => r.revenue)));
+    const sharedMax = niceMax(Math.max(...rxm.flat()));
+    const panelsRoot = $('c-rxm'); panelsRoot.replaceChildren();
+    REGIONS.forEach((reg, ri) => {
+      const panel = el('div', { class: 'panel' + (state.region && reg !== state.region ? ' dim' : '') });
+      panel.append(el('p', { class: 'panel-title', text: reg }), el('p', { class: 'panel-sub', text: PRODUCT_OF[reg] }));
+      const holder = el('div'); panel.append(holder); panelsRoot.append(panel);
+      columnChart(holder, MONTHS.map((mo, i) => ({
+        key: mo, label: MONTH_SHORT[mo], value: rxm[ri][i], dim: !!state.month && mo !== state.month,
+        tipTitle: `${reg} · ${MONTH_NAME[mo]} 2026`,
+        tipRows: [['Ingresos', fmtCOP.format(rxm[ri][i])], ['Unidades', fmtInt.format(sum(ROWS.filter(r => r.region === reg && r.month === mo), r => r.units))]],
+      })), { height: 170, yMax: sharedMax, labelMax: false });
+    });
+    table($('t-rxm'),
+      [{ label: 'Región' }, ...MONTHS.map(mo => ({ label: MONTH_NAME[mo], num: true })), { label: 'Total', num: true }],
+      REGIONS.map((reg, ri) => [reg, ...rxm[ri].map(v => fmtCOP.format(v)), fmtCOP.format(sum(rxm[ri], v => v))]),
+      ['Total', ...MONTHS.map((_, i) => fmtCOP.format(sum(rxm, row => row[i]))), fmtCOP.format(sum(rxm.flat(), v => v))]);
+
+    /* 4. Unidades por producto — sorted bars with unit price */
+    const prodUnits = groupSum(byMonth, r => r.product, r => r.units);
+    const prodRev = groupSum(byMonth, r => r.product, r => r.revenue);
+    const prodSorted = [...prodUnits.entries()].map(([p, u]) => ({ product: p, units: u, revenue: prodRev.get(p) || 0 })).sort((a, b) => b.units - a.units);
+    const selProduct = state.region ? PRODUCT_OF[state.region] : '';
+    $('d-units').textContent = (state.month ? `${MONTH_NAME[state.month]} · ` : '') + 'Con precio unitario · ordenado de mayor a menor';
+    barChart($('c-units'), prodSorted.map(p => ({
+      label: p.product, sub: `${fmtCOP.format(PRICE_OF[p.product])} / u`, value: p.units, dim: !!selProduct && p.product !== selProduct,
+      tipTitle: p.product,
+      tipRows: [['Unidades', fmtInt.format(p.units)], ['Precio unitario', fmtCOP.format(PRICE_OF[p.product])], ['Ingresos', fmtCOP.format(p.revenue)]],
+    })), { fmt: fmtInt.format, labelCol: 130 });
+    table($('t-units'),
+      [{ label: 'Producto' }, { label: 'Unidades', num: true }, { label: 'Precio unitario', num: true }, { label: 'Ingresos', num: true }],
+      prodSorted.map(p => [p.product, fmtInt.format(p.units), fmtCOP.format(PRICE_OF[p.product]), fmtCOP.format(p.revenue)]),
+      ['Total', fmtInt.format(sum(prodSorted, p => p.units)), '', fmtCOP.format(sum(prodSorted, p => p.revenue))]);
+
+    /* 5. Detalle */
+    $('d-raw').textContent = `${slice.length} de ${ROWS.length} filas del CSV`;
+    table($('t-raw'),
+      [{ label: 'Fecha' }, { label: 'Región' }, { label: 'Producto' }, { label: 'Unidades', num: true }, { label: 'Ingresos', num: true }],
+      slice.map(r => [r.date, r.region, r.product, fmtInt.format(r.units), fmtCOP.format(r.revenue)]),
+      ['Total', '', '', fmtInt.format(units), fmtCOP.format(rev)]);
+  };
+
+  /* ---------- events ---------- */
+  fMonth.addEventListener('change', () => { state.month = fMonth.value; render(); });
+  fRegion.addEventListener('change', () => { state.region = fRegion.value; render(); });
+  $('f-reset').addEventListener('click', () => { state.month = ''; state.region = ''; fMonth.value = ''; fRegion.value = ''; render(); });
+
+  document.querySelectorAll('.card[data-chart] .seg').forEach(seg => {
+    const card = seg.closest('.card');
+    seg.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+      const view = btn.dataset.view;
+      seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b === btn)));
+      card.querySelector('.view-chart').hidden = view !== 'chart';
+      card.querySelector('.view-table').hidden = view !== 'table';
+      if (view === 'chart') render();
+    }));
+  });
+
+  const themeBtn = $('theme');
+  const THEMES = ['auto', 'light', 'dark'];
+  let themeIdx = 0;
+  themeBtn.addEventListener('click', () => {
+    themeIdx = (themeIdx + 1) % THEMES.length;
+    const t = THEMES[themeIdx];
+    if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', t);
+    themeBtn.textContent = 'Tema: ' + (t === 'auto' ? 'auto' : t === 'light' ? 'claro' : 'oscuro');
+  });
+
+  let resizeT;
+  window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(render, 120); });
+
+  render();
+})();
+</script>
+</body>
+</html>

@@ -10,32 +10,59 @@
 #   - Skill            whose name starts with "hyperui:"
 #   - Read/Glob/Grep   of a path under the plugin root (references, templates)
 #   - Bash             commands that start with "<plugin root>/scripts/profile.sh" (quoted or not)
+#   - Read/Edit/Write  of a path under <root>/.hyperui/ for every project root resolved by
+#                      `profile.sh roots` (the cwd, or the repo(s) remembered for it with
+#                      `/hyperui --repo <path>`), so memory lands in the target repo without a
+#                      prompt.
+#   - Read/Glob/Grep   (reads only) anywhere under a resolved root, so the stack can be inferred
+#                      from a repo outside cwd. Edit/Write of repo files outside .hyperui/ are
+#                      NOT covered: normal flow (the user approves each one).
 # Anything else: no output, exit 0 -> the normal permission flow decides. Deny/ask rules in the
 # user's settings still override an "allow" from here (documented hook semantics).
 set -u
 ROOT="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 INPUT="$(cat)"
 command -v python3 >/dev/null 2>&1 || exit 0
-HOOK_INPUT="$INPUT" HOOK_ROOT="$ROOT" python3 - <<'PY'
+# Project roots, one per line (same resolution as every profile.sh command). The hook runs with
+# CLAUDE_PROJECT_DIR set; the JSON `cwd` is the fallback key.
+HOOK_CWD="$(printf '%s' "$INPUT" | python3 -c 'import json,sys; print((json.load(sys.stdin) or {}).get("cwd",""))' 2>/dev/null || true)"
+ROOTS="$(CLAUDE_PROJECT_DIR="${CLAUDE_PROJECT_DIR:-${HOOK_CWD:-$PWD}}" "$ROOT/scripts/profile.sh" roots 2>/dev/null || true)"
+# Opt-in trace for debugging the hook: HYPERUI_PERMIT_LOG=/path/file appends input + roots + decision.
+HOOK_INPUT="$INPUT" HOOK_ROOT="$ROOT" HOOK_ROOTS="$ROOTS" HOOK_CWD="${CLAUDE_PROJECT_DIR:-${HOOK_CWD:-$PWD}}" python3 - <<'PY'
 import json, os, sys
+log = os.environ.get("HYPERUI_PERMIT_LOG")
 root = os.path.realpath(os.environ["HOOK_ROOT"])
+roots = [os.path.realpath(r) for r in os.environ.get("HOOK_ROOTS", "").split("\n") if r.strip()]
 try:
     d = json.loads(os.environ["HOOK_INPUT"])
 except Exception:
     sys.exit(0)
 tool = d.get("tool_name"); inp = d.get("tool_input") or {}
-ok = False
+ok = False; why = "hyperui: plugin's own skill/reference/profile.sh"
+def under(p, base):
+    return bool(p) and os.path.realpath(p).startswith(base + os.sep)
 if tool == "Skill" and str(inp.get("skill", "")).startswith("hyperui:"):
     ok = True
 elif tool in ("Read", "Glob", "Grep"):
     p = inp.get("file_path") or inp.get("path") or ""
-    ok = bool(p) and os.path.realpath(p).startswith(root + os.sep)
+    ok = under(p, root)
 elif tool == "Bash":
     cmd = str(inp.get("command", "")).lstrip()
     script = root + "/scripts/profile.sh"
     ok = cmd.startswith(script + " ") or cmd.startswith('"' + script + '" ') or cmd == script or cmd == '"' + script + '"'
+if not ok and tool in ("Read", "Edit", "Write"):
+    p = inp.get("file_path") or inp.get("path") or ""
+    if any(under(p, os.path.join(r, ".hyperui")) for r in roots):
+        ok = True; why = "hyperui: project memory (.hyperui/) of a resolved project root"
+if not ok and tool in ("Read", "Glob", "Grep"):
+    p = inp.get("file_path") or inp.get("path") or ""
+    if any(under(p, r) or os.path.realpath(p) == r for r in roots if p):
+        ok = True; why = "hyperui: read of a resolved project root"
+if log:
+    with open(log, "a") as f:
+        f.write(json.dumps({"tool": tool, "input": inp, "cwd": os.environ.get("HOOK_CWD"), "roots": roots, "ok": ok}) + "\n")
 if ok:
     print(json.dumps({"hookSpecificOutput": {"hookEventName": "PreToolUse",
-          "permissionDecision": "allow", "permissionDecisionReason": "hyperui: plugin's own skill/reference/profile.sh"}}))
+          "permissionDecision": "allow", "permissionDecisionReason": why}}))
 PY
 exit 0

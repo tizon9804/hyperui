@@ -3,6 +3,7 @@ name: viz
 description: "Decide how to visualize data before drawing anything: Munzner's what–why–how analysis, idiom choice by channel effectiveness, interaction and validation. Use for dashboards, charts, analytics views, reports, KPI pages, metrics, any CSV or table about to become a graphic — also when asked in Spanish (dashboard de ventas, tablero, gráfica, reporte). Invoke it FIRST, before any chart code and before a rendering skill such as dataviz: viz decides what to draw and writes the what–why–how table; the rendering skill only decides how it looks."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -16,7 +17,7 @@ duplicate them here. Nothing is drawn until the what–why–how table exists.
 
 ## 1. Preflight
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
    Profile fields used: `archetype` (sets the tone, §4), `conversation_language` (reply
    language), `product_languages` (language of chart titles, axis labels and legends — the first
    entry; if the list is empty, use the conversation language and say so in one line),

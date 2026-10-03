@@ -12,7 +12,8 @@ hyperui/
 │   ├── plugin.json          # "skills": ["./"] so the root SKILL.md loads next to skills/
 │   └── marketplace.json     # tizonai → hyperui
 ├── SKILL.md                 # /hyperui — the only visible entry (greet · profile · route · thread)
-├── hooks/hooks.json         # SessionStart(startup) → scripts/welcome.sh
+├── references/workspace.md  # several repos from one directory: roles, routing, workspace.md
+├── hooks/hooks.json         # SessionStart(startup) → welcome.sh · PreToolUse → permit.sh
 ├── skills/
 │   ├── setup/  doctor/      # manual (disable-model-invocation: true)
 │   ├── design/    references/sources.md
@@ -29,8 +30,9 @@ hyperui/
 ├── templates/hyperui/       # seeds for .hyperui/: profile brief state decisions design ship (.md)
 ├── scripts/
 │   ├── setup.sh  doctor.sh  # install / report the third-party stack
-│   ├── welcome.sh           # SessionStart: intro when .hyperui/ is missing, one routing line otherwise
-│   ├── profile.sh           # init [--private] | get | set | private | user-get | user-set | path
+│   ├── welcome.sh           # SessionStart: intro when <root>/.hyperui/ is missing, one routing line otherwise
+│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, <root>/.hyperui/ writes
+│   ├── profile.sh           # init | get | set | private | user-get | user-set | path | root | roots | root-set | root-clear
 │   └── check.sh             # quality + company-agnostic gate
 ├── evals/graders/           # claude plugin eval graders (cases land under evals/<case>/case.yaml)
 ├── docs/                    # architecture.md (this file), research/ (grounding snapshots)
@@ -81,12 +83,28 @@ The hook gives model-facing context only (shape `{"hookSpecificOutput":{"hookEve
 "SessionStart","additionalContext":…}}`): the full intro when `.hyperui/` is missing, and an
 always-on routing line when it exists, so a bare "what can you do?" reaches `/hyperui` instead
 of generic help. Several intents in one message run in journey order (design → spec → build →
-review → ship). Every specialist starts with: if `.hyperui/profile.md` is missing, invoke the
-`hyperui` skill first.
+review → ship). Every specialist starts with: resolve the root with `profile.sh root`; if
+`<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first.
 
 ## Memory model
 
-Per project, `.hyperui/` (seeded from `templates/hyperui/` by `profile.sh init`):
+**Project root.** Every `profile.sh` command, the hooks and every skill resolve the root first:
+`HYPERUI_ROOT` → `--repo <path>` (repeatable) → the `roots:` map in the per-machine `user.md`
+(current directory → repo or list of repos) → the current directory. `/hyperui --repo <path>` (or
+the path said in words) runs `profile.sh root-set`, so a user can work on a repo from any
+directory and never repeat the path; `--repo .` forgets it. With several roots the first is the
+primary, each repo keeps its own `.hyperui/`, and `<primary>/.hyperui/workspace.md` lists the
+repos with a role each (rules in `references/workspace.md`). In the Bash tool `CLAUDE_PROJECT_DIR`
+is not exported, so the key is `$PWD`: skills call profile.sh by absolute path and never `cd` first.
+`permit.sh` pre-approves reads anywhere under a resolved root and Read/Edit/Write under its
+`.hyperui/`; shell commands in a root outside the working directory stay blocked by Claude Code until
+the user runs `/add-dir <root>` (or starts there), which the entry skill says once when needed.
+For the same reason the per-machine file is pinned to `~/.claude/plugins/data/hyperui/user.md`
+(`HYPERUI_DATA` overrides) instead of `${CLAUDE_PLUGIN_DATA}`: hooks receive that variable with an
+id-dependent value (`data/hyperui-tizonai` for the marketplace install) and Bash-tool commands never
+do, so the two contexts would read different files.
+
+Per project, `<root>/.hyperui/` (seeded from `templates/hyperui/` by `profile.sh init`):
 
 - `profile.md` — YAML frontmatter (archetype, languages, purpose, budget, country, platform, stack, providers, design) + dated notes.
 - `brief.md` — five lines: product, audience, the one job, tone words, constraints, product language(s).
@@ -96,8 +114,9 @@ Per project, `.hyperui/` (seeded from `templates/hyperui/` by `profile.sh init`)
 - `state.md` — phase, next, open items; read first and updated at the end of every turn.
 - `ship.md` — the go-live checklist (domain, DNS, host, secrets, deploy, payments, email, monitoring).
 
-Per machine, `${CLAUDE_PLUGIN_DATA}/user.md`: archetype default, conversation language, country,
-tone notes; a known user gets a one-line confirmation instead of the questions. No product data.
+Per machine, `~/.claude/plugins/data/hyperui/user.md`: archetype default, conversation language, country,
+tone notes, and the `roots:` map (directory → repo(s)); a known user gets a one-line confirmation
+instead of the questions. No product data.
 
 `.hyperui/` is **committed by default**. `/hyperui --private` (or saying it must not be pushed)
 runs `profile.sh private`: adds `.hyperui/` to `.gitignore` and sets `private: true`. hyperui
@@ -121,7 +140,8 @@ itself and never guesses a URL: it comes from the provider's docs or `docs/resea
 ## Company-agnostic gate
 
 `scripts/check.sh` runs `claude plugin validate .`, `bash -n` on every script, a frontmatter
-lint (name + description everywhere; `user-invocable: false` on specialists), a `## Sources`
+lint (name + description everywhere; `user-invocable: false`, `allowed-tools` with the plugin-root
+Read and the profile.sh Bash rule, and the exact root preamble on specialists), a `## Sources`
 lint, and a grep that fails on employer- or team-specific strings. `.hyperui-gate` sets
 `lenient` (warnings) or `strict` (failures) for the specialist lints. Run it before every commit.
 
@@ -149,7 +169,9 @@ machine. Cases live in `evals/<case>/case.yaml`, graders in `evals/graders/`.
 ## Adding a specialist
 
 1. Create `skills/<name>/SKILL.md` with `name`, a trigger-style `description`, `user-invocable: false`.
-2. Start it with the preamble: missing `.hyperui/profile.md` → invoke `hyperui` first; else read profile + state.
+2. Start it with the exact preamble sentence (`PREAMBLE` in `scripts/check.sh`): resolve the root
+   with `profile.sh root`; missing `<root>/.hyperui/profile.md` → invoke `hyperui` first; else read
+   profile + state. Declare `Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)` in `allowed-tools`.
 3. Put long material in `skills/<name>/references/*.md`, in English, company-agnostic.
 4. End it with `## Sources` (URLs from `docs/research/`, opened before writing).
 5. Add its row to the routing table in the root `SKILL.md` and its line in the README table.

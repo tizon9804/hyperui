@@ -15,7 +15,7 @@ MCP server yourself. You prepare; the user executes.
 
 ## 1. Read before asking
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
    Profile fields used (YAML frontmatter): `purpose`, `budget`, `country`, `archetype`,
    `platform`, `stack.*`, `providers.*`, `conversation_language`.
 2. `.hyperui/state.md` and `.hyperui/ship.md` if they exist: resume the checklist, do not restart it.

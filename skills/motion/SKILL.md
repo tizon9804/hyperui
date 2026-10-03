@@ -3,6 +3,7 @@ name: motion
 description: "Animate React/Next.js UI with the `motion` package (Framer Motion's successor): entrances, stagger, hover/tap feedback, layout and shared-element transitions, AnimatePresence, scroll-linked effects, reduced-motion. Use when adding or fixing animations, transitions or micro-interactions."
 user-invocable: false
 allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -11,7 +12,7 @@ allowed-tools:
 
 ## 0. Before anything
 
-- If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+- Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
   Profile fields used: archetype, `conversation_language`, `design.*`, `tone_notes`; also
   `.hyperui/design.md`.
 - `design.motion` sets the register: `restrained` → only the hero sequence and micro-feedback;

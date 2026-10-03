@@ -1,0 +1,58 @@
+{
+  "name": "hyperui",
+  "version": "0.4.0",
+  "description": "Product copilot for anything with a UI: one entry point (/hyperui) that profiles the user, shows designs before building, plans (spec), builds with language rules and TDD, reviews security and complexity, and guides shipping (domain, hosting, payments by country) and infra — with per-project memory in .hyperui/.",
+  "bin": {
+    "hyperui": "bin/hyperui.js"
+  },
+  "type": "module",
+  "files": [
+    "bin/",
+    ".claude-plugin/",
+    "SKILL.md",
+    "skills/",
+    "references/",
+    "scripts/",
+    "hooks/",
+    "templates/",
+    "docs/assets/logo.svg",
+    "!docs/assets/README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "version-check": "node -e \"const p=JSON.parse(require('fs').readFileSync('.claude-plugin/plugin.json','utf8')).version,n=require('./package.json').version;if(p!==n){console.error('[hyperui] version mismatch: package.json '+n+' != .claude-plugin/plugin.json '+p);process.exit(1)}console.log('[hyperui] version ok: '+n)\"",
+    "prepublishOnly": "npm run version-check"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "claude-code",
+    "claude-code-plugin",
+    "claude",
+    "frontend",
+    "design",
+    "motion",
+    "hyperframes",
+    "ui-ux",
+    "product-copilot",
+    "sdd",
+    "security",
+    "cli"
+  ],
+  "author": "Stevenson Contreras",
+  "license": "MIT",
+  "homepage": "https://github.com/tizon9804/hyperui",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tizon9804/hyperui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tizon9804/hyperui/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

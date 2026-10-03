@@ -16,7 +16,7 @@ you are unsure of: you open the docs (MCP or `WebFetch`). You never add an MCP y
 
 ## 0. Read memory first — never re-ask what is already known
 
-1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
 2. Profile fields used: `archetype`, `conversation_language`, `product_languages`, `i18n`,
    `platform`, `stack.*`, `providers.*`, `design.*`, `tone_notes`; also `design.md` if present
    and `decisions.md`. Write a field the moment the user settles it (`profile.sh set`).

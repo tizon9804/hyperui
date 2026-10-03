@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@tizonai/hyperui"><img src="https://img.shields.io/npm/v/%40tizonai%2Fhyperui" alt="npm version"></a>
   <a href="https://www.npmjs.com/package/@tizonai/hyperui"><img src="https://img.shields.io/npm/dm/%40tizonai%2Fhyperui" alt="npm downloads"></a>
-  <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftizon9804%2Fhyperui%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=plugin" alt="plugin version"></a>
+  <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftizonai%2Fhyperui%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=plugin" alt="plugin version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-%E2%89%A5%202.1.221-black" alt="Claude Code >= 2.1.221">
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-brightgreen" alt="node >= 20">

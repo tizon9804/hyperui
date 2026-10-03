@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="120" viewBox="0 0 520 120" role="img" aria-labelledby="t d">
+  <title id="t">hyperui</title>
+  <desc id="d">hyperui logo: an emerald rounded-square frame holding stacked UI layers and a text caret, next to the wordmark.</desc>
+  <style>
+    .ink    { fill: #0b0d12; }
+    .muted  { fill: #5b6170; }
+    .accent { fill: #17b877; }
+    .frame  { fill: none; stroke: #17b877; }
+    .layer  { fill: #17b877; }
+    .layer2 { fill: #17b877; opacity: .45; }
+    .caret  { fill: #0b0d12; }
+    .word   { font-family: Sora, Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 800; }
+    .tag    { font-family: Inter, "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif; font-weight: 500; }
+    @media (prefers-color-scheme: dark) {
+      .ink    { fill: #f4f6f8; }
+      .muted  { fill: #9aa1ad; }
+      .accent { fill: #3ecf8e; }
+      .frame  { stroke: #3ecf8e; }
+      .layer  { fill: #3ecf8e; }
+      .layer2 { fill: #3ecf8e; opacity: .4; }
+      .caret  { fill: #f4f6f8; }
+    }
+  </style>
+  <!-- mark: rounded-square frame, stacked layers, caret -->
+  <g transform="translate(16 16)">
+    <rect class="frame" x="3" y="3" width="82" height="82" rx="22" stroke-width="6"/>
+    <rect class="layer"  x="20" y="22" width="48" height="10" rx="5"/>
+    <rect class="layer2" x="20" y="39" width="34" height="10" rx="5"/>
+    <rect class="layer2" x="20" y="56" width="22" height="10" rx="5"/>
+    <rect class="caret"  x="58" y="44" width="6"  height="27" rx="3"/>
+  </g>
+  <!-- wordmark -->
+  <text class="word" x="124" y="72" font-size="62" letter-spacing="-2"><tspan class="ink">hyper</tspan><tspan class="accent">ui</tspan></text>
+  <text class="tag muted" x="127" y="100" font-size="15" letter-spacing=".3">idea → design → spec → build → ship</text>
+</svg>

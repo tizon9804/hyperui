@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="250" viewBox="0 0 960 250" role="img" aria-labelledby="t d">
+<title id="t">The hyperui journey</title>
+<desc id="d">One entry, /hyperui, leads through six stages: Design (shown before built), Spec (gated PRD to tasks), Build (TDD and language rules), Review (OWASP 2025 and complexity), Ship (domain, host, payments), Infra (Terraform, Fargate). A .hyperui/ memory folder underneath feeds every stage.</desc>
+<style>
+  .sans{font-family:Sora,Inter,"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+  .node{fill:#f6f7f9;stroke:#d5d9e0;stroke-width:1.5}
+  .door{fill:#17b877}
+  .doortx{fill:#06281a}
+  .title{fill:#0b0d12;font-weight:800}
+  .num{fill:#17b877;font-weight:700}
+  .prom{fill:#4a5060}
+  .arrow{stroke:#9aa1ad;stroke-width:2;fill:none}
+  .head{fill:#9aa1ad}
+  .feed{stroke:#17b877;stroke-width:1.5;stroke-dasharray:3 4;fill:none}
+  .bar{fill:#e8f8f0;stroke:#17b877;stroke-width:1.5}
+  .bartx{fill:#0b0d12;font-weight:700}
+  .barsub{fill:#4a5060}
+  @media (prefers-color-scheme: dark){
+    .node{fill:#12151c;stroke:#2a2f3a}
+    .door{fill:#3ecf8e}
+    .doortx{fill:#06281a}
+    .title{fill:#f4f6f8}
+    .num{fill:#3ecf8e}
+    .prom{fill:#a7aebb}
+    .arrow{stroke:#5b6170}
+    .head{fill:#5b6170}
+    .feed{stroke:#3ecf8e}
+    .bar{fill:#0f2a1f;stroke:#3ecf8e}
+    .bartx{fill:#f4f6f8}
+    .barsub{fill:#a7aebb}
+  }
+</style>
+<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="head" d="M0 0L8 4L0 8z"/></marker></defs>
+<rect class="door" x="16" y="44" width="112" height="104" rx="16"/>
+<text class="mono doortx" x="72" y="92" font-size="17" font-weight="700" text-anchor="middle">/hyperui</text>
+<text class="sans doortx" x="72" y="114" font-size="12" font-weight="600" text-anchor="middle">one door</text>
+<text class="sans doortx" x="72" y="130" font-size="12" text-anchor="middle">idea in</text>
+<line class="arrow" x1="128" y1="96.0" x2="146" y2="96.0" marker-end="url(#ah)"/>
+<rect class="node" x="148" y="44" width="116" height="104" rx="14"/>
+<text class="sans num" x="162" y="68" font-size="12">01</text>
+<text class="sans title" x="162" y="94" font-size="18">Design</text>
+<text class="sans prom" x="162" y="116" font-size="12.5">shown before</text>
+<text class="sans prom" x="162" y="132" font-size="12.5">built</text>
+<line class="arrow" x1="264" y1="96.0" x2="282" y2="96.0" marker-end="url(#ah)"/>
+<line class="feed" x1="206.0" y1="184" x2="206.0" y2="148"/>
+<rect class="node" x="284" y="44" width="116" height="104" rx="14"/>
+<text class="sans num" x="298" y="68" font-size="12">02</text>
+<text class="sans title" x="298" y="94" font-size="18">Spec</text>
+<text class="sans prom" x="298" y="116" font-size="12.5">gated</text>
+<text class="sans prom" x="298" y="132" font-size="12.5">PRD → tasks</text>
+<line class="arrow" x1="400" y1="96.0" x2="418" y2="96.0" marker-end="url(#ah)"/>
+<line class="feed" x1="342.0" y1="184" x2="342.0" y2="148"/>
+<rect class="node" x="420" y="44" width="116" height="104" rx="14"/>
+<text class="sans num" x="434" y="68" font-size="12">03</text>
+<text class="sans title" x="434" y="94" font-size="18">Build</text>
+<text class="sans prom" x="434" y="116" font-size="12.5">TDD + language</text>
+<text class="sans prom" x="434" y="132" font-size="12.5">rules</text>
+<line class="arrow" x1="536" y1="96.0" x2="554" y2="96.0" marker-end="url(#ah)"/>
+<line class="feed" x1="478.0" y1="184" x2="478.0" y2="148"/>
+<rect class="node" x="556" y="44" width="116" height="104" rx="14"/>
+<text class="sans num" x="570" y="68" font-size="12">04</text>
+<text class="sans title" x="570" y="94" font-size="18">Review</text>
+<text class="sans prom" x="570" y="116" font-size="12.5">OWASP 2025</text>
+<text class="sans prom" x="570" y="132" font-size="12.5">+ complexity</text>
+<line class="arrow" x1="672" y1="96.0" x2="690" y2="96.0" marker-end="url(#ah)"/>
+<line class="feed" x1="614.0" y1="184" x2="614.0" y2="148"/>
+<rect class="node" x="692" y="44" width="116" height="104" rx="14"/>
+<text class="sans num" x="706" y="68" font-size="12">05</text>
+<text class="sans title" x="706" y="94" font-size="18">Ship</text>
+<text class="sans prom" x="706" y="116" font-size="12.5">domain · host ·</text>
+<text class="sans prom" x="706" y="132" font-size="12.5">payments</text>
+<line class="arrow" x1="808" y1="96.0" x2="826" y2="96.0" marker-end="url(#ah)"/>
+<line class="feed" x1="750.0" y1="184" x2="750.0" y2="148"/>
+<rect class="node" x="828" y="44" width="116" height="104" rx="14"/>
+<text class="sans num" x="842" y="68" font-size="12">06</text>
+<text class="sans title" x="842" y="94" font-size="18">Infra</text>
+<text class="sans prom" x="842" y="116" font-size="12.5">Terraform ·</text>
+<text class="sans prom" x="842" y="132" font-size="12.5">Fargate</text>
+<line class="feed" x1="886.0" y1="184" x2="886.0" y2="148"/>
+<rect class="bar" x="16" y="184" width="928" height="48" rx="12"/>
+<text class="mono bartx" x="34" y="214" font-size="16">.hyperui/</text>
+<text class="sans barsub" x="140" y="213" font-size="13">per-project memory: profile · decisions · spec — read and updated by every stage</text>
+</svg>

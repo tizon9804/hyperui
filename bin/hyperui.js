@@ -27,7 +27,7 @@ const dryRun = flags.has('--dry-run');
 function help() {
   console.log(`hyperui ${pkg.version} — installer for the hyperui Claude Code plugin
 
-Usage: npx hyperui [command] [options]
+Usage: npx @tizonai/hyperui [command] [options]
 
 Commands:
   install      Add the ${MARKETPLACE} marketplace and install ${PLUGIN} (default)
@@ -52,7 +52,7 @@ function requireClaude() {
   if (hasClaude()) return;
   err('the `claude` command (Claude Code) was not found on your PATH.');
   log(`Install Claude Code first: ${CLAUDE_INSTALL_URL}`);
-  log('Then run `npx hyperui install` again.');
+  log('Then run `npx @tizonai/hyperui install` again.');
   process.exit(1);
 }
 
@@ -177,7 +177,7 @@ function doctor() {
     const state = p.enabled === false ? 'disabled' : p.enabled === true ? 'enabled' : 'installed';
     log(`plugin ${PLUGIN}: ${state}${p.version ? ` (${p.version})` : ''}`);
   } else {
-    log(`plugin ${PLUGIN}: missing — run \`npx hyperui install\``);
+    log(`plugin ${PLUGIN}: missing — run \`npx @tizonai/hyperui install\``);
   }
 }
 

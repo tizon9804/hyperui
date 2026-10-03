@@ -7,8 +7,8 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/hyperui"><img src="https://img.shields.io/npm/v/hyperui" alt="npm version"></a>
-  <a href="https://www.npmjs.com/package/hyperui"><img src="https://img.shields.io/npm/dm/hyperui" alt="npm downloads"></a>
+  <a href="https://www.npmjs.com/package/@tizonai/hyperui"><img src="https://img.shields.io/npm/v/%40tizonai%2Fhyperui" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/@tizonai/hyperui"><img src="https://img.shields.io/npm/dm/%40tizonai%2Fhyperui" alt="npm downloads"></a>
   <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftizon9804%2Fhyperui%2Fmain%2F.claude-plugin%2Fplugin.json&query=%24.version&label=plugin" alt="plugin version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue" alt="Apache 2.0"></a>
   <img src="https://img.shields.io/badge/Claude%20Code-%E2%89%A5%202.1.221-black" alt="Claude Code >= 2.1.221">
@@ -24,7 +24,7 @@ It remembers everything per project in a `.hyperui/` folder, so you never answer
 One command (needs Claude Code installed and signed in):
 
 ```
-npx hyperui install
+npx @tizonai/hyperui install
 ```
 
 Or the two plugin lines it runs for you:
@@ -176,7 +176,7 @@ hyperui does not install these. Each line ends with how to check.
 | **Claude Code CLI**, signed in to a Claude account (hyperui runs on your own Claude; no hyperui account, no telemetry). No documented minimum for the `"skills": ["./"]` manifest form hyperui uses (only the `"."` spelling needs v2.1.221+); **tested on 2.1.288** — stay current. | runs everything | `claude --version` |
 | **macOS** (tested: 15+, Apple Silicon and Intel). Linux should work (bash + python3; untested). Windows only via WSL2 — the hooks and scripts are bash (untested). | hooks, scripts | `uname -s` |
 | **git** | `git` specialist, plugin updates | `git --version` |
-| **Node 24 LTS recommended, ≥ 20 required** (+ npm; `nvm` is the easiest way to manage versions) | `npx hyperui`, `/hyperui:setup` components, `motion` | `node --version` |
+| **Node 24 LTS recommended, ≥ 20 required** (+ npm; `nvm` is the easiest way to manage versions) | `npx @tizonai/hyperui`, `/hyperui:setup` components, `motion` | `node --version` |
 | **python3** (macOS ships it) | `scripts/profile.sh` and `scripts/permit.sh`; without it profile.sh falls back to awk but permit.sh stays silent, so permission prompts appear; UI UX Pro Max search needs it too | `python3 --version` |
 
 Node or python3 missing (or Node < 20)? `/hyperui:setup` prints the install line for your OS (Node 24 via `brew install node@24` / `nvm install 24` / NodeSource 24.x) and offers to run it (`--install-prereqs`, Homebrew on macOS; on Linux/WSL2 you run the printed line).
@@ -215,7 +215,7 @@ claude plugin eval . --scaffold --allow-tools Bash Write Edit --no-publish --tru
 Bump `version` in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` **and** `package.json` (`npm run version-check` compares the first and the last), push to `main`, then on each machine:
 
 ```
-npx hyperui install              # re-running it updates the marketplace and the plugin
+npx @tizonai/hyperui install              # re-running it updates the marketplace and the plugin
 claude plugin update hyperui@tizonai
 ```
 

@@ -40,8 +40,8 @@ before running setup.
 
 ## For power users
 
-The specialists are hidden from the slash menu (`user-invocable: false`) and routed to
-automatically by `/hyperui`; you can still call one by name:
+Every specialist is hidden from the slash menu (`user-invocable: false`) and routed to
+automatically by `/hyperui`; call one by name if you want:
 
 | Skill | Use |
 |---|---|
@@ -49,7 +49,11 @@ automatically by `/hyperui`; you can still call one by name:
 | `/hyperui:motion` | Motion language: easing, durations, choreography, `motion` recipes. |
 | `/hyperui:video` | Promo/demo clip with HyperFrames from the project's real tokens and assets. |
 | `/hyperui:spec` | Gated PRD → requirements → design → tasks, or a one-file SDD-lite. |
+| `/hyperui:build` | One task at a time: test first, per-language rules, official docs over memory. |
+| `/hyperui:review` | Security, complexity and safety pass before anything is called done. |
+| `/hyperui:patterns` | DDD, CQRS, hexagonal, GoF, resilience — only when the spec needs one. |
 | `/hyperui:ship` | Domain, DNS, hosting, payments by country, store/desktop distribution. |
+| `/hyperui:infra` | Terraform/Terragrunt, ECS Fargate vs EKS, GitHub Actions OIDC, state and IAM first. |
 | `/hyperui:viz` | Munzner what–why–how analysis before any chart. |
 | `/hyperui:git` | Conventional Commits, PRs, releases, hotfixes. |
 
@@ -67,6 +71,18 @@ After setup the installed third-party skills are available too: `/hyperframes`,
 | **frontend-design** | Anthropic's official design-direction skill. | `frontend-design@claude-plugins-official` |
 | **Impeccable** | Design vocabulary for agents: `/impeccable audit`, `polish`, `typeset`, `critique`… anti-pattern detection. | https://impeccable.style · `pbakaus/impeccable` |
 
+## How it remembers
+
+Project memory lives in `.hyperui/` (profile, brief, design, spec, decisions, state, ship) and is
+committed by default, so the next session — or a teammate — picks up the thread.
+`/hyperui --private` adds `.hyperui/` to `.gitignore` instead.
+A small per-machine profile (`${CLAUDE_PLUGIN_DATA}/user.md`) means you are not profiled again in a new project.
+
+## Grounding
+
+Advice comes from sources opened at the time (each skill lists them; snapshots in `docs/research/`).
+When an official MCP would help, hyperui shows the exact `claude mcp add` line and asks — it never adds one.
+`scripts/check.sh` keeps the plugin company-agnostic. How it fits together: [`docs/architecture.md`](docs/architecture.md) · research: [`docs/research/`](docs/research/README.md).
 
 ## Requirements
 

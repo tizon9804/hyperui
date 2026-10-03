@@ -2,6 +2,9 @@
 name: git
 description: "Commits, branches, pull requests, releases and hotfixes for the user's repo: Conventional Commits, SemVer, changelog, branching model by team size. Use when the user asks to commit, save or upload changes to git, open or describe a PR, cut a release, bump a version, tag, write the changelog, start or finish a hotfix, or pick a branching model — in any language (\"haz commit\", \"súbelo a git\", \"saca una versión\")."
 user-invocable: false
+allowed-tools:
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:git — commits, PRs, releases, hotfixes
@@ -11,9 +14,9 @@ tools can read, versions that mean something, and nothing irreversible without a
 
 ## 0. Before anything
 
-1. Read `.hyperui/profile.md` (`archetype`, `conversation_language`, any ticketing tool in the
-   notes) and `.hyperui/decisions.md` (branching model already chosen). If missing, assume
-   `archetype: dev` and no decision yet.
+1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+   Profile fields used: `archetype`, `conversation_language`, any ticketing tool in the notes;
+   also `.hyperui/decisions.md` (a branching model already chosen is final; none → no decision yet).
 2. Orient (read-only, safe without asking):
    ```bash
    git status --short
@@ -150,6 +153,8 @@ End each action with: what ran (commit sha / PR URL / tag), what was verified (`
 match), and the next step in one line. Update `.hyperui/state.md` `next:` if it exists.
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 Open the source before stating a rule you are unsure of.
 

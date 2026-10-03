@@ -2,6 +2,10 @@
 name: design
 description: "Build standout, production-grade frontends end to end: brief → visual direction → design tokens → components → motion → QA. Use when asked to design or build a landing page, marketing site, dashboard, app UI, component or redesign, or to make an existing UI look premium. Orchestrates ui-ux-pro-max, frontend-design, 21st.dev, motion and Impeccable when they are installed."
 user-invocable: false
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:design — standout frontends, end to end
@@ -11,9 +15,10 @@ of view, a typographic identity and one thing people remember.
 
 ## 0. Before anything
 
-- Read `.hyperui/profile.md` (archetype, `conversation_language`, `product_languages`, `i18n`,
-  `platform`, `design.*`), `.hyperui/state.md`, and `.hyperui/brief.md` / `design.md` if present.
-  Never re-ask a field that already has a value; build on the picked direction if there is one.
+- If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+  Profile fields used: archetype, `conversation_language`, `product_languages`, `i18n`,
+  `platform`, `design.*`; also `.hyperui/brief.md` / `design.md` if present — build on the
+  picked direction if there is one.
 - Reply in the conversation language; keep internal reasoning, code and files in English.
 - Tone per archetype: non-tech → one or two plain sentences per step, one question with a
   recommended answer; dev → the fact + one line of why; senior → the fact, ~12 lines max.
@@ -154,5 +159,7 @@ URLs and rejected directions (one line) → `.hyperui/design.md`; the next step 
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 Open the source before stating. Canonical references: [`references/sources.md`](references/sources.md).

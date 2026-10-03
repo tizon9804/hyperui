@@ -1,0 +1,87 @@
+# Python — rules for writing code
+
+**Sources** (open before stating): PEP 8 https://peps.python.org/pep-0008/ · PEP 20
+https://peps.python.org/pep-0020/ · Google Python Style Guide
+https://google.github.io/styleguide/pyguide.html · Ruff https://docs.astral.sh/ruff/ · pytest
+good practices https://docs.pytest.org/en/stable/explanation/goodpractices.html
+
+## Rules for the Agent
+
+1. Run `ruff format` and `ruff check --fix` on every file you touch; never hand-format.
+2. Type hints on every signature you write; every `# type: ignore` carries a reason.
+3. Keep `pytest` green after each change; a failing test you did not write is a signal, not noise.
+4. Follow this file and the project's existing idioms; do not introduce a second pattern for the same job.
+5. Short responses: the diff and at most 3–5 lines of text.
+6. Clear task → execute. Destructive step (delete data, drop a table, bump dependencies) → stop and ask.
+
+## Project layout
+
+- `src/<package>/` layout with `pyproject.toml`; tests in `tests/` mirroring the package. Why: avoids importing the uninstalled working tree by accident.
+- Organise by domain/feature (`users/`, `billing/`), each with its API layer, service, repository, schemas, exceptions. Why: cohesion; a feature is deletable.
+- Framework code (web handlers, CLI commands) only parses input and calls a service; no business logic in handlers. Why: logic stays testable without the framework.
+- Validate input at the boundary with typed schemas (`pydantic`, `dataclasses`, `TypedDict`); no bare `dict` for structured data.
+- Configuration from environment variables, loaded once at startup, validated, fail-fast with an actionable message. Never hardcode secrets; commit `.env.example`, never `.env`.
+- Imports: module level, absolute within the package, three blocks (stdlib · third party · local); no `from x import *`.
+- One virtual environment per project (`uv`, `venv`, `poetry`); pin with a lockfile.
+
+## Naming
+
+- `snake_case` functions/variables/modules, `PascalCase` classes, `UPPER_SNAKE_CASE` constants, `_leading_underscore` for internal.
+- Functions are verbs (`load_user`, `send_invoice`); booleans read as predicates (`is_active`, `has_paid`).
+- A function does one thing; "and" in the name means split it.
+- `@property` for cheap attribute access instead of `get_x()`; never for I/O or heavy work.
+- Avoid single-letter names except indices and comprehensions; never `l`, `O`, `I`.
+- Docstrings on modules, classes and non-trivial public functions; document the non-obvious, not the signature.
+- No ticket ids or task ids in comments or docstrings; comments explain behaviour and rationale.
+
+## Errors
+
+- Catch specific exceptions; never bare `except:` and never `except Exception:` without re-raising or logging with traceback. Why: silent failure.
+- `except: pass` is a bug; if ignoring is intentional, use `contextlib.suppress(SpecificError)` with a comment.
+- Domain errors are custom exception classes in `exceptions.py`; re-raise with `raise DomainError(...) from err` to keep the chain.
+- Do not expose stack traces or internal messages in API responses; map exceptions to status codes at the boundary.
+- Mutable default arguments (`def f(items=[])`) are a bug; use `None` and create inside.
+- Prefer `X | None` (3.10+) over `Optional[X]`; explicit return types on public functions.
+- `logging` (or `structlog`), one logger per module (`logging.getLogger(__name__)`), lazy formatting (`logger.info("x=%s", x)`), never `print` in library code. Never log secrets or personal data. Log or re-raise, not both.
+
+## Concurrency / async
+
+- Pick one model per process: `asyncio` for I/O-bound services, threads for blocking libraries, processes for CPU-bound work.
+- Never call blocking I/O (`requests`, `time.sleep`, sync DB drivers) inside `async def`; use async clients or `asyncio.to_thread`. Why: blocks the event loop.
+- Every `await` on the network has a timeout (`asyncio.timeout`, client `timeout=`). Why: defaults are often infinite.
+- Use `asyncio.TaskGroup` (3.11+) or `gather(..., return_exceptions=False)` to own tasks; no fire-and-forget `create_task` without storing the reference.
+- Shared mutable state across threads needs a `Lock`; prefer passing data to sharing it.
+- `ThreadPoolExecutor` as a context manager; bound the pool size.
+
+## Data access & SQL safety
+
+- Parameterised queries only (`cursor.execute("... WHERE id = %s", (user_id,))` or ORM expressions); never f-strings or `%` formatting into SQL. Why: injection.
+- Prefer the ORM/query builder (SQLAlchemy, Django ORM); raw SQL only when it is clearly faster or impossible otherwise, still parameterised.
+- Watch N+1: `selectinload`/`joinedload` (SQLAlchemy), `select_related`/`prefetch_related` (Django), never query in a loop.
+- Transactions explicit and short (`with session.begin():`); never hold one across a network call.
+- Sessions/connections scoped per request or per unit of work, closed in `finally` or by a context manager.
+- Migrations generated by the tool (Alembic/Django), reviewed, one logical change each, never edited after being applied in a shared environment.
+- Repository returns domain/schema objects, not raw rows, to the service layer.
+
+## Testing
+
+- `pytest`; tests in `tests/` mirroring the package; files `test_<module>.py`; functions `test_<behaviour>_when_<condition>`.
+- Arrange–act–assert; one behaviour per test; `@pytest.mark.parametrize` for scenarios.
+- Fixtures for shared setup (`conftest.py`), scoped as narrowly as possible; no `unittest`-style `setUp` unless the project already uses `unittest`.
+- Mock at the boundary (HTTP, database, clock, filesystem), not inside the logic; `monkeypatch` or `unittest.mock.patch` where the name is **looked up**, not where it is defined.
+- Async tests with `pytest-asyncio` (or `anyio`) markers; never `asyncio.run` inside a test.
+- Unit tests run with no network and no real database; integration tests marked (`@pytest.mark.integration`) and skippable.
+- Cover happy path, error path and one edge per public function; use `pytest.raises(SpecificError, match=...)`.
+
+## Tooling
+
+| Step | Command | Note |
+|---|---|---|
+| Format | `ruff format .` | replaces black; respect `pyproject.toml` |
+| Lint | `ruff check --fix .` | enable `I` (isort), `B` (bugbear), `UP` (pyupgrade) when configuring |
+| Types | `mypy .` or `pyright` | whichever the project has; do not add a second one |
+| Test | `pytest -q` | `--cov` only if coverage is configured |
+| Deps | `uv lock` / `pip-compile` / `poetry lock` | never bump versions without asking |
+| Security | `pip-audit` or `uv pip audit` | if available |
+
+Before saying "done": formatted, lint clean, types clean, tests green, no new `noqa` without a rule code and reason.

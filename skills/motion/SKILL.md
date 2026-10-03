@@ -2,14 +2,18 @@
 name: motion
 description: "Animate React/Next.js UI with the `motion` package (Framer Motion's successor): entrances, stagger, hover/tap feedback, layout and shared-element transitions, AnimatePresence, scroll-linked effects, reduced-motion. Use when adding or fixing animations, transitions or micro-interactions."
 user-invocable: false
+allowed-tools:
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # Motion — animation for React / Next.js
 
 ## 0. Before anything
 
-- Read `.hyperui/profile.md` (archetype, `conversation_language`, `design.*`, `tone_notes`),
-  `.hyperui/state.md` and `.hyperui/design.md`. Never re-ask what is there.
+- If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+  Profile fields used: archetype, `conversation_language`, `design.*`, `tone_notes`; also
+  `.hyperui/design.md`.
 - `design.motion` sets the register: `restrained` → only the hero sequence and micro-feedback;
   `expressive` → add scroll reveals and shared-element transitions. Unset → `restrained`.
   `prefers-reduced-motion` is honored by default (recipe H) — never ask whether to.
@@ -183,5 +187,7 @@ When a choreography is settled (what moves, durations, easings), write it to
 `decisions.md` (`date · decision · why · source`).
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 Verify API names before use. Canonical references: [`references/sources.md`](references/sources.md).

@@ -2,6 +2,10 @@
 name: spec
 description: "Plan a product or change before building: gated PRD → requirements → design → tasks, or a one-file SDD-lite for small changes. Use after a design is picked or when the user asks to plan, scope, break down, or 'how do we build this' (planéalo, cómo lo hacemos, plan it, spec it) — any language. Reads .hyperui/profile.md, writes .hyperui/spec/."
 user-invocable: false
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:spec — an executable specification, sized to the job
@@ -14,10 +18,11 @@ costs minutes; fixing it after the code is written costs days.
 
 ## 0. Read memory first — never re-ask what is already known
 
-1. Read `.hyperui/profile.md` (archetype, conversation_language, product_languages, i18n,
-   purpose, budget, country, platform, stack, providers), `.hyperui/state.md`, `brief.md`,
-   `design.md`, and anything under `.hyperui/spec/`. If a spec for this topic exists, say which
-   phase it stopped at and continue there — never overwrite an approved file.
+1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+   Profile fields used: archetype, conversation_language, product_languages, i18n, purpose,
+   budget, country, platform, stack, providers; also `brief.md`, `design.md`, and anything
+   under `.hyperui/spec/`. If a spec for this topic exists, say which phase it stopped at and
+   continue there — never overwrite an approved file.
 2. Anchor in the repo: `README.md`, `package.json` / `Makefile` / lockfile (real build and test
    commands, framework), folder layout, existing tokens and docs. Every path, type, table or
    route you later write comes from a file you read, or is marked **new**. Never invent one.
@@ -140,6 +145,8 @@ regression risk, minimal fix. Then design and tasks focused on the fix (usually 
   tool, buying, deploying, deleting data). The spec itself has none.
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 - EARS — Alistair Mavin, *Easy Approach to Requirements Syntax*: https://alistairmavin.com/ears/
 - Given / When / Then — Gherkin reference (Cucumber): https://cucumber.io/docs/gherkin/reference/
 - Given When Then — Martin Fowler (bliki, credits North & Matts): https://martinfowler.com/bliki/GivenWhenThen.html

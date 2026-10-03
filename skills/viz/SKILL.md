@@ -2,6 +2,9 @@
 name: viz
 description: "Decide how to visualize data before drawing anything: Munzner's what–why–how analysis, idiom choice by channel effectiveness, interaction and validation. Use for dashboards, charts, analytics views, reports, KPI pages, metrics, any CSV or table about to become a graphic — also when asked in Spanish (dashboard de ventas, tablero, gráfica, reporte). Invoke it FIRST, before any chart code and before a rendering skill such as dataviz: viz decides what to draw and writes the what–why–how table; the rendering skill only decides how it looks."
 user-invocable: false
+allowed-tools:
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:viz — decide the chart before drawing it
@@ -13,11 +16,12 @@ duplicate them here. Nothing is drawn until the what–why–how table exists.
 
 ## 1. Preflight
 
-1. Read `.hyperui/profile.md`: `archetype` (sets the tone, §4), `conversation_language` (reply
+1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+   Profile fields used: `archetype` (sets the tone, §4), `conversation_language` (reply
    language), `product_languages` (language of chart titles, axis labels and legends — the first
    entry; if the list is empty, use the conversation language and say so in one line),
    `design.palette` (reuse the product's accent as the categorical anchor when it exists).
-2. Read `.hyperui/state.md`, `brief.md` and `design.md` if present; never re-ask what they hold.
+2. Read `brief.md` and `design.md` if present; never re-ask what they hold.
 3. Check whether a skill named `dataviz` is listed in this session. If yes, charts follow its
    form, color and interaction rules and the reply says "chart follows the dataviz rules". If
    not, fall back to the color guidance in `references/channel-effectiveness.md`.
@@ -115,6 +119,8 @@ lie factor and data-ink ratio are Tufte's. The matrix beats node-link when links
 roughly 4× the nodes (errata). The channel ranking is tiers, not a proven total order.
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 - Book page (slides, videos, figures, errata linked): https://www.cs.ubc.ca/~tmm/vadbook/
 - Official full slide deck (689 slides, free): https://www.cs.ubc.ca/~tmm/talks/vad/vadallslides-2021.pdf

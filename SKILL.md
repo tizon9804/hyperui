@@ -5,9 +5,8 @@ when_to_use: "Invoke this skill FIRST for anything a product needs — a landing
 argument-hint: "[--private] [what you want to build]"
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
-  - Read
-  - Glob
-  - Grep
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui — one guide from idea to shipped
@@ -29,10 +28,11 @@ markdown you edit directly. If the script is unavailable, edit the frontmatter b
 1. **Memory.** Read `.hyperui/state.md` and `.hyperui/profile.md` if present. If `.hyperui/` is
    missing, read `${CLAUDE_PLUGIN_DATA}/user.md` (`profile.sh user-get archetype_default`; a
    non-zero exit means unknown user).
-2. **No profile → onboarding (§2), then continue with the request in the same turn.** During
-   onboarding you do **not** call a specialist: its brief questions (business name, the ONE
-   job, product language) come after the three onboarding answers, never instead of them.
-   Profile present → skip straight to routing; never re-ask a field that has a value.
+2. **No profile → onboarding (§2). That turn is profile init + the questions + a stated next
+   step; the specialist starts on the NEXT turn, with the answers.** During onboarding you do
+   **not** call a specialist: its brief questions (business name, the ONE job, product
+   language) come after the three onboarding answers, never instead of them. Profile present
+   → skip straight to routing; never re-ask a field that has a value.
 3. Detect or confirm the archetype (§3). Apply tone (§5) and languages (§6).
 4. Route (§4). The specialist reads and writes `.hyperui/`; it never re-asks what is there.
 5. Close (§9): one line done, one line next — written to `state.md` and said to the user.
@@ -146,7 +146,9 @@ specialist's name to the user and never ask them to choose one.
 
 Always: lead with the answer or the next step; no "I'm going to…" preambles; after onboarding,
 **one question per turn at most**; code in fenced blocks; prose names only the file or command
-the user must touch. Respect `tone_notes` in the profile.
+the user must touch. Respect `tone_notes` in the profile. When the request IS a full artifact (a
+spec, an infra layout, a design system), the summary on top stays ≤ 12 lines for experts; the
+artifact itself can be as long as needed and goes to files.
 
 ## 6. Three languages, kept apart
 
@@ -174,7 +176,7 @@ the user must touch. Respect `tone_notes` in the profile.
 
 **Open the source before stating.** A technical or pricing claim carries a link (docs page,
 pricing page, MCP result); re-fetch prices before quoting; a fact you cannot verify in-session
-is marked "(unverified)" or omitted. Specialists end with `## Sources`. **MCP policy:** when an
+is marked "(unverified)" or omitted. Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL. Specialists end with `## Sources`. **MCP policy:** when an
 official MCP exists for a chosen provider, show the exact `claude mcp add …` line and ask —
 never add an MCP yourself.
 
@@ -195,3 +197,6 @@ Mechanics verified on 2026-10-03 in the Claude Code docs:
   `${CLAUDE_PLUGIN_ROOT}`, `${CLAUDE_PLUGIN_DATA}`): https://code.claude.com/docs/en/hooks.md
 - Plugin components (single skill at the plugin root, `hooks/hooks.json`, `${CLAUDE_PLUGIN_DATA}`
   survives updates at `~/.claude/plugins/data/<id>/`): https://code.claude.com/docs/en/plugins/components.md
+- Permission rules (`Read(//abs/**)` absolute paths, `Edit(path)` covers Write; a skill with
+  `allowed-tools` is gated at the Skill call — `scripts/permit.sh` pre-approves hyperui's own):
+  https://code.claude.com/docs/en/permissions.md

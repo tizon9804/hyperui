@@ -2,6 +2,10 @@
 name: ship
 description: "Put a product online and get paid: domain, DNS, hosting/deploy, backend/db/auth, payments by seller country, app-store/desktop distribution — chosen by budget, ease and the user's level. Use when the user asks (in any language) how to publish or deploy, go live, buy a domain, accept cards or get paid, pick a database or auth, or ship to the App Store, Google Play, Microsoft Store or as a desktop app. Prepares configs and the exact command or clicks; the user runs every purchase and deploy."
 user-invocable: false
+allowed-tools:
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:ship — from "it works on my machine" to online and paid
@@ -11,9 +15,9 @@ MCP server yourself. You prepare; the user executes.
 
 ## 1. Read before asking
 
-1. `.hyperui/profile.md` (YAML frontmatter): `purpose`, `budget`, `country`, `archetype`,
-   `platform`, `stack.*`, `providers.*`, `conversation_language`. Never ask for a field that has
-   a value. If the file is missing, infer `archetype` from the message and treat the rest as unknown.
+1. If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+   Profile fields used (YAML frontmatter): `purpose`, `budget`, `country`, `archetype`,
+   `platform`, `stack.*`, `providers.*`, `conversation_language`.
 2. `.hyperui/state.md` and `.hyperui/ship.md` if they exist: resume the checklist, do not restart it.
 3. The reference that matches the concern (table below). Open it; do not answer from memory.
 
@@ -126,6 +130,8 @@ registration free · Azure Artifact Signing not for Colombian individuals · App
 Developer ID + notarization · Expo MCP docs search needs a paid EAS plan.
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 Snapshot 2026-10-03; every row in `references/` carries its URL. Load-bearing pages, re-opened
 the same day: https://stripe.com/global · https://docs.stripe.com/payments/managed-payments/eligibility ·

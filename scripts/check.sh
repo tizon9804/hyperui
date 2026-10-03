@@ -10,13 +10,21 @@
 #                                         user-invocable: false         (gated, see below)
 #   (d) sources lint                    — every skills/*/SKILL.md except setup/doctor has a
 #                                         "## Sources" heading          (gated, see below)
+#   (d2) allowed-tools lint             — every skills/*/SKILL.md except setup/doctor declares
+#                                         allowed-tools with Read(//${CLAUDE_PLUGIN_ROOT}/**)
+#                                         (the only form that pre-approves reference reads
+#                                         AND stays scoped to the plugin; bare Read leaks,
+#                                         single-slash form never matches)      (gated)
+#   (d3) preamble lint                  — every skills/*/SKILL.md except setup/doctor contains
+#                                         the exact phrase "invoke the `hyperui` skill first"
+#                                         (profile-missing fallback)    (gated)
 #   (e) company-agnostic grep           — no employer/team-specific strings anywhere in the
 #                                         repo (excluding .git, node_modules and this file,
 #                                         which necessarily contains the pattern)  (hard fail)
 #
 # Gate toggle (.hyperui-gate at the repo root):
 #   The file holds a single word on its first non-comment line:
-#     lenient  — (c)'s user-invocable rule and (d) print "!" warnings, exit code unaffected.
+#     lenient  — (c)'s user-invocable rule and (d)/(d2)/(d3) print "!" warnings, exit code unaffected.
 #                Used during wave 1 so specialists can be migrated incrementally.
 #     strict   — those warnings become failures. Flip to strict once every specialist is done.
 #   Lines starting with "#" are comments. A missing file means lenient.
@@ -92,9 +100,15 @@ for f in "${skill_files[@]}"; do
   if ! grep -qE '^##[[:space:]]+Sources[[:space:]]*$' "$f"; then
     gated "$f: specialist lacks a '## Sources' heading"; gated_count=$((gated_count + 1))
   fi
+  if ! grep -qF 'Read(//${CLAUDE_PLUGIN_ROOT}/**)' <<<"$fm"; then
+    gated "$f: specialist lacks allowed-tools 'Read(//\${CLAUDE_PLUGIN_ROOT}/**)' (reference reads outside the project need it)"; gated_count=$((gated_count + 1))
+  fi
+  if ! grep -qF 'invoke the `hyperui` skill first' "$f"; then
+    gated "$f: specialist lacks the preamble phrase 'invoke the \`hyperui\` skill first'"; gated_count=$((gated_count + 1))
+  fi
 done
 [[ $fm_fail -eq 0 ]] && ok "frontmatter name/description on ${#skill_files[@]} SKILL.md file(s)"
-[[ $gated_count -eq 0 ]] && ok "specialists: user-invocable: false + ## Sources (gate: $GATE)"
+[[ $gated_count -eq 0 ]] && ok "specialists: user-invocable: false + ## Sources + allowed-tools + preamble phrase (gate: $GATE)"
 
 # (e) company-agnostic grep
 if hits="$(grep -rniE '\bolo\b|ubits|ololabs|engage-specs|OLO-[0-9]' \

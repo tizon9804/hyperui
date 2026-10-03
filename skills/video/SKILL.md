@@ -2,6 +2,9 @@
 name: video
 description: "Make a short promo/demo video of a web product with HyperFrames (HTML → MP4), reusing the project's real brand tokens and components. Use when asked for a promo, teaser, product video, launch clip, social clip."
 user-invocable: false
+allowed-tools:
+  - Read(//${CLAUDE_PLUGIN_ROOT}/**)
+  - Edit(.hyperui/**)
 ---
 
 # hyperui:video — promo clip with HyperFrames
@@ -12,9 +15,9 @@ reimplement their API or project layout — hand the composition to them.
 
 ## 0. Before anything
 
-- Read `.hyperui/profile.md` (archetype, `conversation_language`, `product_languages`,
-  `design.*`), `.hyperui/state.md` and `.hyperui/design.md`. Never re-ask what is there: the
-  picked direction's fonts, palette and motion register are the clip's brand.
+- If `.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold.
+  Profile fields used: archetype, `conversation_language`, `product_languages`, `design.*`; also
+  `.hyperui/design.md`: the picked direction's fonts, palette and motion register are the clip's brand.
 - Clip copy language = `product_languages[0]` unless the user says otherwise.
 - Reply in the conversation language; keep internal reasoning, code and files in English.
 - Tone per archetype: non-tech → one or two plain sentences per step; dev → the fact + one
@@ -93,6 +96,8 @@ settled decision (message, duration, aspect, copy language) to `decisions.md`
 (`date · decision · why · source`).
 
 ## Sources
+
+Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
 HyperFrames API and layout come from its docs and skills. Canonical references:
 [`references/sources.md`](references/sources.md).

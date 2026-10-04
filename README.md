@@ -1,6 +1,7 @@
 <p align="center"><img src="docs/assets/logo.svg" width="420" alt="hyperui"></p>
 
 <p align="center"><b>One door from idea to shipped product. For Claude Code.</b></p>
+<p align="center">Made by <a href="https://tizonai.com/en/apps/hyperui">TizonAI</a>, the product studio of Javier Stevenson.</p>
 
 <p align="center">
   <a href="#quick-start">Quick start</a> · <a href="#how-it-works">How it works</a> · <a href="#examples">Examples</a> · <a href="#specialists">Specialists</a> · <a href="#requirements">Requirements</a> · <a href="#docs">Docs</a>

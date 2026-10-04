@@ -4,8 +4,9 @@ Use the official docs instead of memory. Policy (REQ-018): when one of these fit
 **show the exact line below and ask**; the user runs it. Never run `claude mcp add` yourself,
 never paste a secret into a command (point to an env var). Without an MCP, `WebFetch` the docs
 URL. Syntax verified 2026-10-03 at https://code.claude.com/docs/en/mcp: options (`--scope|-s`,
-`--transport|-t`, `--header|-H`, `--env|-e`) go **before** the server name; stdio commands go
-after `--`; `--scope user` makes it available in every project, the default `local` only here.
+`--transport|-t`) go **before** the server name; the variadic ones (`--header|-H`, `--env|-e`)
+go **after** the name and URL (otherwise they swallow them: `missing required argument 'name'`);
+stdio commands go after `--`; `--scope user` makes it available in every project, the default `local` only here.
 
 | Server | What it is for | Install line (user runs it) | Docs |
 |---|---|---|---|

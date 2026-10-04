@@ -109,7 +109,9 @@ Always lead with the result or next step, never with "I'm going to…". Reply in
 4. State plainly, once: *only the immediate validation of the nested model was done (design
    justified against perceptual principles, cost estimated); the downstream validation —
    real users doing their own work, adoption — has not happened.*
-5. Name the sources in the reply, one line at the end, every time a chart or table is delivered:
+5. Before the closing choice, the root §9 care line for what the chart handled unasked (a11y (color-safe,
+   labels) · responsive · dark mode · performance · sources cited — only what is true).
+6. Name the sources in the reply, one line at the end, every time a chart or table is delivered:
    *Idiom choices follow Munzner, Visualization Analysis and Design — slides
    https://www.cs.ubc.ca/~tmm/talks/vad/vadallslides-2021.pdf · nested model (InfoVis 2009) ·
    task typology (Brehmer & Munzner, InfoVis 2013).* Add "(slides pN)" next to any specific claim.

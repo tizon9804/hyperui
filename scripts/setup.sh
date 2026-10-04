@@ -340,8 +340,9 @@ elif [[ -z "$KEY_21ST" ]]; then
   record "21st.dev MCP" "skipped (no key)" "-"
 else
   # User scope: the key lives in ~/.claude.json, never in the project → never committed.
+  # NOTE: --header is variadic — it must come AFTER the server name and URL or it swallows them.
   if run "register 21st MCP (user scope)" claude mcp add --transport http --scope user \
-       --header "x-api-key: $KEY_21ST" 21st https://21st.dev/api/mcp; then
+       21st https://21st.dev/api/mcp --header "x-api-key: $KEY_21ST"; then
     did "21st MCP registered (user scope)"; record "21st.dev MCP" "$(status_installed)" "claude mcp (user scope)"
   else
     fail "21st MCP registration failed"; FAILURES+=("21st"); record "21st.dev MCP" "FAILED" "-"
@@ -358,6 +359,9 @@ for row in "${SUMMARY[@]}"; do
   printf '  %-24s %-24s %s\n' "$c" "$s" "$w"
 done
 echo
+if grep -q 'claude mcp' <<<"${SUMMARY[*]}" 2>/dev/null && [[ $DRY -eq 0 ]]; then
+  echo "[hyperui] ! MCP servers registered in this run (21st / motion) become available after you restart Claude Code (or run /mcp)."
+fi
 echo "[hyperui] Try: /hyperui:design (design brief), /motion (Motion docs, springs, audits), /hyperframes (video), /ui-ux-pro-max, /frontend-design, /impeccable audit"
 
 if [[ ${#FAILURES[@]} -gt 0 ]]; then

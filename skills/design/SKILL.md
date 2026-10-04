@@ -71,10 +71,15 @@ Check which helpers exist and adapt — never block on a missing one:
    phone; no horizontal scroll; contrast AA; visible focus states; full keyboard navigation;
    every image has width/height; fonts cause no layout shift; Lighthouse ≥ 90 in all four
    categories (run it when a build is available and report the numbers).
-7. **Impeccable gate (before declaring any UI done).** Check `claude plugin list`. If Impeccable
-   is installed: run `/impeccable audit`, address the findings, then `/impeccable polish`. If
-   not: say once that it is not installed and suggest `/hyperui:setup` (note it in `state.md`
-   so the hint is not repeated). No UI is "done" without one of the two.
+7. **Impeccable gate (before declaring any UI done) — with evidence.** Check `claude plugin list`.
+   If Impeccable is installed: ACTUALLY invoke `/impeccable audit` (Skill tool), fix the findings,
+   then invoke `/impeccable polish`; record the evidence in `design.md` under `## Quality gate`
+   (audit: N findings, what was fixed; polish: run/not) and mention it in the care line. A gate
+   without recorded evidence is NOT done — never say "audited" or "polished" if the skill did not
+   run; say "not run" and why. If not installed: say once and suggest `/hyperui:setup` (note it in
+   `state.md`). 21st.dev likewise: use it only if `mcp__21st__*` tools exist in THIS session; a
+   just-registered MCP appears after Claude Code restarts — say so and state components were built
+   by hand.
 
 ## 3. Rules of taste
 
@@ -161,7 +166,8 @@ body { background: var(--bg); color: var(--text); font: var(--fs-body)/1.6 var(-
 Write what you decided: picked direction, tokens, fonts, palette, signature element, artifact
 URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
-When the next step is theirs (pick made, UI done), close with the root §9 choice prompt.
+When the next step is theirs (pick made, UI done), close with the root §9 care line (what the directions
+or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n — only what is true) and then the §9 choice prompt.
 
 ## Sources
 

@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: ui-tdd-browser
+description: "Developer, Spanish, Vite + React app with Vitest + Testing Library and a picked design direction, asks to add an accessible primary button to the hero: TDD applies to UI (the component test is written before the component, tests run green, the care line says tests), and the UI is never called visually verified without browser evidence — either a `## Browser evidence` section in .hyperui/design.md or an explicit statement that no browser tool was available."
+tags: [wave4, build, design, tdd, browser, es]
+expected_outcome: "Spanish; test file written before the component (tool order in the trace); vitest ran and passed; the reply mentions tests; the reply either cites browser evidence (viewports, screenshots, tool) or states plainly that no browser tool was available — no visual claim without evidence; no side effects (git push, mcp add, deploy)."
+context:
+  scaffold_script: fixture.sh

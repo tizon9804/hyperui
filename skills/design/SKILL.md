@@ -16,18 +16,16 @@ of view, a typographic identity and one thing people remember.
 ## 0. Before anything
 
 - Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
-  Profile fields used: archetype, `conversation_language`, `product_languages`, `i18n`,
-  `platform`, `design.*`; also `.hyperui/brief.md` / `design.md` if present — build on the
-  picked direction if there is one.
+  Profile fields used: archetype, `conversation_language`, `product_languages`, `i18n`, `platform`,
+  `design.*`; also `.hyperui/brief.md` / `design.md` if present — build on the picked direction.
 - Reply in the conversation language; keep internal reasoning, code and files in English.
 - Tone per archetype: non-tech → one or two plain sentences per step, one question with a recommended answer; dev → the fact + one line of why; senior → the fact, ~12 lines max.
 
 ## 1. Preflight
 
-Check which helpers exist and adapt — never block on a missing one:
-- `ui-ux-pro-max`: `.claude/skills/ui-ux-pro-max/` or `~/.claude/skills/ui-ux-pro-max/` (styles, palettes, font pairings, UX rules, chart types).
-- `frontend-design` (Anthropic plugin skill) for aesthetic direction; 21st.dev MCP tools (`mcp__21st__*`) for component candidates; `motion` in `package.json` for animation.
-- If the key ones are missing, suggest `/hyperui:setup` once, then proceed with what is available.
+Check which helpers exist and adapt — never block on a missing one: `ui-ux-pro-max` (`.claude/skills/ui-ux-pro-max/` or `~/.claude/skills/…`: styles, palettes, font pairings, UX rules);
+`frontend-design` (Anthropic plugin skill) for aesthetic direction; 21st.dev MCP tools (`mcp__21st__*`) for component candidates; `motion` in `package.json`;
+a browser tool (`references/browser-verify.md` §1). Key ones missing → suggest `/hyperui:setup` once, then proceed with what is available.
 
 ## 2. Process
 
@@ -47,7 +45,8 @@ Check which helpers exist and adapt — never block on a missing one:
    dark. Publish each with the Artifact tool (load the `artifact-design` skill first when it is
    available); when the session offers `/design` (Claude Design artboards), use it instead.
    No Artifact tool in the session → write `.hyperui/directions/<name>.html` and give the paths.
-   Record every URL/path in `.hyperui/design.md`. Present them as one line per direction (name ·
+   Record every URL/path in `.hyperui/design.md`. **A browser tool in the session** (`references/browser-verify.md` §1) → open each
+   direction page and take one 1280 screenshot before presenting it (catches a broken page or a missing font). Present them as one line per direction (name ·
    type pairing · palette · signature · link), then the pick as the entry skill's choice prompt
    (root §9: `AskUserQuestion`, else a numbered list as the LAST thing in the reply; user's language):
    the 2–3 direction names, the recommended one first with "(Recommended)" · "Mix / adjust a
@@ -63,14 +62,17 @@ Check which helpers exist and adapt — never block on a missing one:
 4. **Components.** Compose from the stack's primitives. When 21st.dev is installed, pull 2–3
    candidates per component and *adapt* them to the tokens — never paste a component with its own
    palette, radius or shadow system. One visual signature element per page (a type treatment, a
-   live demo, a material, an animation), everything else quiet.
+   live demo, a material, an animation), everything else quiet. **Test first, UI included:** the
+   component's render test (project runner — Vitest + Testing Library typical: `getByRole` + accessible
+   name, an `axe` assertion when available) is written and red BEFORE the component exists (build §3).
 5. **Motion.** Hand off to the `motion` skill. Defaults: entrance stagger on the hero, hover and tap
    micro-feedback on interactive elements, scroll reveal only where it aids reading. Always honor
    `prefers-reduced-motion`.
-6. **QA.** Responsive at 360 / 768 / 1280 / 1920; 16px side gutters on
-   phone; no horizontal scroll; contrast AA; visible focus states; full keyboard navigation;
-   every image has width/height; fonts cause no layout shift; Lighthouse ≥ 90 in all four
-   categories (run it when a build is available and report the numbers).
+6. **QA in the browser, with evidence** — `references/browser-verify.md`: detect the tool (Claude in Chrome →
+   Playwright MCP → headless Chrome), capture 360 / 768 / 1280 (+1920 marketing) light AND dark, one interaction,
+   run the checks (no horizontal scroll, no clipped text, contrast AA, visible focus, hero in the first 360 viewport,
+   fonts loaded, images sized; 16px phone gutters; full keyboard navigation), record `## Browser evidence` in `design.md`.
+   No browser tool → say so, static checks only, never a visual claim. Lighthouse ≥ 90 ×4 when a build is available.
 7. **Impeccable gate (before declaring any UI done) — with evidence.** Check `claude plugin list`.
    If Impeccable is installed: ACTUALLY invoke `/impeccable audit` (Skill tool), fix the findings,
    then invoke `/impeccable polish`; record the evidence in `design.md` under `## Quality gate`
@@ -92,37 +94,34 @@ Check which helpers exist and adapt — never block on a missing one:
 - One accent color, used sparingly, always meaning "action" or "live".
 - Depth from layering and tonal steps (bg → surface → raised), not borders on everything.
 - Whitespace is generous and rhythmic: 8pt grid, sections breathe, density only where data lives.
-- Real copy and real data in the deliverable. Never lorem ipsum, never placeholder avatars.
-- The hero opens with the most characteristic thing in the product's world: a live demo, a real
-  screenshot, a single bold statement. Decide which, on purpose.
-- Images with intent: the product, its output, its materials. No stock people pointing at laptops.
+- Real copy and real data in the deliverable. Never lorem ipsum, never placeholder avatars. Images with intent: the product, its output, its materials; no stock people pointing at laptops.
+- The hero opens with the most characteristic thing in the product's world: a live demo, a real screenshot, a single bold statement. Decide which, on purpose.
 - Dark mode is designed, not inverted: lift surfaces, lower saturation, re-check contrast.
-- Icons from one set, one stroke width, one optical size.
+- Icons from one set, one stroke width, one optical size. Max 80ch line length for body text; serif bodies get slightly more line-height.
 - Empty, loading and error states are designed up front, with the same care as the happy path.
-- Max 80ch line length for body text; serif bodies get slightly more line-height.
 - Forms: labels always visible, inline validation, generous hit targets (≥ 44px).
 - Motion is choreography, not decoration: one entrance sequence per view.
 
 ## 4. Stack defaults
 
-React + Next.js App Router unless the project says otherwise. Styling follows the project (CSS
-Modules or Tailwind); tokens always live in CSS variables so either works. `next/image` and
-`next/font`. Motion (`motion/react`) for animation. No component-library lock-in: shadcn and
-21st.dev pieces are source you own and restyle to the tokens.
+React + Next.js App Router unless the project says otherwise. Styling follows the project (CSS Modules or
+Tailwind); tokens always live in CSS variables so either works. `next/image`, `next/font`, Motion (`motion/react`).
+No component-library lock-in: shadcn and 21st.dev pieces are source you own and restyle to the tokens.
 
 ## 5. Deliverable
 
-End with: what changed (files, by role) · how to run it · screenshots if a browser tool exists ·
-Lighthouse numbers if measured · open decisions for the user. Keep it short; the page speaks.
+**Show before you ask (root §7).** After any UI change the dev server STAYS RUNNING (never kill it after tests) and the reply
+carries, BEFORE the choice prompt: the local URL + how to restart the server · the 360/768/1280 screenshots (an artifact when the
+Artifact tool exists, else file paths) · one line "what to look at" · browser evidence or the one line that no browser tool was
+available · Lighthouse numbers if measured · open decisions. Headless `-p` (no server for the user) → the start command and the paths.
 
 ## 6. Redesigns and existing UIs
 
 - Audit first, the live site and the repo: tokens present or absent, the fonts actually loaded,
   the count of distinct grays / radii / shadows in use. The count is the diagnosis; the fix is
   consolidation. Put the numbers in the reply in one line.
-- Directions keep the information architecture unless the brief asks otherwise and are visibly
-  a step up: new skin, type and rhythm. Users forgive a new look, not a lost page. They go
-  through the same artifact contract (step 2) before any code changes.
+- Directions keep the information architecture unless the brief asks otherwise and are visibly a step up: new skin,
+  type and rhythm. Users forgive a new look, not a lost page. Same artifact contract (step 2) before any code changes.
 - Migrate incrementally: tokens → global type → shared primitives (button, card, input) → pages.
   Each step ships and keeps Lighthouse ≥ 90.
 - Delete dead CSS as you go; the redesign is not done while two systems coexist.
@@ -167,7 +166,7 @@ Write what you decided: picked direction, tokens, fonts, palette, signature elem
 URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
 When the next step is theirs (pick made, UI done), close with the root §9 care line (what the directions
-or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n — only what is true) and then the §9 choice prompt.
+or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) — only what verifiably ran) and then the §9 choice prompt.
 
 ## Sources
 

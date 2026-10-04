@@ -63,6 +63,7 @@ para que elijas una, y a partir de ahí planificamos y construimos.
 /hyperui:setup --global              # skills → ~/.claude/skills, motion MCP → user scope (once per machine)
 /hyperui:setup --21st-key <key>      # also register the 21st.dev MCP (user scope, key never committed)
 /hyperui:setup --motion-plus         # also register the motion-plus MCP (Motion+ subscribers; sign in from the MCP settings)
+/hyperui:setup --playwright-mcp      # also register the Playwright MCP (headless): browser fallback for visual checks when Claude in Chrome is off
 /hyperui:setup --skip-motion-kit     # no Motion AI Kit (/motion skill, motion-reviewer agent, motion MCP)
 /hyperui:setup --skip-motion         # any of: --skip-hyperframes --skip-uipro --skip-motion --skip-motion-kit --skip-21st --skip-frontend-design --skip-impeccable
 /hyperui:setup --dry-run             # print the commands, install nothing
@@ -89,6 +90,7 @@ After setup the installed third-party skills are available too: `/motion`, `/hyp
 
 - **Profile and tone by archetype.** Non-tech, developer or senior: detected from your words and your repo, confirmed in at most three questions, never asked twice.
 - **Show before build.** 2–3 visual directions as HTML artifacts come before any code; UI is never called done without the Impeccable `audit` → `polish` gate (or one line saying Impeccable is not installed).
+- **Sees what it built.** Opens the result in Chrome (Claude in Chrome, `claude --chrome`) or a headless browser at 360/768/1280, light and dark, and keeps the screenshots as evidence in `.hyperui/design.md` — it never says "looks right" without one, and says plainly when no browser tool was available. It shows before it asks: the dev server stays running and you get the local URL, the screenshots and "what to look at" before any approve/commit/merge question. TDD for everything, UI included: the component test is written before the component.
 - **Gated spec, read as artifacts.** PRD → requirements → design → tasks with approval between phases, or a one-file SDD-lite for small changes, in `.hyperui/spec/`. Every spec file is also published as a Claude artifact (a readable page with table of contents and rendered diagrams) the moment it is written, and the full track ends with one consolidated `Spec: <Topic>` artifact; without the Artifact tool the same page is written next to the markdown.
 - **Every step ends with a choice** (continue, do all, fix something, stop) — you never have to guess what to say next.
 - **Does the heavy lifting itself.** When a job is big — "do all the remaining tasks", three features at once, a docs or pricing lookup, a first look at your repo — hyperui decides alone whether to run it inline or in subagents, in parallel, and on which model. No new questions, no menus; experts see one discreet line ("3 tasks in parallel · reviewer after each"), everyone else just the result.
@@ -170,6 +172,7 @@ Everything above is the default path; nothing here is required.
 - **Call a specialist by name**: `/hyperui:design`, `/hyperui:spec`, `/hyperui:build`, … (table above).
 - **Agents** (what the automatic dispatch runs; also callable by name or `@agent-hyperui:<name>`): `hyperui:builder` (one spec task with TDD, the session's model), `hyperui:reviewer` (security + complexity on given files, `sonnet`), `hyperui:researcher` (docs, prices, MCPs with URLs, `haiku`), `hyperui:scout` (repo inspection for the profile, `haiku`).
 - **Override in words**: "hazlo con sonnet", "use opus for this", "no uses subagentes", "back to automatic". hyperui obeys and stores it in `.hyperui/profile.md` as `dispatch: auto | inline | sonnet | opus | haiku` (`auto` is the default; edit the file to change it by hand). Rules and mechanics: [`references/dispatch.md`](references/dispatch.md).
+- **Live browser checks**: start Claude Code with `claude --chrome` (or `/chrome` → "Enabled by default") so hyperui verifies UI in your real Chrome — screenshots at 360/768/1280, light/dark, one interaction, a short GIF. Interactive sessions only (one per machine); `-p`, evals and subagents use the headless path. Procedure: [`skills/design/references/browser-verify.md`](skills/design/references/browser-verify.md).
 
 ## Working from any directory
 
@@ -214,6 +217,7 @@ Node or python3 missing (or Node < 20)? `/hyperui:setup` prints the install line
 - **Via `/hyperui:setup`:** HyperFrames skills, Motion AI Kit (`/motion` skill, `motion-reviewer` agent, `motion` MCP), UI UX Pro Max skill, Anthropic `frontend-design` plugin, Impeccable plugin, the `motion` npm package in the project.
 - **Via `infra`, on first use:** Terraform — asks once, then `brew install hashicorp/tap/terraform` on macOS; on Linux it prints the official install line for you to run.
 - **Optional, only if you want them:** the 21st.dev components MCP (free key you create at https://21st.dev/mcp; hyperui registers it when you pass `--21st-key`), provider MCPs (Vercel, Supabase, Stripe, Terraform MCP…: hyperui shows the exact `claude mcp add` line and asks before adding).
+- **Optional, for visual verification:** [Claude in Chrome](https://code.claude.com/docs/en/chrome.md) — the Chrome extension (≥ 1.0.36) plus a direct Anthropic plan (Pro/Max/Team/Enterprise) and `/login`; start with `claude --chrome`. Without it, `/hyperui:setup --playwright-mcp` registers the Playwright MCP (headless) as the fallback, and a local Google Chrome binary is used for plain headless screenshots; with none of them hyperui says the UI was not visually verified.
 
 ### Network and permissions
 

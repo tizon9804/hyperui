@@ -97,6 +97,7 @@ Always lead with the result or next step, never with "I'm going to…". Reply in
   - small multiples instead of animation when more than two states must be compared.
 - Dashboards: an overview (aggregate) first, then detail views; the same hue means the same
   category in every panel; shared aligned scales within a small-multiple row.
+- **Verified in a browser before "done"** (`${CLAUDE_PLUGIN_ROOT}/skills/design/references/browser-verify.md`): tooltips appear on hover and axis labels, legend and ticks stay legible at 360 (no overlap, no clipping), light and dark; evidence under `## Browser evidence` in `design.md`, or one explicit line that no browser tool was available.
 
 ## 6. Record and close
 

@@ -22,7 +22,7 @@ hyperui/
 ├── hooks/hooks.json         # SessionStart(startup) → welcome.sh · PreToolUse → permit.sh
 ├── skills/
 │   ├── setup/  doctor/      # manual (disable-model-invocation: true)
-│   ├── design/    references/sources.md
+│   ├── design/    references/{sources,browser-verify}.md   # browser-verify: seen-in-Chrome evidence rule
 │   ├── motion/    references/sources.md
 │   ├── video/     references/sources.md
 │   ├── spec/      references/{prd,requirements,design,tasks,sdd-lite}-template.md
@@ -48,7 +48,7 @@ hyperui/
 
 Each specialist, one line:
 
-- `design` — brief → 2–3 directions as HTML artifacts (show before build) → tokens → components → QA.
+- `design` — brief → 2–3 directions as HTML artifacts (show before build) → tokens → components (test first) → QA in the browser with evidence.
 - `motion` — animation recipes on the chosen tokens; reduced motion always honored.
 - `video` — promo/demo clip with HyperFrames from the project's real tokens; only when asked.
 - `spec` — gated PRD → requirements → design → tasks, or a one-file SDD-lite, in `.hyperui/spec/`.
@@ -79,7 +79,7 @@ flowchart TD
   S2 --> MEM
   S3 --> MEM
   S4 --> MEM
-  S3 --> G["Gates: review, Impeccable audit + polish for UI, safety stop-and-ask"]
+  S3 --> G["Gates: TDD, review, browser evidence + Impeccable for UI, safety stop-and-ask"]
   S1 --> G
   G -- "blocking finding" --> S3
   G -- "clean" --> D["Close: one line done, one line next, written to state.md"]
@@ -101,6 +101,27 @@ Agent tool as `subagent_type: "hyperui:<name>"`; a named model that is unavailab
 the archetype — one discreet line for experts, only the result for non-tech — and the user can
 override in words ("hazlo con sonnet", "no uses subagentes"), stored as `dispatch:` in `profile.md`.
 Every delivered unit of work also ends with the §9 care line (what was handled unasked) before the choice.
+
+## Gates
+
+Four gates stand between "built" and "done", and none accepts a claim in place of evidence. **TDD** is the
+default for every code change, UI included: a failing test first (unit for logic, a component/render test
+with Testing Library — `getByRole`, accessible name, an `axe` assertion when the project has it — for UI,
+e2e for flows), the minimal implementation, refactor; the care line says `tests` only when tests ran green
+that turn. **Review** (`skills/review`) runs after each build task; blocking findings are fixed first.
+**Browser evidence** (`skills/design/references/browser-verify.md`): UI is never reported done without
+captures at 360/768/1280 (1920 for marketing pages), light and dark, one interaction, checked for
+horizontal scroll, clipped text, contrast, focus, fold, fonts and image sizing, recorded under
+`## Browser evidence` in `.hyperui/design.md`; the tool is detected in order — Claude in Chrome (the
+`claude-in-chrome` MCP of an interactive `claude --chrome` session; never in `-p` or in subagents),
+Playwright MCP (`/hyperui:setup --playwright-mcp`), a headless Chrome binary — and when none exists the
+reply says so and claims only what tests, build and lint prove. Subagents (`hyperui:builder`,
+`hyperui:reviewer`) report `needs main-session browser check` instead of claiming. **Impeccable**
+`audit` → `polish` closes UI work, with the evidence recorded. **Show before you ask**: no approval, pick,
+commit, merge or push question on UI work without the local URL (dev server left running, restart command),
+the screenshots (artifact or paths) and one line "what to look at" in the same reply; `git` checks the
+evidence exists before proposing a commit of UI changes. `/hyperui:doctor` shows the three browser rows
+(Claude in Chrome is per-session and reported as `unknown` from the shell, honestly).
 
 ## Update check
 
@@ -142,7 +163,7 @@ Per project, `<root>/.hyperui/` (seeded from `templates/hyperui/` by `profile.sh
 
 - `profile.md` — YAML frontmatter (archetype, languages, purpose, budget, country, platform, stack, providers, design) + dated notes.
 - `brief.md` — five lines: product, audience, the one job, tone words, constraints, product language(s).
-- `design.md` — the picked direction: tokens, type, palette, artifact URLs, rejected directions.
+- `design.md` — the picked direction: tokens, type, palette, artifact URLs, rejected directions, `## Browser evidence` (captures per viewport/theme, tool used).
 - `spec/` — SDD output (`00-prd.md … 03-tasks.md` or `sdd-lite.md`).
 - `decisions.md` — ADR-lite, one line each: date · decision · why · source URL.
 - `state.md` — phase, next, open items; read first and updated at the end of every turn.

@@ -38,6 +38,10 @@ tools can read, versions that mean something, and nothing irreversible without a
   (`rebase` of pushed commits, `filter-branch`, `reset --hard` that drops work) unless the user
   explicitly asks for that exact operation after you name the risk in one line.
 - **Never `--no-verify`**; never skip hooks. A failing hook is a finding: fix the cause.
+- **UI changes are shown before they are committed, merged or pushed.** Before proposing any of those on a change
+  that touches UI, check `<root>/.hyperui/design.md` has a `## Browser evidence` entry for it and that this reply or
+  the previous one gave the user the local URL, the 360/768/1280 screenshots and "what to look at" (root §7). Missing →
+  show it first (`${CLAUDE_PLUGIN_ROOT}/skills/design/references/browser-verify.md`), ask afterwards.
 - **Never commit secrets**: scan the staged diff for `.env`, keys, tokens, certificates,
   credentials. Found one → unstage it, add it to `.gitignore`, tell the user. If it was already
   pushed, say it must be rotated — deleting it in a new commit is not enough.

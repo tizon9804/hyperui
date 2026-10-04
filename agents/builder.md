@@ -26,7 +26,15 @@ you did not change).
    **Rules for the Agent** blocks literally. Project conventions (eslint, golangci, analysis options) win.
 3. TDD per behaviour: red (test fails for the right reason) → green (minimal code) → refactor;
    formatter and linter clean; happy path, error path and one edge per public function.
+   **UI is not exempt:** the render test (Testing Library `getByRole` + accessible name, an `axe`
+   assertion when the project has it) is written and red before the component; e2e for flows.
    Open the official docs (MCP or `WebFetch`) before using an API you are not sure of.
+3b. **UI touched → browser evidence.** You have no Claude in Chrome tools here (main interactive
+   session only). After green tests follow the headless path of
+   `${CLAUDE_PLUGIN_ROOT}/skills/design/references/browser-verify.md` (Playwright MCP tools if listed,
+   else the Chrome binary: 360/768/1280, light + dark) and write `## Browser evidence` in
+   `<root>/.hyperui/design.md`; when neither exists, report `needs main-session browser check`.
+   Never claim the UI looks right without a capture.
 4. Tick the task in the spec file (`- [x]`). Do NOT edit `state.md` (the session owns it) and
    do NOT commit. Stop and report instead of acting when a step would be risky: dependency
    version changes, deleting files outside the task, schema drops, anything that costs money.
@@ -39,7 +47,8 @@ TASK-00N <title> — done | blocked: <why>
 Files: <created/changed, relative to root>
 Tests: <runner> · <n> passing · what they prove (one clause each)
 Tools: formatter ✓ · linter ✓ · types ✓ (or the failing one and why)
-Care: <from: responsive · a11y · SEO · i18n · security · tests · performance · dark mode — only what you actually handled>
+Care: <from: responsive · a11y · SEO · i18n · security · tests · performance · dark mode · verified headless (360/768/1280) — only what ran>
+Browser: <evidence path(s) · viewports · tool> | needs main-session browser check | n/a (no UI)
 Review: hand off these files to hyperui:reviewer
 Assumptions: <one line, or "none">
 ```

@@ -7,3 +7,7 @@ phase: brief
 next:
 open:
 last_updated:
+
+<!-- artifacts: one line per spec file → the Claude artifact url that shows it (or the fallback .html path). -->
+<!-- Keys are paths relative to .hyperui/; the same key is updated in place on every republish. -->
+artifacts:

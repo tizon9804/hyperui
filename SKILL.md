@@ -134,7 +134,7 @@ specialist's name to the user and never ask them to choose one.
 | New UI, landing, app screen, "rediseña", "que se vea premium" | `design` | **Show before build**: 2–3 directions as HTML artifacts (real copy, tokens, motion); use `/design` when the session offers it; ask for the pick; write `design.md` |
 | Animation, transitions, micro-interactions | `motion` | Recipes on the chosen tokens; reduced-motion always |
 | Promo, teaser, launch clip | `video` | Only if asked; HyperFrames via installed skills |
-| "Planéalo", "cómo lo hacemos", after a design pick | `spec` | SDD-lite for landings/small apps; full gated track for products with backend |
+| "Planéalo", "cómo lo hacemos", after a design pick | `spec` | SDD-lite for landings/small apps; full gated track for products with backend; every spec file is shown as an artifact, final consolidated spec artifact at the end |
 | "Hazlo", "implementa", a spec task | `build` | Rules per language, docs MCPs, TDD by default; then `review` inline; then Impeccable `audit`→`polish` for UI |
 | "Revisa", after any build task | `review` | Security + complexity on the plugin's own output; fix blocking findings before "done" |
 | Architecture: aggregates, consistency, external calls | `patterns` | Only when the spec calls for it; one line of why + source; never on a landing |

@@ -175,6 +175,8 @@ conversion: `${CLAUDE_PLUGIN_ROOT}/skills/spec/references/spec-artifacts.md`.
   repo over "the system". Every diagram gets a 1–2 sentence caption. Cite ids with their gloss:
   `REQ-002 (checkout form validation)`, never bare. A section that does not apply says
   `N/A — reason`.
+- Every spec file presented ends, before its gate choice, with the root §9 care line (what the spec already
+  covers unasked: a11y · SEO · i18n · security · tests · performance · cost — only what the file truly contains).
 - After every gate: `.hyperui/state.md` → `phase: spec`, `next:` the next phase or first task,
   `open:` the open questions, `last_updated`. Track, spec path and `artifacts:` urls recorded there too.
 - `.hyperui/decisions.md`, one line each: `YYYY-MM-DD · track = SDD-lite · landing, no backend ·

@@ -21,13 +21,15 @@
 #                                         fallback "invoke the `hyperui` skill first") and
 #                                         declares Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
 #                                         in allowed-tools (every specialist runs `root`) (gated)
+#   (d4) agents lint                    — every agents/*.md has frontmatter name:, description:
+#                                         and model: (plugin agent contract)           (gated)
 #   (e) company-agnostic grep           — no employer/team-specific strings anywhere in the
 #                                         repo (excluding .git, node_modules and this file,
 #                                         which necessarily contains the pattern)  (hard fail)
 #
 # Gate toggle (.hyperui-gate at the repo root):
 #   The file holds a single word on its first non-comment line:
-#     lenient  — (c)'s user-invocable rule and (d)/(d2)/(d3) print "!" warnings, exit code unaffected.
+#     lenient  — (c)'s user-invocable rule and (d)/(d2)/(d3)/(d4) print "!" warnings, exit code unaffected.
 #                Used during wave 1 so specialists can be migrated incrementally.
 #     strict   — those warnings become failures. Flip to strict once every specialist is done.
 #   Lines starting with "#" are comments. A missing file means lenient.
@@ -118,6 +120,18 @@ for f in "${skill_files[@]}"; do
 done
 [[ $fm_fail -eq 0 ]] && ok "frontmatter name/description on ${#skill_files[@]} SKILL.md file(s)"
 [[ $gated_count -eq 0 ]] && ok "specialists: user-invocable: false + ## Sources + allowed-tools (Read + profile.sh) + root preamble (gate: $GATE)"
+
+# (d4) agents lint: name + description + model on every plugin agent
+agent_files=(agents/*.md)
+ag_count=0
+for f in "${agent_files[@]}"; do
+  fm="$(frontmatter "$f")"
+  if [[ -z "$fm" ]]; then gated "$f: agent lacks YAML frontmatter"; ag_count=$((ag_count + 1)); continue; fi
+  for key in name description model; do
+    grep -qE "^${key}:[[:space:]]*[^[:space:]]" <<<"$fm" || { gated "$f: agent frontmatter lacks ${key}:"; ag_count=$((ag_count + 1)); }
+  done
+done
+[[ $ag_count -eq 0 ]] && ok "agents: name/description/model on ${#agent_files[@]} agents/*.md file(s) (gate: $GATE)"
 
 # (e) company-agnostic grep
 if hits="$(grep -rnIiE '\bolo\b|ubits|ololabs|engage-specs|OLO-[0-9]' \

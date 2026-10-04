@@ -130,16 +130,23 @@ reason in the same line. Dependency **version** changes need an explicit yes.
 3. `decisions.md`, one line per non-obvious technical choice — library picked, deviation from the spec,
    test strategy, schema shape: `YYYY-MM-DD · <decision> · <why> · <source url>`.
 4. Report in ≤ 5 lines: what the tests prove, files touched, tools run (formatter/lint/tests green),
-   review result. Then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
+   review result. Then the root §9 care line — one line of what you handled unasked (tests · security ·
+   a11y · responsive · i18n · performance…, only what is true) — then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
    list as the LAST thing in the reply), in the user's language, with exactly these options:
    1. Continue with task N+1: <its title> (Recommended)
    2. Do all remaining tasks (M left) without stopping — I will report once at the end and still stop
       for any blocking review finding or risky action
    3. Fix or change something in task N first (free text: tell me what)
    4. Stop here; the spec and state are saved
-5. **"Do all"** → the remaining tasks in order, each with its own TDD loop, `review` and tick; ask again
-   only when something blocks (a blocking finding you cannot fix, a risky action, an ambiguous spec).
-   One report at the end.
+5. **"Do all"** (and any request for ≥ 3 tasks at once) → dispatch per root §10 / `references/dispatch.md`
+   rule (b): one `hyperui:builder` (Agent tool, `subagent_type: "hyperui:builder"`) per **independent** task,
+   all launched in ONE message, `isolation: worktree` when their files overlap; dependent tasks after the
+   one they need; then `hyperui:reviewer` on each task's files. Each builder gets the root, the task id, the
+   spec path, its files and "others run in parallel: yes/no". You consolidate: tick the tasks, `state.md`,
+   `decisions.md`, one report at the end (experts also get one discreet line: "3 tasks in parallel · reviewer
+   after each"); ask again only when something blocks (a blocking finding, a risky action, an ambiguous
+   spec). `dispatch: inline` in the profile, or agents not listed by the Agent tool → the same loop inline,
+   task by task, said in one line.
 6. **All tasks done** → options: Review everything / run the full check (Recommended) · Ship it (routes
    to `ship`) · Add another feature (routes to `spec`) · Stop.
 

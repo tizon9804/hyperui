@@ -24,6 +24,7 @@ design:
   palette: { bg: "", accent: "" }
   motion: ""                     # restrained | expressive
 tone_notes: ""                   # e.g. "terse; technical terms; no metaphors"
+dispatch: auto                   # auto | inline | sonnet | opus | haiku — subagent/model override said in words ("no uses subagentes")
 private: false                   # true after `profile.sh private` (.hyperui/ added to .gitignore)
 ---
 <!-- Free notes the model may append below (one line each, dated). -->

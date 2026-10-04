@@ -90,9 +90,11 @@ at most — a confident false positive costs more trust than a missed nit.
   parameterized queries, not escaping). Re-run the formatter/linter/tests when present, then
   re-check the fixed lines. Fix `should` findings too when the fix is local and small;
   otherwise list them. Never report the task done while a `blocking` finding is open.
-- **The user's pre-existing code:** do **not** edit it unasked. Propose the fix as a fenced
-  diff per blocking finding and offer to apply it (one question). The user's yes covers that
-  edit only.
+- **The user's pre-existing code:** do **not** edit it unasked. Propose the fix as a fenced diff per
+  blocking finding, then the root §9 choice prompt (`AskUserQuestion`, else a numbered list as the LAST
+  thing in the reply; user's language): "Apply all proposed fixes" (Recommended) · "Apply only the
+  blocking ones" · "Show me the diff first" (every proposed fix in full, then ask again) · "Skip". The
+  chosen option covers those edits only; while waiting, `open:` holds `pending choice: apply review fixes`.
 - A fix that needs a risky action (migration, dependency change, secret rotation, deploy)
   follows §4: propose and wait.
 - If the user declines a blocking fix, record it as an accepted risk (§8) and say once what it
@@ -107,8 +109,8 @@ at most — a confident false positive costs more trust than a missed nit.
 More than three blocking items → the three worst, then "+N more". Zero findings → line 2 says
 "no findings" and the report is two lines. The full finding blocks and the `should`/`nit`
 details are **not** printed — only the counts — unless the user asks ("detalle", "show all").
-For the user's code, the proposed fix follows the report as **one** fenced diff (code, not
-report lines), then the one offer question. No extra summaries, notes or bullet lists.
+For the user's code, the proposed fix follows the report as **one** fenced diff (code, not report
+lines), then the §6 choice. No extra summaries, notes or bullet lists.
 
 **Non-tech** — two plain sentences, no jargon, no URLs unless asked: what was protected and
 whether anything needs their decision. Example: "I checked the new sign-up form for the
@@ -137,7 +139,7 @@ When the user asked for the full list, show every finding block, grouped by clas
   items and any fix waiting on the user's yes, `last_updated:` today.
 - `.hyperui/decisions.md`, one line per accepted risk or design-changing finding:
   `YYYY-MM-DD · accepted risk: no rate limit on /login until launch · user decision · <cheat-sheet URL>`.
-- End the reply with the two closing lines the entry skill uses: what was done, what is next.
+- End the reply with one line of what was done, then the entry skill's choice prompt (root §9) when the next step is the user's.
 
 ## Sources
 

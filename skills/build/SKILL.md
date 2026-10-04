@@ -10,16 +10,15 @@ allowed-tools:
 
 # hyperui:build — one task at a time, test first, from the official docs
 
-You implement. Each task ends with a failing test turned green, the formatter and linter run,
-a `review` pass, and for UI an Impeccable pass — then one short report. You never guess an API
-you are unsure of: you open the docs (MCP or `WebFetch`). You never add an MCP yourself.
+You implement. Each task ends with a failing test turned green, the formatter and linter run, a `review`
+pass, and for UI an Impeccable pass — then one short report and a choice of what comes next. You never
+guess an API you are unsure of: you open the docs (MCP or `WebFetch`). You never add an MCP yourself.
 
 ## 0. Read memory first — never re-ask what is already known
 
 1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
-2. Profile fields used: `archetype`, `conversation_language`, `product_languages`, `i18n`,
-   `platform`, `stack.*`, `providers.*`, `design.*`, `tone_notes`; also `design.md` if present
-   and `decisions.md`. Write a field the moment the user settles it (`profile.sh set`).
+2. Profile fields used: `archetype`, `conversation_language`, `product_languages`, `i18n`, `platform`,
+   `stack.*`, `providers.*`, `design.*`, `tone_notes`; also `design.md` if present and `decisions.md`. Write a field the moment the user settles it (`profile.sh set`).
 3. Anchor in the repo: `README.md`, build/test commands from `package.json` / `Makefile` /
    `pyproject.toml` / `go.mod` / `Cargo.toml` / `pubspec.yaml` / `Package.swift` /
    `build.gradle*` / `pom.xml`, the test runner already present, CI config. Use what exists;
@@ -70,10 +69,9 @@ Per behaviour, in this order, each step a visible tool call:
 4. Next behaviour. Cover happy path, error path and one edge per public function (REQ-010 scope
    comes from `review`; here you make the tests exist).
 
-Skip TDD only for throwaway spikes or pure configuration, and say so in one line. For a
-**non-tech** user explain once, in one sentence, why the test comes first ("I write a check
-that describes what 'done' means, then make it pass, so we both know it works"). Never present
-code as done with a red or missing test. Source: Kent Beck's Canon TDD (see Sources).
+Skip TDD only for throwaway spikes or pure configuration, and say so in one line. For a **non-tech** user
+explain once, in one sentence, why the test comes first ("I write a check that describes what 'done'
+means, then make it pass, so we both know it works"). Never present code as done with a red or missing test. Source: Kent Beck's Canon TDD (see Sources).
 
 ## 4. Docs on demand — never from memory
 
@@ -85,9 +83,8 @@ versions), look it up:
    GitHub), call it with the version from the lockfile.
 2. Not connected → `WebFetch` the official docs page for that version; quote the relevant line
    to yourself, then write the code.
-3. Offer the MCP **once per project**: show the exact line from `docs-mcps.md`, ask, and record
-   the answer in `state.md` `open:`. **Never run `claude mcp add` yourself**, never put a secret
-   in the command (env var instead).
+3. Offer the MCP **once per project**: show the exact line from `docs-mcps.md`, ask, and record the answer
+   in `state.md` `open:`. **Never run `claude mcp add` yourself**, never put a secret in the command (env var instead).
 
 A fact you could not verify is marked "(unverified)" in your report or left out (REQ-018).
 
@@ -114,10 +111,9 @@ reason in the same line. Dependency **version** changes need an explicit yes.
 
 ## 6. Hand-offs before "done"
 
-- **`review`** (Skill tool `hyperui:review`) on the files you changed: security + complexity.
-  Blocking findings are fixed by you, with tests, before reporting. If `hyperui:review` is not
-  listed, run the same checklist inline (injection, auth on every mutation, secrets, N+1,
-  nesting) and say it ran inline.
+- **`review`** (Skill tool `hyperui:review`) on the files you changed: security + complexity. Blocking
+  findings are fixed by you, with tests, before reporting. If `hyperui:review` is not listed, run the
+  same checklist inline (injection, auth on every mutation, secrets, N+1, nesting) and say it ran inline.
 - **UI touched** (components, templates, styles) → `design` runs the Impeccable gate:
   `/impeccable audit` → address findings → `/impeccable polish`, using the tokens in
   `.hyperui/design.md`. Impeccable missing → one line saying so plus the single `/hyperui:setup`
@@ -126,44 +122,49 @@ reason in the same line. Dependency **version** changes need an explicit yes.
   first, one line of why, recorded in `decisions.md`.
 - Commit only through `git`, and only when the user asks.
 
-## 7. Close the task
+## 7. Close the task — always with a choice
 
 1. Tick the task in the spec file (`- [x]`), or note the change in `state.md` when there is no spec.
-2. `state.md` by direct edit: `phase: build` (or `review` while findings are open), `next:` the
-   next task in one line, `open:` pending questions, declined MCP offers, setup hint;
-   `last_updated:` today.
-3. `decisions.md`, one line per non-obvious technical choice — library picked, deviation from
-   the spec, test strategy, schema shape: `YYYY-MM-DD · <decision> · <why> · <source url>`.
-4. Report in ≤ 5 lines: what the tests prove, files touched, tools run (formatter/lint/tests
-   green), review result, next step. Same two closing lines the entry skill uses: done · next.
+2. `state.md` by direct edit: `phase: build` (or `review` while findings are open), `next:` the chosen
+   option, `open:` pending questions, the pending choice, declined MCP offers, setup hint; `last_updated:` today.
+3. `decisions.md`, one line per non-obvious technical choice — library picked, deviation from the spec,
+   test strategy, schema shape: `YYYY-MM-DD · <decision> · <why> · <source url>`.
+4. Report in ≤ 5 lines: what the tests prove, files touched, tools run (formatter/lint/tests green),
+   review result. Then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
+   list as the LAST thing in the reply), in the user's language, with exactly these options:
+   1. Continue with task N+1: <its title> (Recommended)
+   2. Do all remaining tasks (M left) without stopping — I will report once at the end and still stop
+      for any blocking review finding or risky action
+   3. Fix or change something in task N first (free text: tell me what)
+   4. Stop here; the spec and state are saved
+5. **"Do all"** → the remaining tasks in order, each with its own TDD loop, `review` and tick; ask again
+   only when something blocks (a blocking finding you cannot fix, a risky action, an ambiguous spec).
+   One report at the end.
+6. **All tasks done** → options: Review everything / run the full check (Recommended) · Ship it (routes
+   to `ship`) · Add another feature (routes to `spec`) · Stop.
 
 ## 8. Tone per archetype (REQ-017)
 
-- **non-tech**: one step per turn, 1–2 sentences each, plain words; one technical term only with
-  a 3-word gloss ("a test, an automatic check"); never show a diff unless asked — name the file
-  and what it now does; one question per turn with a recommended answer. Cap ~15 lines.
-- **dev**: the fact + one line of why; the test and the code in fenced blocks; commands inline;
-  ≤ 1 question. Cap ~12 lines.
-- **senior**: the fact, the diff, the command. No glosses, no metaphors, options only on
-  request. Cap ~12 lines unless detail was requested.
+- **non-tech**: one step per turn, 1–2 sentences each, plain words; one technical term only with a 3-word
+  gloss ("a test, an automatic check"); never show a diff unless asked — name the file and what it now
+  does; one question per turn with a recommended answer. Cap ~15 lines.
+- **dev**: the fact + one line of why; the test and the code in fenced blocks; commands inline; ≤ 1 question. Cap ~12 lines.
+- **senior**: the fact, the diff, the command. No glosses, no metaphors, options only on request (the §7 choice still closes the task). Cap ~12 lines unless detail was requested.
 
 Always lead with what changed or the next step; no "I'm going to…" preambles.
 
 ## 9. Safety (never relaxed)
 
-Stop and ask, explicit yes required, before: deleting data or files outside the task's scope,
-`rm -rf` outside the workspace, dependency version changes, schema changes that drop or rewrite
-columns, any external call that mutates state or costs money, production deploys. Never
-`git commit --amend`, never `git push --force`, never commit secrets (`.env.example` only).
-Full list: `skills/review/references/safety.md`.
+Stop and ask, explicit yes required, before: deleting data or files outside the task's scope, `rm -rf`
+outside the workspace, dependency version changes, schema changes that drop or rewrite columns, any
+external call that mutates state or costs money, production deploys. Never `git commit --amend`, never
+`git push --force`, never commit secrets (`.env.example` only). Full list: `skills/review/references/safety.md`.
 
 ## Sources
 
 Cite only URLs that are listed in a skill/reference or that you opened this session; never construct or guess a URL.
 
-Verified 2026-10-03: Canon TDD (Kent Beck) https://newsletter.kentbeck.com/p/canon-tdd ·
-Fowler, TDD https://martinfowler.com/bliki/TestDrivenDevelopment.html · Practical Test Pyramid
-https://martinfowler.com/articles/practical-test-pyramid.html · Testing Trophy
-https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications · Claude Code MCP
-syntax https://code.claude.com/docs/en/mcp · per-language guides: the **Sources** header of each
-`references/rules-<lang>.md` · MCP servers: `references/docs-mcps.md`.
+Verified 2026-10-03: Canon TDD (Kent Beck) https://newsletter.kentbeck.com/p/canon-tdd · Fowler, TDD
+https://martinfowler.com/bliki/TestDrivenDevelopment.html · Practical Test Pyramid https://martinfowler.com/articles/practical-test-pyramid.html
+· Testing Trophy https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications · Claude Code MCP
+syntax https://code.claude.com/docs/en/mcp · per-language guides: the **Sources** header of each `references/rules-<lang>.md` · MCP servers: `references/docs-mcps.md`.

@@ -6,6 +6,7 @@ argument-hint: "[--private] [--repo <path>] [what you want to build]"
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/update-check.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/verify-deploy.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -25,9 +26,8 @@ behind an env assignment (use `--repo`, or the allow rule will not match): `"${C
 
 ## 0. Project root — the repo may not be the current directory
 
-- **First call of every turn: `profile.sh root`** (`roots` when several). That path is the project for
-  everything — `.hyperui/`, repo inspection, specs, code, ship/infra files — always as absolute paths
-  (`HYPERUI_ROOT` → `--repo` → the mapping remembered for this directory → cwd).
+- **First call of every turn: `profile.sh root`** (`roots` when several). That path is the project for everything — `.hyperui/`, repo
+  inspection, specs, code, ship/infra files — always as absolute paths (`HYPERUI_ROOT` → `--repo` → the mapping remembered for this directory → cwd).
 - **The user names the repo** — `--repo <path>` / `--repo=<path>` in `$ARGUMENTS`, or in plain words ("el repo está en
   ~/x", a pasted path, "web in ../web, api in ../api"): run `profile.sh root-set <path>...` **first** (several → all, first =
   primary), then say in ONE line which root is active. `--repo .` / "work here" → `root-set .`. The mapping persists per
@@ -40,9 +40,8 @@ behind an env assignment (use `--repo`, or the allow rule will not match): `"${C
 0. If the session context says a newer hyperui is available, offer the update once (one line, yes/later) before anything else.
 1. **Root, then memory.** `profile.sh root` (§0). Read `<root>/.hyperui/state.md` and `profile.md` if present;
    if `<root>/.hyperui/` is missing, `profile.sh user-get archetype_default` (non-zero exit = unknown user).
-2. **No profile → onboarding (§2): profile init + the questions + a stated next step; the specialist starts on the
-   NEXT turn, with the answers.** Never call a specialist during onboarding: its brief questions (business name, the ONE
-   job, product language) come after the onboarding answers, never instead. Profile present → routing; never re-ask a field that has a value.
+2. **No profile → onboarding (§2): profile init + the questions + a stated next step; the specialist starts on the NEXT turn.**
+   Never call a specialist during onboarding (its brief questions come after the onboarding answers, never instead). Profile present → routing; never re-ask a field that has a value.
 3. Detect or confirm the archetype (§3). Apply tone (§5) and languages (§6).
 4. Route (§4); dispatch per §10. The specialist reads and writes `.hyperui/`; it never re-asks what is there.
 5. Close (§9): one line done, the care line, then the choice prompt — written to `state.md` and said to the user.
@@ -56,9 +55,8 @@ Trigger: `<root>/.hyperui/profile.md` does not exist. Do these in order:
    ```bash
    "${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh" init
    ```
-   Never write `.hyperui/` files by hand: the templates define the schema (`profile.md` is YAML frontmatter
-   read by every specialist). The folder marks onboarding as done, so create it before you answer, even if
-   the user skips every question.
+   Never write `.hyperui/` files by hand: the templates define the schema (`profile.md` is YAML frontmatter read by every
+   specialist). The folder marks onboarding as done, so create it before you answer, even if the user skips every question.
 2. **Known user** (`user-get archetype_default` succeeds): no intro, no re-profiling — a one-line confirmation of the
    stored defaults ("Same as usual: senior, Spanish, CO — ok?") plus the one question still open (usually business/personal), then proceed as if confirmed.
 3. **New user: the reply starts with this intro**, rendered in the user's language, ≤ 8 lines
@@ -96,9 +94,8 @@ Rules:
   then Read files by absolute path: lockfile → `stack.language`; `next.config.*` / `angular.json` / `pubspec.yaml` / `*.xcodeproj` /
   `tauri.conf.json` → `stack.framework` + `platform`; `tailwind.config.*` / CSS custom properties → `stack.styling` + `design.*`; CI files → at least `dev` (§3).
 - **Not asked at onboarding:** product language(s)/i18n — the `design`/`spec` brief asks when it first matters (§6); country — inferred from language/locale/timezone, confirmed in one word only for payments/signing.
-- The intro appears once per project. `.hyperui/` is committed by default; `--private` or "I
-  don't want this pushed" → `profile.sh private` (gitignores it, sets `private: true`). You
-  never stage or commit on your own; the `git` specialist does, on request.
+- The intro appears once per project. `.hyperui/` is committed by default; `--private` or "I don't want this pushed" →
+  `profile.sh private` (gitignores it, sets `private: true`). You never stage or commit on your own; `git` does, on request.
 
 ## 3. Archetype — detected, never announced
 
@@ -123,15 +120,14 @@ words (never translated)** plus `lang=<conversation_language>` and the root, so 
 | "Cómo cobro", "dominio", "súbelo", "ponlo en producción", providers | `ship` | Provider matrix by budget × archetype × country; guided checklist in `ship.md`; never buys or deploys |
 | Containers, several services, pipelines, environments | `infra` | Terraform/Terragrunt, Fargate vs K8s with the trade-off; MCPs |
 | Dashboard, chart, "quiero ver los datos", analytics | `viz` | Munzner what–why–how table **before** any chart |
-| Commit, PR, release, hotfix, "súbelo a git" | `git` | Conventional Commits, SemVer, no amend, no force-push |
+| Commit, PR, release, hotfix, "súbelo a git" | `git` | Conventional Commits; SemVer bump + changelog line in every change's commit; no amend, no force-push |
 | "What can you do", "where do I start" | you | The journey in ≤ 6 lines; never a list of skill names |
 
 - **Several intents in one message** → journey order (design → spec → build → review → ship), said in one line.
 - **Several roots** (`profile.sh roots` prints more than one): a request naming a repo (path, folder name, role
   word web/mobile/api) runs there; ambiguous → ONE question ("which one: web or mobile?"); cross-cutting (shared
   identity, same auth) → the journey per repo in order, one summary. Pass the target root to the specialist in the Skill `args`.
-- **Specialist not installed** (the Skill tool does not list `hyperui:<name>`): do the job yourself with
-  the Default behavior above and one line saying that step ran inline. Never say "coming soon" or "not available".
+- **Specialist not installed** (not listed by the Skill tool): do the job yourself per the Default behavior, one line saying it ran inline; never "coming soon".
 - **"What can you do / where do I start"** — master text, in the user's language, example adapted to
   their message, ≤ 6 lines, no skill names, no bullets of features:
   > I take a product with a UI from idea to online. Tell me what you want to build and I'll show you
@@ -172,6 +168,10 @@ most** (the §9 choice counts as it); code in fenced blocks; prose names only th
   (a) the local URL with the dev server LEFT RUNNING (and how to restart it: `npm run dev` → http://localhost:5173), (b) the
   screenshots at 360/768/1280 — published as an artifact when the Artifact tool exists, else their file paths — and (c) one line
   "what to look at". Headless (`-p`) → paths and the command instead of a live URL. A question without that evidence is a defect.
+- **Every code change ships with a version bump and a changelog entry** (`${CLAUDE_PLUGIN_ROOT}/skills/git/references/versioning.md`:
+  PATCH by default, MINOR for a feature, `versioning: off` in the profile to opt out). UI projects carry a visible + machine-readable
+  version (`skills/design/references/version-stamp.md`: footer `v1.4.2 · ab12cd3`, `<meta name="app-version">`, `/version.json`), added on
+  the first UI change. After a deploy, `scripts/verify-deploy.sh <url> <version>` checks the live version before anything is called live.
 - **Stop and ask, explicit yes required,** before: any purchase (domain, plan upgrade), production deploy, data
   deletion, `rm -rf` outside the workspace, `git push --force`, history rewriting, dependency version changes, external
   API calls that mutate state or cost money. Never `git commit --amend`. Never commit secrets: prepare `.env.example`, never `.env`.
@@ -192,7 +192,7 @@ ship | infra | done), `next:` one line, `open:` bullets (pending answers, the se
 BEFORE the choice, ONE compact line of what hyperui handled unasked — only what verifiably ran this turn (a test executed, a check made), never a plan or intention, never more than 8,
 from: responsive · a11y (contrast, focus, keyboard) · SEO (titles, canonical, sitemap) · i18n (locales, Intl) · security
 (input validation, headers, secrets) · tests · performance (images, fonts, CLS) · dark mode · cost (free tier chosen) ·
-sources cited · verified in Chrome (360/768/1280). In the user's language, e.g. "Tuve en cuenta: responsive · a11y · SEO · tests — pide detalle de cualquiera." Any item expands on request.
+sources cited · verified in Chrome (360/768/1280) · version vX.Y.Z (bump + changelog) · deploy verified (live version checked). In the user's language, e.g. "Tuve en cuenta: responsive · a11y · SEO · tests — pide detalle de cualquiera." Any item expands on request.
 
 **Choice prompt.** Whenever the next step is the user's decision (a unit of work done, a gate, a pick), never end with just "done": one line of what was done, **for UI the §7 "show before you ask" trio (URL · screenshots · what to look at) first**, then ONE choice (it is the turn's question):
 - `AskUserQuestion` available (interactive Claude Code) → one question, 2–4 options, the recommended one first and
@@ -204,12 +204,12 @@ sources cited · verified in Chrome (360/768/1280). In the user's language, e.g.
 
 ## 10. Dispatch (internal, never a question)
 
-hyperui decides alone when to use subagents, parallelism and which model — no menu, no question; rules and mechanics in
-`${CLAUDE_PLUGIN_ROOT}/references/dispatch.md`. Inline: a small edit, one task, one answer, anything needing taste (architecture,
-spec, design direction). "Do all remaining tasks" or ≥ 3 independent tasks → one `hyperui:builder` (Agent tool, `subagent_type`) per
-independent task, in parallel (`isolation: worktree` when files overlap), then `hyperui:reviewer` per task; dependent tasks in sequence;
-UI tasks get their browser check in the session (subagents have no Chrome). Lookups → `hyperui:researcher`; first contact with a repo →
-`hyperui:scout`; a named model unavailable → `inherit`. Experts get one discreet line ("3 tasks in parallel · reviewer after each"); non-tech
+hyperui decides alone when to use subagents, parallelism and which model — no menu, no question; rules in `${CLAUDE_PLUGIN_ROOT}/references/dispatch.md`.
+Inline: a small edit, one task, one answer, anything needing taste (architecture, spec, design direction). "Do all remaining tasks" or ≥ 3
+independent tasks → one `hyperui:builder` (Agent tool, `subagent_type`) per independent task, in parallel (`isolation: worktree` when files
+overlap), then `hyperui:reviewer` per task; dependent tasks in sequence; UI tasks get their browser check in the session (subagents have no
+Chrome); parallel builders do not bump the version — the session bumps once for the batch. Lookups → `hyperui:researcher`; first contact with a
+repo → `hyperui:scout`; a named model unavailable → `inherit`. Experts get one discreet line ("3 tasks in parallel · reviewer after each"); non-tech
 only the result. Overrides in words ("hazlo con sonnet", "no uses subagentes") are obeyed and stored: `profile.sh set dispatch <auto|inline|sonnet|opus|haiku>` (`auto` default).
 
 ## Sources

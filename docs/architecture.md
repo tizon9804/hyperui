@@ -38,7 +38,8 @@ hyperui/
 │   ├── setup.sh  doctor.sh  # install / report the third-party stack
 │   ├── welcome.sh           # SessionStart: intro when <root>/.hyperui/ is missing, one routing line otherwise, + update offer
 │   ├── update-check.sh      # daily check of plugin.json on GitHub main (24 h cache, --decline <v>, silent offline)
-│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, update-check.sh, <root>/.hyperui/ writes
+│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, update-check.sh, verify-deploy.sh, <root>/.hyperui/ writes
+│   ├── verify-deploy.sh     # after a deploy: /version.json → <meta app-version> → footer text vs the expected version; polls 30 s × 10 min
 │   ├── profile.sh           # init | get | set | private | user-get | user-set | path | root | roots | root-set | root-clear
 │   └── check.sh             # quality + company-agnostic gate
 ├── evals/graders/           # claude plugin eval graders (cases land under evals/<case>/case.yaml)
@@ -122,6 +123,20 @@ commit, merge or push question on UI work without the local URL (dev server left
 the screenshots (artifact or paths) and one line "what to look at" in the same reply; `git` checks the
 evidence exists before proposing a commit of UI changes. `/hyperui:doctor` shows the three browser rows
 (Claude in Chrome is per-session and reported as `unknown` from the shell, honestly).
+
+A fifth gate keeps the **version honest** (`skills/git/references/versioning.md`): every code change hyperui
+makes bumps SemVer in the project's version file — PATCH by default, MINOR for a user-facing feature, MAJOR
+only on the user's word — and adds a Keep a Changelog line, both staged in the same commit as the change
+(`Bumps to vX.Y.Z.` in the body; `chore(release): vX.Y.Z` for a pure release commit); `versioning: off` in
+`profile.md` opts a project out, `version_file` remembers where the version lives, and parallel builders
+leave the single bump to the session. UI projects get a **version stamp** on their first UI change
+(`skills/design/references/version-stamp.md`): the version and short commit injected at build, shown as
+`v1.4.2 · ab12cd3` in the footer or About, plus `<meta name="app-version">` and `/version.json` so a script
+can read it. After the user runs a deploy, `ship` does not take the host's green check as proof:
+`scripts/verify-deploy.sh <url> <expected>` reads `/version.json`, then the meta, then the footer text
+(HTML comments stripped), polling every 30 s for up to 10 min, and the result (`deployed vX.Y.Z ✓` or
+`still vA.B.C → build log`) is written under `## Deploys` in `.hyperui/ship.md`; the care line says
+`deploy verified` only after a match.
 
 ## Update check
 

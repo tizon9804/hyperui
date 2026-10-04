@@ -97,7 +97,8 @@ After setup the installed third-party skills are available too: `/motion`, `/hyp
 - **Does the heavy lifting itself.** When a job is big — "do all the remaining tasks", three features at once, a docs or pricing lookup, a first look at your repo — hyperui decides alone whether to run it inline or in subagents, in parallel, and on which model. No new questions, no menus; experts see one discreet line ("3 tasks in parallel · reviewer after each"), everyone else just the result.
 - **Tells you what it took care of.** Every delivered piece ends with one line of what was handled unasked — responsive · a11y · SEO · i18n · security · tests · performance · dark mode · cost · sources — and any item expands on request.
 - **Review before done.** Security (OWASP Top 10:2025, ASVS), complexity and safety pass after every build task; blocking findings are fixed first.
-- **Ship never buys or deploys for you.** Domain, DNS, hosting, payments by seller country, store/desktop distribution: it prepares configs and the exact command or clicks; you run every purchase and deploy.
+- **Keeps your version honest.** Every change bumps SemVer (patch by default, minor for a feature) and adds a changelog line in the same commit; your app shows `v1.4.2 · ab12cd3` in the footer or About and exposes `/version.json` + `<meta name="app-version">`; after a deploy hyperui checks the live version itself (`scripts/verify-deploy.sh`) before saying it is live. Say "no versioning for this project" to turn it off.
+- **Ship never buys or deploys for you.** Domain, DNS, hosting, payments by seller country, store/desktop distribution: it prepares configs and the exact command or clicks; you run every purchase and deploy — then it verifies what went live.
 
 Three languages, kept apart: skill content and everything in `.hyperui/` in English; replies in the language you write in; the product's language(s) and i18n asked explicitly at the brief, never inferred from the conversation.
 
@@ -238,10 +239,13 @@ git clone git@github.com:tizonai/hyperui.git
 cd hyperui
 bash scripts/check.sh           # validate + lint + company-agnostic grep (strict gate)
 claude --plugin-dir .           # load this checkout for one session
-claude plugin eval . --scaffold --allow-tools Bash Write Edit --no-publish --trust-plugin   # eval cases in evals/
+claude plugin eval . --case <name> --runs 1 --ablation none --scaffold --allow-tools Bash Write Edit --no-publish --trust-plugin   # iterate on one case, cheap
+claude plugin eval . --scaffold --allow-tools Bash Write Edit --no-publish --trust-plugin   # full suite: 3 runs + no-plugin baseline — only before a release
 ```
 
 `scripts/check.sh` runs `claude plugin validate .` (manifests + skills), `bash -n` on every script, the frontmatter and preamble lints, and the grep that fails on company-specific strings.
+
+Evals burn tokens: iterate with `--runs 1 --ablation none` (one with-plugin run, no baseline arm; add `--max-cost-usd 4` as a ceiling); the full suite (3 runs per case + the baseline arm) runs only before a release.
 
 ## Updating
 

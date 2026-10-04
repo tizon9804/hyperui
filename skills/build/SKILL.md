@@ -18,7 +18,7 @@ never guess an API you are unsure of: you open the docs (MCP or `WebFetch`). You
 
 1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
 2. Profile fields used: `archetype`, `conversation_language`, `product_languages`, `i18n`, `platform`,
-   `stack.*`, `providers.*`, `design.*`, `tone_notes`; also `design.md` if present and `decisions.md`. Write a field the moment the user settles it (`profile.sh set`).
+   `stack.*`, `providers.*`, `design.*`, `tone_notes`, `versioning`, `version_file`; also `design.md` if present and `decisions.md`. Write a field the moment the user settles it (`profile.sh set`).
 3. Anchor in the repo: `README.md`, build/test commands from `package.json` / `Makefile` / `pyproject.toml` /
    `go.mod` / `Cargo.toml` / `pubspec.yaml` / `Package.swift` / `build.gradle*` / `pom.xml`, the test runner
    already present, CI config. Use what exists; add a test runner only when none exists, saying so in one line.
@@ -114,6 +114,14 @@ A red linter or type check is part of the task, not a note for later. Never add 
   `## Browser evidence` in `.hyperui/design.md`. No browser tool → say so, never a visual claim; a dispatched builder or
   reviewer reports "needs main-session browser check" and the session runs it. Then the Impeccable gate: `/impeccable audit`
   → address findings → `/impeccable polish` with the tokens in `design.md`; missing → one line + the single `/hyperui:setup` hint.
+- **First UI touch in a project without a version stamp** → add it in this task, test first
+  (`${CLAUDE_PLUGIN_ROOT}/skills/design/references/version-stamp.md`: build-time version + short commit, footer or About
+  `v1.4.2 · ab12cd3`, `<meta name="app-version">`, `/version.json`), said in one line. The user must be able to tell which
+  build is live.
+- **Version + changelog are part of "done"** whenever the task changed code (not docs/tests only): bump per
+  `${CLAUDE_PLUGIN_ROOT}/skills/git/references/versioning.md` (PATCH by default, MINOR for a feature; `versioning: off` in the
+  profile skips it) and add the `CHANGELOG.md` line, so both travel in the commit `git` proposes. Never a second bump
+  for the same change.
 - Spec says the task needs a pattern decision (aggregate boundary, external call) → `patterns`
   first, one line of why, recorded in `decisions.md`.
 - Commit only through `git`, and only when the user asks.
@@ -126,10 +134,10 @@ A red linter or type check is part of the task, not a note for later. Never add 
 3. `decisions.md`, one line per non-obvious technical choice — library picked, deviation from the spec,
    test strategy, schema shape: `YYYY-MM-DD · <decision> · <why> · <source url>`.
 4. Report in ≤ 5 lines: what the tests prove, files touched, tools run (formatter/lint/tests green), browser evidence or
-   "not visually verified", review result. **UI touched → show before you ask (root §7):** the dev server stays running, and
+   "not visually verified", the new version (`vX.Y.Z` + changelog line, §6), review result. **UI touched → show before you ask (root §7):** the dev server stays running, and
    before the choice the reply gives its local URL (+ restart command; headless → the command and paths), the 360/768/1280
    screenshots (artifact or paths) and one line "what to look at". Then the root §9 care line — what you handled unasked (tests · security · a11y ·
-   responsive · verified in Chrome (360/768/1280)…, only what ran) — then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
+   responsive · verified in Chrome (360/768/1280) · version vX.Y.Z…, only what ran) — then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
    list as the LAST thing in the reply), in the user's language, with exactly these options:
    1. Continue with task N+1: <its title> (Recommended)
    2. Do all remaining tasks (M left) without stopping — I will report once at the end and still stop

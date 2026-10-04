@@ -4,6 +4,7 @@ description: "Put a product online and get paid: domain, DNS, hosting/deploy, ba
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/verify-deploy.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -11,7 +12,7 @@ allowed-tools:
 # hyperui:ship — from "it works on my machine" to online and paid
 
 You choose providers and walk the user to production. You never buy, never deploy, never add an
-MCP server yourself. You prepare; the user executes.
+MCP server yourself. You prepare; the user executes; you verify what actually went live (§7).
 
 ## 1. Read before asking
 
@@ -26,7 +27,7 @@ MCP server yourself. You prepare; the user executes.
 | host, db, auth, which tier, free-tier traps | `references/providers.md` |
 | charging money, fees, country rules, MoR | `references/payments-by-country.md` |
 | domain, DNS records, HTTPS, transactional email | `references/domains-dns.md` |
-| build command, env vars, connect repo, first deploy | `references/deploy-recipes.md` |
+| build command, env vars, connect repo, first deploy, verify the live version | `references/deploy-recipes.md` |
 | App Store, Google Play, Microsoft Store, notarization, signing | `references/mobile-desktop.md` |
 
 ## 2. The only two questions you may ask
@@ -109,7 +110,23 @@ End every turn by updating `.hyperui/state.md`: `phase: ship`, `next:` the one n
 If `scripts/profile.sh` exists in the plugin, use `profile.sh set <key> <value>`; otherwise edit
 the frontmatter in place and keep it valid YAML.
 
-## 7. Tone by archetype (REQ-017)
+## 7. Verify the deploy — before saying "it's live"
+
+After the user runs a deploy (or says it ran), the host's green check and the user's word are not evidence:
+
+1. Expected version = the project's version file (`profile.md` `version_file`; else per
+   `${CLAUDE_PLUGIN_ROOT}/skills/git/references/versioning.md` §2).
+2. Run `"${CLAUDE_PLUGIN_ROOT}/scripts/verify-deploy.sh" https://<domain> <x.y.z>`. It reads `/version.json`, then
+   `<meta name="app-version">`, then the `v<x.y.z>` footer text, polling every 30 s for up to 10 min (hosts build
+   asynchronously); the Bash call needs a timeout ≥ 600 s, otherwise `--timeout <s>` / `--once` and poll between other
+   work. Give the user the one-liner too: `curl -s https://<domain>/version.json`.
+3. Report exactly one of: `deployed vX.Y.Z (commit) ✓` · `still vA.B.C after 10 min → check the host's build log` (offer
+   to read it) · no version found → the site has no stamp: add it (`${CLAUDE_PLUGIN_ROOT}/skills/design/references/version-stamp.md`),
+   then redeploy. Never "it's live" without the ✓.
+4. Record under `## Deploys` in `.hyperui/ship.md`: `YYYY-MM-DD · vX.Y.Z (commit) · URL · result`. The care line says
+   `deploy verified` only after an ✓.
+
+## 8. Tone by archetype (REQ-017)
 
 - **non-tech**: one step per turn, one or two sentences each, say where to click ("En Vercel:
   Add New → Project → Import → elige tu repo → Deploy"). A technical term only with a 3-word
@@ -120,7 +137,7 @@ the frontmatter in place and keep it valid YAML.
 
 Reply in the user's language; file contents, commands, env names and commit text stay in English.
 
-## 8. Known traps (details and URLs in the references)
+## 9. Known traps (details and URLs in the references)
 
 Vercel Hobby non-commercial · Fly.io no free tier · Render free Postgres expires at 30 days ·
 Supabase free pauses after 7 idle days · PlanetScale no free tier · Cloudflare says start on

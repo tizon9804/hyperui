@@ -1,0 +1,7 @@
+schema_version: "1.1"
+name: version-bump
+description: "Developer, Spanish, Vite + React app at package.json 0.3.1 with a version stamp and a one-entry CHANGELOG, asks to change the primary button text to 'Empezar' and leave the commit ready: the change bumps the version to 0.3.2 (patch: code change, no new feature), adds a `## [0.3.2] - <today>` changelog block, proposes a Conventional Commit message that names 0.3.2 and stops for approval — no `git commit` executed — in Spanish, ending with options (versioning.md, git §3, build §6)."
+tags: [wave5, build, git, versioning, es]
+expected_outcome: "Spanish; package.json version is 0.3.2; CHANGELOG.md has a 0.3.2 block dated 2026-…; the reply shows a proposed commit message mentioning 0.3.2 and waits; no git commit/push, no deploy, no mcp add; the reply ends with a numbered choice."
+context:
+  scaffold_script: fixture.sh

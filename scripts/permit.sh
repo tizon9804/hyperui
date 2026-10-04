@@ -9,8 +9,9 @@
 # Allows, by returning permissionDecision "allow":
 #   - Skill            whose name starts with "hyperui:"
 #   - Read/Glob/Grep   of a path under the plugin root (references, templates)
-#   - Bash             commands that start with "<plugin root>/scripts/profile.sh" or
-#                      "<plugin root>/scripts/update-check.sh" (quoted or not)
+#   - Bash             commands that start with "<plugin root>/scripts/profile.sh",
+#                      "<plugin root>/scripts/update-check.sh" or "<plugin root>/scripts/verify-deploy.sh"
+#                      (quoted or not; verify-deploy.sh only reads a public URL with curl)
 #   - Read/Edit/Write  of a path under <root>/.hyperui/ for every project root resolved by
 #                      `profile.sh roots` (the cwd, or the repo(s) remembered for it with
 #                      `/hyperui --repo <path>`), so memory lands in the target repo without a
@@ -39,7 +40,7 @@ try:
 except Exception:
     sys.exit(0)
 tool = d.get("tool_name"); inp = d.get("tool_input") or {}
-ok = False; why = "hyperui: plugin's own skill/reference/profile.sh/update-check.sh"
+ok = False; why = "hyperui: plugin's own skill/reference/profile.sh/update-check.sh/verify-deploy.sh"
 def under(p, base):
     return bool(p) and os.path.realpath(p).startswith(base + os.sep)
 if tool == "Skill" and str(inp.get("skill", "")).startswith("hyperui:"):
@@ -49,7 +50,7 @@ elif tool in ("Read", "Glob", "Grep"):
     ok = under(p, root)
 elif tool == "Bash":
     cmd = str(inp.get("command", "")).lstrip()
-    for script in (root + "/scripts/profile.sh", root + "/scripts/update-check.sh"):
+    for script in (root + "/scripts/profile.sh", root + "/scripts/update-check.sh", root + "/scripts/verify-deploy.sh"):
         if cmd.startswith(script + " ") or cmd.startswith('"' + script + '" ') or cmd == script or cmd == '"' + script + '"':
             ok = True
 if not ok and tool in ("Read", "Edit", "Write"):

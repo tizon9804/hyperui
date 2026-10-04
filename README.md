@@ -89,7 +89,7 @@ After setup the installed third-party skills are available too: `/motion`, `/hyp
 
 - **Profile and tone by archetype.** Non-tech, developer or senior: detected from your words and your repo, confirmed in at most three questions, never asked twice.
 - **Show before build.** 2–3 visual directions as HTML artifacts come before any code; UI is never called done without the Impeccable `audit` → `polish` gate (or one line saying Impeccable is not installed).
-- **Gated spec.** PRD → requirements → design → tasks with approval between phases, or a one-file SDD-lite for small changes, in `.hyperui/spec/`.
+- **Gated spec, read as artifacts.** PRD → requirements → design → tasks with approval between phases, or a one-file SDD-lite for small changes, in `.hyperui/spec/`. Every spec file is also published as a Claude artifact (a readable page with table of contents and rendered diagrams) the moment it is written, and the full track ends with one consolidated `Spec: <Topic>` artifact; without the Artifact tool the same page is written next to the markdown.
 - **Review before done.** Security (OWASP Top 10:2025, ASVS), complexity and safety pass after every build task; blocking findings are fixed first.
 - **Ship never buys or deploys for you.** Domain, DNS, hosting, payments by seller country, store/desktop distribution: it prepares configs and the exact command or clicks; you run every purchase and deploy.
 
@@ -151,7 +151,7 @@ Every specialist is hidden from the slash menu (`user-invocable: false`) and rou
 | `/hyperui:design` | Brief → 2–3 visual directions as artifacts → tokens → components → QA. |
 | `/hyperui:motion` | Motion language: easing, durations, choreography, `motion` recipes. |
 | `/hyperui:video` | Promo/demo clip with HyperFrames from the project's real tokens and assets. |
-| `/hyperui:spec` | Gated PRD → requirements → design → tasks, or a one-file SDD-lite. |
+| `/hyperui:spec` | Gated PRD → requirements → design → tasks, or a one-file SDD-lite; every spec file shown as an artifact, plus a consolidated spec artifact at the end. |
 | `/hyperui:build` | One task at a time: test first, per-language rules, official docs over memory. |
 | `/hyperui:review` | Security, complexity and safety pass before anything is called done. |
 | `/hyperui:patterns` | DDD, CQRS, hexagonal, GoF, resilience — only when the spec needs one. |

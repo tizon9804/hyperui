@@ -41,7 +41,7 @@ costs minutes; fixing it after the code is written costs days.
 | Any backend or database, auth, payments, several user roles, external integrations, several services, mobile + web | **Full track** | `.hyperui/spec/<topic>/00-prd.md → 01-requirements.md → 02-design.md → 03-tasks.md`, one approval per file |
 
 Say it like: "This is a landing with no backend → SDD-lite, one file. Say *full* if you want the
-four-phase plan." Record the choice in `decisions.md` (section 6). If the user overrides, follow
+four-phase plan." Record the choice in `decisions.md` (section 7). If the user overrides, follow
 them and record that instead.
 
 ## 2. Voice by archetype
@@ -67,7 +67,7 @@ Write `.hyperui/spec/<topic>.md` from `${CLAUDE_PLUGIN_ROOT}/skills/spec/referen
 ONE job, audience, success signal, in/out) · **Requirements** (3–8 EARS lines, each with one
 Given-When-Then acceptance) · **Design** (stack chosen, pages/sections, tokens from
 `design.md`, product languages/i18n, hosting intent, nothing invented) · **Tasks** (≤ 8,
-ordered, each with files, command, binary acceptance). Then present it and ask once:
+ordered, each with files, command, binary acceptance). Publish it as an artifact (section 6), then present it and ask once:
 "Does this match what you want? Anything to add or drop before I build the first task?"
 Wait for approval. Revisions go in the same file under `## Revisions`.
 
@@ -75,7 +75,7 @@ Wait for approval. Revisions go in the same file under `## Revisions`.
 
 Templates: read `${CLAUDE_PLUGIN_ROOT}/skills/spec/references/<name>.md`; if that read is denied, the
 section lists below are the contract — do not stop. Each phase: write the file → self-review against its checklist →
-present it → ask the gate question → **wait for explicit approval**. On feedback, fix the same
+publish its artifact (section 6) → present it → ask the gate question → **wait for explicit approval**. On feedback, fix the same
 file, append a one-line entry to its `## Revisions`, present again. If feedback invalidates an
 approved earlier file, say so and update that file too.
 
@@ -130,14 +130,45 @@ Phase 2 becomes `01-bug-analysis.md`: reported vs expected behavior, what must n
 repro steps, affected files with line refs, root cause stated with caution ("probably"),
 regression risk, minimal fix. Then design and tasks focused on the fix (usually 1–3 tasks).
 
-## 6. Writing style and memory writes
+## 6. Every spec file is shown as an artifact
+
+The user reads the spec in a page, not in the terminal. **After writing ANY spec markdown** to
+`.hyperui/spec/` (`00-prd.md`, `01-requirements.md`, `02-design.md`, `03-tasks.md`,
+`01-bug-analysis.md`, or the SDD-lite `<topic>.md`) publish it **in the same turn**, before the
+gate question — never skip it, never leave it for later. Full rules and the markdown → HTML
+conversion: `${CLAUDE_PLUGIN_ROOT}/skills/spec/references/spec-artifacts.md`.
+
+1. Load the `artifact-design` skill when the session offers it. Convert the markdown to HTML
+   (headings, lists, tables, code, checklists; Mermaid as `<pre class="mermaid">` with its caption)
+   and fill `${CLAUDE_PLUGIN_ROOT}/skills/spec/references/spec-page-template.html` (header card,
+   sticky table of contents, dark mode, print). Read the template; never write a page from memory.
+2. Publish with the Artifact tool: title `<Topic> — PRD | Requirements | Design | Tasks` (full) or
+   `<Topic> — Spec` (lite); icon `document`; **one artifact per file**. A revision republishes to
+   the **same url** (`url` parameter) — never a second artifact for the same file.
+3. Record the url in `.hyperui/state.md` under `artifacts:` (`spec/<path>: <url>`) and as
+   `artifact_url:` in the spec file's frontmatter (add the block; the templates have none).
+4. Reply: **non-tech** → the link, **≤ 3 lines** on what the page says, the gate question — nothing
+   else; the page replaces the summary, so do not repeat its sections in the reply. **dev / senior**
+   → the link + the usual terse summary + the gate question. Gates are unchanged:
+   one explicit approval per phase, in whatever medium the user answers.
+5. **Consolidated spec (full track).** When `03-tasks.md` is approved — all four files approved —
+   also publish `Spec: <Topic>`: header card (status, date, track, repo root, approvals per phase),
+   sticky table of contents, the four sections in order, the merged UC → REQ → decision → TASK
+   traceability table. Republish it to its url whenever any section changes later; record it as
+   `spec/<topic>/consolidated`. SDD-lite: its single artifact IS the consolidated document.
+6. **No Artifact tool in the session** (headless `-p`, evals, CI): write the same filled HTML to
+   `.hyperui/spec/<topic>/index.html` (full; rebuilt after each phase, the consolidated page at the
+   end) or `.hyperui/spec/<topic>.html` (lite), record that path where the url would go, and give
+   the path in the reply. Never skip the page because the tool is missing.
+
+## 7. Writing style and memory writes
 
 - Plain language, short sentences; no "leverage / robust / seamless". Concrete names from the
   repo over "the system". Every diagram gets a 1–2 sentence caption. Cite ids with their gloss:
   `REQ-002 (checkout form validation)`, never bare. A section that does not apply says
   `N/A — reason`.
 - After every gate: `.hyperui/state.md` → `phase: spec`, `next:` the next phase or first task,
-  `open:` the open questions, `last_updated`. Track and spec path recorded there too.
+  `open:` the open questions, `last_updated`. Track, spec path and `artifacts:` urls recorded there too.
 - `.hyperui/decisions.md`, one line each: `YYYY-MM-DD · track = SDD-lite · landing, no backend ·
   spec/<topic>.md`; the same format for stack, framework, data and auth decisions, with the
   source URL when one was opened.

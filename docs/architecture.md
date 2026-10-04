@@ -11,8 +11,14 @@ hyperui/
 ├── .claude-plugin/
 │   ├── plugin.json          # "skills": ["./"] so the root SKILL.md loads next to skills/
 │   └── marketplace.json     # tizonai → hyperui
-├── SKILL.md                 # /hyperui — the only visible entry (greet · profile · route · thread)
+├── SKILL.md                 # /hyperui — the only visible entry (greet · profile · route · dispatch · thread)
 ├── references/workspace.md  # several repos from one directory: roles, routing, workspace.md
+├── references/dispatch.md   # when a job runs inline, in a subagent, in parallel, on which model
+├── agents/                  # plugin subagents, namespaced hyperui:<name> (Agent tool subagent_type)
+│   ├── builder.md           # one spec task, TDD per skills/build rules · model: inherit
+│   ├── reviewer.md          # skills/review checklist on given files · model: sonnet
+│   ├── researcher.md        # docs / prices / MCP lookups with URLs · model: haiku
+│   └── scout.md             # repo inspection for the profile · model: haiku
 ├── hooks/hooks.json         # SessionStart(startup) → welcome.sh · PreToolUse → permit.sh
 ├── skills/
 │   ├── setup/  doctor/      # manual (disable-model-invocation: true)
@@ -30,8 +36,9 @@ hyperui/
 ├── templates/hyperui/       # seeds for .hyperui/: profile brief state decisions design ship (.md)
 ├── scripts/
 │   ├── setup.sh  doctor.sh  # install / report the third-party stack
-│   ├── welcome.sh           # SessionStart: intro when <root>/.hyperui/ is missing, one routing line otherwise
-│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, <root>/.hyperui/ writes
+│   ├── welcome.sh           # SessionStart: intro when <root>/.hyperui/ is missing, one routing line otherwise, + update offer
+│   ├── update-check.sh      # daily check of plugin.json on GitHub main (24 h cache, --decline <v>, silent offline)
+│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, update-check.sh, <root>/.hyperui/ writes
 │   ├── profile.sh           # init | get | set | private | user-get | user-set | path | root | roots | root-set | root-clear
 │   └── check.sh             # quality + company-agnostic gate
 ├── evals/graders/           # claude plugin eval graders (cases land under evals/<case>/case.yaml)
@@ -78,6 +85,33 @@ flowchart TD
   G -- "clean" --> D["Close: one line done, one line next, written to state.md"]
   MEM --> D
 ```
+
+## Dispatch
+
+The entry skill decides, without asking, whether a job runs inline or in a subagent, in parallel, and
+on which model (root `SKILL.md` §10, rules in `references/dispatch.md`). A small edit, one task, one
+answer, and anything needing taste (architecture, spec, design direction) stay inline on the session
+model. "Do all remaining tasks" or three or more independent tasks launch one `hyperui:builder` per
+task in a single message (`isolation: worktree` when their files overlap), then a `hyperui:reviewer`
+per task; dependent tasks run in sequence. Lookups go to `hyperui:researcher` (`haiku`, returns facts
+with URLs), first contact with a repo to `hyperui:scout` (`haiku`, read-only). The agents live in
+`agents/*.md` (frontmatter `name`, `description`, `model`, `tools`, `maxTurns`) and are called with the
+Agent tool as `subagent_type: "hyperui:<name>"`; a named model that is unavailable falls back to
+`inherit`, and agents not listed by the Agent tool fall back to the inline loop. Visibility follows
+the archetype — one discreet line for experts, only the result for non-tech — and the user can
+override in words ("hazlo con sonnet", "no uses subagentes"), stored as `dispatch:` in `profile.md`.
+Every delivered unit of work also ends with the §9 care line (what was handled unasked) before the choice.
+
+## Update check
+
+`scripts/update-check.sh` reads the installed version from `.claude-plugin/plugin.json`, compares it
+once a day with the manifest on GitHub `main` (`curl`, 3 s, cache in
+`~/.claude/plugins/data/hyperui/update-check.json`: `checked_at`, `latest`, `declined`, `whats_new`),
+and prints one JSON line; it is silent on any network error and always exits 0. `welcome.sh` calls it
+and, when a newer version exists that the user has not declined, appends the offer to the SessionStart
+context; the entry skill (§1) offers the update once, in one line with yes/later, and on "later" runs
+`update-check.sh --decline <v>`. `HYPERUI_UPDATE_URL`, `HYPERUI_CHANGELOG_URL` and `HYPERUI_UPDATE_TTL`
+point the script at local files for tests.
 
 The hook gives model-facing context only (shape `{"hookSpecificOutput":{"hookEventName":
 "SessionStart","additionalContext":…}}`): the full intro when `.hyperui/` is missing, and an
@@ -142,7 +176,8 @@ itself and never guesses a URL: it comes from the provider's docs or `docs/resea
 `scripts/check.sh` runs `claude plugin validate .`, `bash -n` on every script, a frontmatter
 lint (name + description everywhere; `user-invocable: false`, `allowed-tools` with the plugin-root
 Read and the profile.sh Bash rule, and the exact root preamble on specialists), a `## Sources`
-lint, and a grep that fails on employer- or team-specific strings. `.hyperui-gate` sets
+lint, an agents lint (`name`, `description`, `model` on every `agents/*.md`), and a grep that fails
+on employer- or team-specific strings. `.hyperui-gate` sets
 `lenient` (warnings) or `strict` (failures) for the specialist lints. Run it before every commit.
 
 ## Hidden specialists and root loading

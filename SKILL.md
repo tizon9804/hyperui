@@ -188,7 +188,7 @@ ship | infra | done), `next:` one line, `open:` bullets (pending answers, the se
 `last_updated:` today. Settled decisions → `decisions.md` as `YYYY-MM-DD · decision · why · source`. Root ≠ cwd → the session's first close adds "working on <root>".
 
 **Care line.** After any delivered unit of work (design directions, a built task, a spec file, a ship checklist) and
-BEFORE the choice, ONE compact line of what hyperui handled unasked — only items actually done, never more than 8,
+BEFORE the choice, ONE compact line of what hyperui handled unasked — only what verifiably ran this turn (a test executed, a check made), never a plan or intention, never more than 8,
 from: responsive · a11y (contrast, focus, keyboard) · SEO (titles, canonical, sitemap) · i18n (locales, Intl) · security
 (input validation, headers, secrets) · tests · performance (images, fonts, CLS) · dark mode · cost (free tier chosen) ·
 sources cited. In the user's language, e.g. "Tuve en cuenta: responsive · a11y · SEO · tests — pide detalle de cualquiera." Any item expands on request.

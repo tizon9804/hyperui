@@ -91,6 +91,8 @@ After setup the installed third-party skills are available too: `/motion`, `/hyp
 - **Show before build.** 2–3 visual directions as HTML artifacts come before any code; UI is never called done without the Impeccable `audit` → `polish` gate (or one line saying Impeccable is not installed).
 - **Gated spec, read as artifacts.** PRD → requirements → design → tasks with approval between phases, or a one-file SDD-lite for small changes, in `.hyperui/spec/`. Every spec file is also published as a Claude artifact (a readable page with table of contents and rendered diagrams) the moment it is written, and the full track ends with one consolidated `Spec: <Topic>` artifact; without the Artifact tool the same page is written next to the markdown.
 - **Every step ends with a choice** (continue, do all, fix something, stop) — you never have to guess what to say next.
+- **Does the heavy lifting itself.** When a job is big — "do all the remaining tasks", three features at once, a docs or pricing lookup, a first look at your repo — hyperui decides alone whether to run it inline or in subagents, in parallel, and on which model. No new questions, no menus; experts see one discreet line ("3 tasks in parallel · reviewer after each"), everyone else just the result.
+- **Tells you what it took care of.** Every delivered piece ends with one line of what was handled unasked — responsive · a11y · SEO · i18n · security · tests · performance · dark mode · cost · sources — and any item expands on request.
 - **Review before done.** Security (OWASP Top 10:2025, ASVS), complexity and safety pass after every build task; blocking findings are fixed first.
 - **Ship never buys or deploys for you.** Domain, DNS, hosting, payments by seller country, store/desktop distribution: it prepares configs and the exact command or clicks; you run every purchase and deploy.
 
@@ -161,6 +163,14 @@ Every specialist is hidden from the slash menu (`user-invocable: false`) and rou
 | `/hyperui:viz` | Munzner what–why–how analysis before any chart. |
 | `/hyperui:git` | Conventional Commits, PRs, releases, hotfixes. |
 
+### For power users
+
+Everything above is the default path; nothing here is required.
+
+- **Call a specialist by name**: `/hyperui:design`, `/hyperui:spec`, `/hyperui:build`, … (table above).
+- **Agents** (what the automatic dispatch runs; also callable by name or `@agent-hyperui:<name>`): `hyperui:builder` (one spec task with TDD, the session's model), `hyperui:reviewer` (security + complexity on given files, `sonnet`), `hyperui:researcher` (docs, prices, MCPs with URLs, `haiku`), `hyperui:scout` (repo inspection for the profile, `haiku`).
+- **Override in words**: "hazlo con sonnet", "use opus for this", "no uses subagentes", "back to automatic". hyperui obeys and stores it in `.hyperui/profile.md` as `dispatch: auto | inline | sonnet | opus | haiku` (`auto` is the default; edit the file to change it by hand). Rules and mechanics: [`references/dispatch.md`](references/dispatch.md).
+
 ## Working from any directory
 
 ```
@@ -230,7 +240,9 @@ claude plugin eval . --scaffold --allow-tools Bash Write Edit --no-publish --tru
 
 ## Updating
 
-Bump `version` in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` **and** `package.json` (`npm run version-check` compares the first and the last), push to `main`, then on each machine:
+hyperui checks once a day (at session start, 3-second timeout, silent offline) whether a newer version is on GitHub `main`; when there is one, the first reply offers it in one line — "yes" prints the two commands below, "later" silences the offer for that version (cache: `~/.claude/plugins/data/hyperui/update-check.json`).
+
+To release: bump `version` in `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json` **and** `package.json` (`npm run version-check` compares the first and the last), push to `main`, then on each machine:
 
 ```
 npx @tizonai/hyperui install              # re-running it updates the marketplace and the plugin

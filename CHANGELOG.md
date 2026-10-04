@@ -2,6 +2,14 @@
 
 All notable changes to hyperui. Format: Keep a Changelog; versions follow SemVer.
 
+## 0.7.0 — 2026-10-03
+- **Explicit next-step choices after every unit of work.** Root `SKILL.md` §9 is now "Close the turn with a choice": when the next step is the user's decision, the turn ends with a choice prompt — the `AskUserQuestion` tool when the session has it (one question, 2–4 options, the recommended one first and marked "(Recommended)", its built-in "Other" for free text), otherwise the same options as a numbered list ending with "or tell me what to change", always the last thing in the reply, with `state.md` `open:` recording the pending choice. Options in the user's language; the chosen one goes to `state.md` `next:`. Never just "done".
+- `build`: after a task → continue with task N+1 (Recommended) · do all remaining tasks without stopping (one report at the end; still stops for a blocking review finding or a risky action) · fix or change something in task N · stop. After the last task → review everything · ship it · add another feature · stop.
+- `spec`: every gate is a choice — approve and continue (Recommended) · change something in this phase · skip ahead / switch to SDD-lite (`dev`/`senior` only); the artifact link line is unchanged.
+- `design`: the pick is a choice of the 2–3 direction names (recommended first) · mix / adjust a direction · show me 2 more.
+- `review`: proposed fixes on the user's code → apply all (Recommended) · only the blocking ones · show me the diff first · skip.
+- `templates/hyperui/state.md` documents `next:` as the chosen option and `open:` `pending choice:`. README "How it works" gains the bullet.
+
 ## 0.6.0 — 2026-10-03
 - **Every spec file is shown as a Claude artifact.** After writing any spec markdown (`00-prd.md`, `01-requirements.md`, `02-design.md`, `03-tasks.md`, `01-bug-analysis.md`, or the SDD-lite `<topic>.md`) the `spec` specialist publishes it in the same turn as a readable page (`skills/spec/references/spec-page-template.html`: design tokens, dark mode, sticky table of contents, tables, checklists, Mermaid via jsdelivr, print stylesheet) with the Artifact tool — one artifact per file, republished to the same url on every revision, the link next to the gate question. When the full track passes the tasks gate it also publishes a consolidated `Spec: <Topic>` page (header card, TOC, the four sections, merged traceability table), republished whenever a section changes; the SDD-lite artifact is already the consolidated document. No Artifact tool in the session (headless `-p`, evals) → the same HTML goes to `.hyperui/spec/<topic>/index.html` or `.hyperui/spec/<topic>.html` and the path is given. Urls recorded in `state.md` under `artifacts:` and in each spec file's frontmatter (`artifact_url`). Conventions in `skills/spec/references/spec-artifacts.md`; `templates/hyperui/state.md` gains the `artifacts:` block. Gates unchanged: one approval per phase.
 

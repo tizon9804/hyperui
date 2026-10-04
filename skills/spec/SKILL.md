@@ -68,8 +68,8 @@ ONE job, audience, success signal, in/out) · **Requirements** (3–8 EARS lines
 Given-When-Then acceptance) · **Design** (stack chosen, pages/sections, tokens from
 `design.md`, product languages/i18n, hosting intent, nothing invented) · **Tasks** (≤ 8,
 ordered, each with files, command, binary acceptance). Publish it as an artifact (section 6), then present it and ask once:
-"Does this match what you want? Anything to add or drop before I build the first task?"
-Wait for approval. Revisions go in the same file under `## Revisions`.
+"Does this match what you want? Anything to add or drop before I build the first task?" — as the
+gate choice (section 4), option 1 = "Approve and build task 1: <title>". Wait for approval. Revisions go in the same file under `## Revisions`.
 
 ## 4. Full track (four files, four gates)
 
@@ -78,6 +78,14 @@ section lists below are the contract — do not stop. Each phase: write the file
 publish its artifact (section 6) → present it → ask the gate question → **wait for explicit approval**. On feedback, fix the same
 file, append a one-line entry to its `## Revisions`, present again. If feedback invalidates an
 approved earlier file, say so and update that file too.
+
+**Gate choice.** Every gate question is asked as the entry skill's choice prompt (root §9:
+`AskUserQuestion`, else a numbered list as the LAST thing in the reply; options in the user's
+language), after the artifact link line, which stays unchanged:
+1. Approve and continue to <next phase> (Recommended) — after tasks: "Approve and start task 1: <title>"
+2. Change something in this phase (free text: tell me what)
+3. Skip ahead / switch to SDD-lite — offered only to `dev` and `senior`
+The answer → `state.md` `next:`; while waiting, `open:` holds `pending choice: <phase> gate`.
 
 ### Phase 1 — PRD (`00-prd.md`, `references/prd-template.md`)
 Starting points: (a) the user has a written brief, ticket or page → summarize it, quote its
@@ -147,9 +155,9 @@ conversion: `${CLAUDE_PLUGIN_ROOT}/skills/spec/references/spec-artifacts.md`.
    the **same url** (`url` parameter) — never a second artifact for the same file.
 3. Record the url in `.hyperui/state.md` under `artifacts:` (`spec/<path>: <url>`) and as
    `artifact_url:` in the spec file's frontmatter (add the block; the templates have none).
-4. Reply: **non-tech** → the link, **≤ 3 lines** on what the page says, the gate question — nothing
+4. Reply: **non-tech** → the link, **≤ 3 lines** on what the page says, the gate choice — nothing
    else; the page replaces the summary, so do not repeat its sections in the reply. **dev / senior**
-   → the link + the usual terse summary + the gate question. Gates are unchanged:
+   → the link + the usual terse summary + the gate choice (section 4). Gates are unchanged:
    one explicit approval per phase, in whatever medium the user answers.
 5. **Consolidated spec (full track).** When `03-tasks.md` is approved — all four files approved —
    also publish `Spec: <Topic>`: header card (status, date, track, repo root, approvals per phase),

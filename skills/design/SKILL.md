@@ -20,8 +20,7 @@ of view, a typographic identity and one thing people remember.
   `platform`, `design.*`; also `.hyperui/brief.md` / `design.md` if present — build on the
   picked direction if there is one.
 - Reply in the conversation language; keep internal reasoning, code and files in English.
-- Tone per archetype: non-tech → one or two plain sentences per step, one question with a
-  recommended answer; dev → the fact + one line of why; senior → the fact, ~12 lines max.
+- Tone per archetype: non-tech → one or two plain sentences per step, one question with a recommended answer; dev → the fact + one line of why; senior → the fact, ~12 lines max.
 
 ## 1. Preflight
 
@@ -49,7 +48,12 @@ Check which helpers exist and adapt — never block on a missing one:
    available); when the session offers `/design` (Claude Design artboards), use it instead.
    No Artifact tool in the session → write `.hyperui/directions/<name>.html` and give the paths.
    Record every URL/path in `.hyperui/design.md`. Present them as one line per direction (name ·
-   type pairing · palette · signature · link) plus the pick question; the user picks before any build.
+   type pairing · palette · signature · link), then the pick as the entry skill's choice prompt
+   (root §9: `AskUserQuestion`, else a numbered list as the LAST thing in the reply; user's language):
+   the 2–3 direction names, the recommended one first with "(Recommended)" · "Mix / adjust a
+   direction" (free text) · "Show me 2 more". With 3 directions in `AskUserQuestion` (4 options max),
+   "Show me 2 more" goes through "Other". `state.md` `open:` holds `pending choice: direction pick`
+   until answered. The user picks before any build.
 3. **Tokens before components.** Write CSS custom properties on `:root`: color *roles*
    (`--bg`, `--surface`, `--text`, `--muted`, `--accent`, `--border`), type scale, spacing, radius,
    elevation, motion durations and easings. Dark mode under `@media (prefers-color-scheme: dark)`
@@ -157,6 +161,7 @@ body { background: var(--bg); color: var(--text); font: var(--fs-body)/1.6 var(-
 Write what you decided: picked direction, tokens, fonts, palette, signature element, artifact
 URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
+When the next step is theirs (pick made, UI done), close with the root §9 choice prompt.
 
 ## Sources
 

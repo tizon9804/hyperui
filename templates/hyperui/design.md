@@ -29,3 +29,7 @@
 ## Rejected directions
 
 <!-- One line: names of the directions not picked and why. -->
+
+## Browser evidence
+
+<!-- Appended by design/build/motion/viz per skills/design/references/browser-verify.md: date · tool (Claude in Chrome | Playwright MCP | headless Chrome) · url/file · 360/768/1280 light+dark pass/fail · interaction (gif) · checks. Absent = not visually verified. -->

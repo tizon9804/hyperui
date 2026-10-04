@@ -175,6 +175,7 @@ export function useMotionSafe() {
 3. No animation blocks reading or clicking; no entrance runs longer than 500 ms except the hero.
 4. 60 fps at 4× CPU throttle on the heaviest page; no layout thrash in the Performance panel.
 5. `AnimatePresence` exits actually play (keys are stable), and nothing flickers on first paint.
+6. **Seen in a browser, with evidence** (`${CLAUDE_PLUGIN_ROOT}/skills/design/references/browser-verify.md`): capture the choreography (a short GIF with Claude in Chrome when available) AND the reduced-motion path at 360 and 1280, recorded under `## Browser evidence` in `design.md`; no browser tool → say so, never "feels smooth".
 
 ## 6. Close the turn
 

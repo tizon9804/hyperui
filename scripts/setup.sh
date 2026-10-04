@@ -3,7 +3,8 @@
 # Idempotent: every step checks before acting; failures never abort the others.
 # Steps: preflight → Motion (npm) → Motion AI Kit (official /motion skill + motion-reviewer
 # agent from the motion-ai npm package, and the hosted `motion` MCP; `motion-plus` only with
-# --motion-plus) → HyperFrames → UI UX Pro Max → frontend-design → Impeccable → 21st.dev MCP.
+# --motion-plus) → HyperFrames → UI UX Pro Max → frontend-design → Impeccable → 21st.dev MCP →
+# Playwright MCP (opt-in, --playwright-mcp: headless browser fallback for visual checks).
 set -euo pipefail
 
 GLOBAL=0
@@ -16,6 +17,7 @@ SKIP_FD=0
 SKIP_IMP=0
 SKIP_MKIT=0
 MOTION_PLUS=0
+PLAYWRIGHT_MCP=0
 INSTALL_PREREQS=0
 KEY_21ST="${TWENTY_FIRST_API_KEY:-}"
 
@@ -33,6 +35,8 @@ Options:
   --skip-hyperframes    --skip-uipro    --skip-motion    --skip-motion-kit    --skip-21st
   --skip-frontend-design    --skip-impeccable
   --motion-plus         Also register the motion-plus MCP (Motion+ subscribers; sign in from the MCP settings)
+  --playwright-mcp      Also register the Playwright MCP (headless; local scope, user with --global) as the
+                        browser fallback for visual checks when Claude in Chrome (claude --chrome) is not available
   --install-prereqs     Install missing node (24 LTS) / python3 with Homebrew on macOS (non-interactive;
                         only after the user said yes). On Linux/WSL2 it prints the distro lines.
   --dry-run             Print every command instead of running it
@@ -55,6 +59,7 @@ while [[ $# -gt 0 ]]; do
     --skip-impeccable) SKIP_IMP=1 ;;
     --skip-motion-kit) SKIP_MKIT=1 ;;
     --motion-plus) MOTION_PLUS=1 ;;
+    --playwright-mcp) PLAYWRIGHT_MCP=1 ;;
     --install-prereqs) INSTALL_PREREQS=1 ;;
     --21st-key) shift; KEY_21ST="${1:-}" ;;
     --21st-key=*) KEY_21ST="${1#*=}" ;;
@@ -349,6 +354,23 @@ else
   fi
 fi
 
+# ---------------------------------------------------------------- f2. playwright MCP (opt-in)
+# Headless browser fallback for skills/design/references/browser-verify.md when Claude in Chrome is off.
+# Official server: https://github.com/microsoft/playwright-mcp (headed by default → --headless).
+if [[ $PLAYWRIGHT_MCP -eq 0 ]]; then
+  skip "playwright MCP (opt-in: --playwright-mcp)"; record "Playwright MCP" "skipped (opt-in)" "-"
+elif [[ $HAS_CLAUDE -eq 0 ]]; then
+  skip "playwright MCP: claude CLI not found"; record "Playwright MCP" "skipped (no claude)" "-"
+elif [[ $DRY -eq 0 ]] && claude mcp list 2>/dev/null | grep -Eq '^playwright[: ]'; then
+  ok "playwright MCP already registered"; record "Playwright MCP" "present" "claude mcp ($MCP_SCOPE scope)"
+else
+  if run "register Playwright MCP ($MCP_SCOPE scope)" claude mcp add --scope "$MCP_SCOPE" playwright -- npx @playwright/mcp@latest --headless; then
+    did "playwright MCP registered ($MCP_SCOPE scope)"; record "Playwright MCP" "$(status_installed)" "claude mcp ($MCP_SCOPE scope)"
+  else
+    fail "playwright MCP registration failed"; FAILURES+=("playwright-mcp"); record "Playwright MCP" "FAILED" "-"
+  fi
+fi
+
 # ---------------------------------------------------------------- g. summary
 echo
 echo "[hyperui] summary"
@@ -360,9 +382,10 @@ for row in "${SUMMARY[@]}"; do
 done
 echo
 if grep -q 'claude mcp' <<<"${SUMMARY[*]}" 2>/dev/null && [[ $DRY -eq 0 ]]; then
-  echo "[hyperui] ! MCP servers registered in this run (21st / motion) become available after you restart Claude Code (or run /mcp)."
+  echo "[hyperui] ! MCP servers registered in this run (21st / motion / playwright) become available after you restart Claude Code (or run /mcp)."
 fi
 echo "[hyperui] Try: /hyperui:design (design brief), /motion (Motion docs, springs, audits), /hyperframes (video), /ui-ux-pro-max, /frontend-design, /impeccable audit"
+echo "[hyperui] For live visual checks start Claude Code with \`claude --chrome\` (Claude in Chrome extension, direct plan); without it, \`--playwright-mcp\` adds a headless fallback."
 
 if [[ ${#FAILURES[@]} -gt 0 ]]; then
   echo "[hyperui] ✗ failed steps: ${FAILURES[*]}"

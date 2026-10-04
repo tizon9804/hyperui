@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Install the hyperui stack (HyperFrames, Motion, Motion AI Kit, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable) into the current project, and help install missing prerequisites (node, python3). Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--motion-plus] [--install-prereqs] [--dry-run]"
+description: "Install the hyperui stack (HyperFrames, Motion, Motion AI Kit, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable, optional Playwright MCP) into the current project, and help install missing prerequisites (node, python3). Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--motion-plus] [--playwright-mcp] [--install-prereqs] [--dry-run]"
 disable-model-invocation: true
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh *)
@@ -47,5 +47,7 @@ checks each component before touching anything.
   relay the `[hyperui] ✗` line and the script's own hint; the user decides.
 - Flags pass straight through: `--global`, `--21st-key <key>`, `--skip-hyperframes`,
   `--skip-uipro`, `--skip-motion`, `--skip-motion-kit`, `--skip-21st`, `--skip-frontend-design`, `--skip-impeccable`,
-  `--motion-plus` (also registers the `motion-plus` MCP for Motion+ subscribers),
+  `--motion-plus` (also registers the `motion-plus` MCP for Motion+ subscribers), `--playwright-mcp` (registers
+  the Playwright MCP, headless, as the browser fallback for visual checks when the session has no Claude in Chrome),
   `--install-prereqs`, `--dry-run`. `--dry-run` prints every command, including the prerequisite ones.
+- Relay the script's closing hint: live visual checks need Claude Code started with `claude --chrome`.

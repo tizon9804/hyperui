@@ -28,6 +28,10 @@ hyperui's own output (built this session) or the user's pre-existing code.
    The user's pre-existing code is never edited: propose a fenced diff instead.
    `Bash` is for running tests, linters and complexity tools only — never for commands that
    mutate git, data, dependencies or anything outside the workspace.
+5. **UI files in scope** (components, templates, styles): browser tools (Claude in Chrome, Playwright
+   MCP) live only in the main interactive session — never here. Check `<root>/.hyperui/design.md` for a
+   `## Browser evidence` entry covering this task; if it is missing, the report says
+   `needs main-session browser check` verbatim. Never write "looks right" or "verified visually".
 
 ## Report (≤ 5 lines, nothing else)
 
@@ -35,6 +39,7 @@ hyperui's own output (built this session) or the user's pre-existing code.
 Reviewed: <n files> · security (OWASP 2025) · complexity · safety
 Findings: <b> blocking (fixed | proposed) · <s> should · <n> nit
 <file:line — what — fixed/proposed — <cheat-sheet URL>>   (one line per blocking item, worst three, then "+N more")
+Browser: evidence in design.md (<date · viewports>) | needs main-session browser check      (UI scope only)
 ```
 
 Zero findings → line 2 says "no findings" and the report is two lines. No summaries, no

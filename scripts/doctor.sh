@@ -68,12 +68,29 @@ if command -v claude >/dev/null 2>&1; then
   else
     row "21st.dev MCP" "missing" "key at https://21st.dev/mcp → /hyperui:setup --21st-key <key>"
   fi
+  if grep -Eq '^playwright[: ]' <<<"$MCP_LIST"; then
+    row "Playwright MCP" "installed" "claude mcp: playwright (headless browser fallback for visual checks)"
+  else
+    row "Playwright MCP" "missing" "optional: /hyperui:setup --playwright-mcp (headless fallback when Claude in Chrome is off)"
+  fi
 else
   row "frontend-design plugin" "unknown" "claude CLI not found"
   row "Impeccable plugin" "unknown" "claude CLI not found"
   row "Motion MCP" "unknown" "claude CLI not found"
   row "21st.dev MCP" "unknown" "claude CLI not found"
+  row "Playwright MCP" "unknown" "claude CLI not found"
 fi
+
+# Browser for visual verification (skills/design/references/browser-verify.md)
+# Claude in Chrome is a per-session MCP (claude-in-chrome) — not detectable from a shell; be honest.
+row "Claude in Chrome" "unknown" "enable with claude --chrome or /chrome (extension ≥ 1.0.36, direct plan); check /mcp in the session"
+CHROME_BIN=""
+for c in "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" "/Applications/Chromium.app/Contents/MacOS/Chromium" google-chrome google-chrome-stable chromium chromium-browser; do
+  if [[ "$c" == /* ]]; then [[ -x "$c" ]] && { CHROME_BIN="$c"; break; }
+  else command -v "$c" >/dev/null 2>&1 && { CHROME_BIN="$(command -v "$c")"; break; }; fi
+done
+if [[ -n "$CHROME_BIN" ]]; then row "Headless Chrome" "ok" "$CHROME_BIN --headless --screenshot=… (fallback when no browser MCP)"
+else row "Headless Chrome" "missing" "install Google Chrome or Chromium for the headless screenshot fallback"; fi
 
 # tools
 command -v node    >/dev/null 2>&1 && row "node"    "ok" "$(node --version)"    || row "node"    "missing" "https://nodejs.org"

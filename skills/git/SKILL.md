@@ -16,8 +16,8 @@ tools can read, versions that mean something, and nothing irreversible without a
 ## 0. Before anything
 
 1. Resolve the project root with `${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh root` and use it (absolute paths) for `.hyperui/` and for every repo read/write. If `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first (it onboards and routes); otherwise read `profile.md` and `state.md` and never re-ask what they hold. With several roots (`profile.sh roots`), work in the repo the request or the touched file belongs to, with that repo's `.hyperui/` (rules: `${CLAUDE_PLUGIN_ROOT}/references/workspace.md`).
-   Profile fields used: `archetype`, `conversation_language`, any ticketing tool in the notes;
-   also `.hyperui/decisions.md` (a branching model already chosen is final; none → no decision yet).
+   Profile fields used: `archetype`, `conversation_language`, `versioning` (`auto` | `off`), `version_file`, any ticketing
+   tool in the notes; also `.hyperui/decisions.md` (a branching model already chosen is final; none → no decision yet).
 2. Orient (read-only, safe without asking):
    ```bash
    git status --short
@@ -42,6 +42,10 @@ tools can read, versions that mean something, and nothing irreversible without a
   that touches UI, check `<root>/.hyperui/design.md` has a `## Browser evidence` entry for it and that this reply or
   the previous one gave the user the local URL, the 360/768/1280 screenshots and "what to look at" (root §7). Missing →
   show it first (`${CLAUDE_PLUGIN_ROOT}/skills/design/references/browser-verify.md`), ask afterwards.
+- **Never skip the version bump.** A code change hyperui made is not ready to commit until the version file(s) and
+  `CHANGELOG.md` carry it (`references/versioning.md`: PATCH by default, MINOR for a feature, MAJOR only on the user's word).
+  The only exception is `versioning: off` in `profile.md`, set when the user says "no versioning for this project"
+  (`profile.sh set versioning off`) — then stay silent about versions.
 - **Never commit secrets**: scan the staged diff for `.env`, keys, tokens, certificates,
   credentials. Found one → unstage it, add it to `.gitignore`, tell the user. If it was already
   pushed, say it must be rotated — deleting it in a new commit is not enough.
@@ -80,22 +84,33 @@ Branching model per project: see `references/branching.md`. Decide it once, writ
 
 1. Look at the change: `git status --short`, `git diff`, `git diff --staged`,
    `git log --oneline -5` (match the repo's existing style when it already uses one).
-2. Propose what to stage. Default: the files of this change by path. Use `git add -A` only
-   when every changed/untracked file belongs to it; never stage `.env`, build output,
+2. **Classify → bump → changelog** (`references/versioning.md`; skipped only with `versioning: off`). Classify from the
+   task/spec type or the commit type you are about to write (`feat` → MINOR; code `fix|perf|refactor|style|chore` → PATCH;
+   docs/tests/CI only → no bump). Find the version file (`version_file` in the profile; detect once per §2 of the reference
+   and `profile.sh set version_file <path>`), bump it — lockfile included — and add the `CHANGELOG.md` block for the new
+   version with today's date (create the file if missing; user-facing bullets in the product's language). Already bumped
+   in this working tree → keep it, never twice. First bump in the project → one line in `decisions.md`.
+3. Propose what to stage: the files of this change by path **plus the version file(s) and `CHANGELOG.md`**. Use
+   `git add -A` only when every changed/untracked file belongs to it; never stage `.env`, build output,
    `.DS_Store`, editor folders.
-3. Draft a **Conventional Commits** message (`references/conventional-commits.md`):
+4. Draft a **Conventional Commits** message (`references/conventional-commits.md`):
    - `type(scope)!: description` — imperative, lowercase start, no period, first line ≤ 72.
    - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`,
      `chore`, `revert`. Breaking change → `!` and a `BREAKING CHANGE:` footer.
-   - Body (optional, wrapped at 72): why, not how. No ticket prefix in the subject; a
-     `Refs: <id>` footer only if the user uses a tracker and gives the id.
+   - Body (wrapped at 72): why, not how, plus the line `Bumps to vX.Y.Z.` when the commit carries a bump. A commit
+     that is only the bump + changelog → `chore(release): vX.Y.Z`. No ticket prefix in the subject; a `Refs: <id>`
+     footer only if the user uses a tracker and gives the id. **No AI co-author trailer** (`Co-Authored-By: Claude …`)
+     unless the user asks for one — the repo's author is the user.
+   - The type and the bump agree: a copy/text or visual tweak with no new capability is `fix` or `style` (PATCH), not `feat`.
    - Change mixes unrelated things → propose splitting into two commits.
-4. **Show and stop.** Present the files to stage and the message in a fenced block, then one
-   question: "Commit with this message?" Do not run `git add` or `git commit` in this turn.
-5. On approval: stage exactly the approved files and commit with exactly the approved text
+5. **Show and stop.** Present the files to stage and the message in a fenced block, then the root §9 choice prompt:
+   commit with this message (Recommended) · edit the message · also push afterwards · not yet. Do not run `git add`
+   or `git commit` in this turn — "haz commit" / "deja listo el commit" ask for the proposal, not for the commit.
+6. On approval: stage exactly the approved files and commit with exactly the approved text
    (`git commit -F <tmpfile>` for multi-line). On edits: redraft and show again.
-6. After committing: `git log --oneline -1`. Do not push unless asked; offer it in one line.
-7. A hook (lint, commitlint, tests) rejects the commit → fix the cause, show the new
+7. After committing: `git log --oneline -1`. Do not push unless asked; offer it in one line. After the merge/push of
+   a bump, offer the tag `vX.Y.Z` (or the project's convention) — its own yes (`references/release.md` §5).
+8. A hook (lint, commitlint, tests) rejects the commit → fix the cause, show the new
    message/diff if it changed, and make a **new** commit attempt — never `--no-verify`.
 
 ## 4. Pull request ("abre un PR", "open a PR")
@@ -118,7 +133,8 @@ Branching model per project: see `references/branching.md`. Decide it once, writ
 
 ## 5. Release ("saca una versión", "release", "bump version")
 
-Full procedure: `references/release.md`. Summary:
+Full procedure: `references/release.md`; the per-change rule that feeds it is `references/versioning.md` (every
+change already carries its bump, so a release usually only tags). Summary:
 
 1. Precondition: clean tree on the release source branch (default branch, or `develop` under
    Git Flow). Find the version file (`package.json`, `pyproject.toml`, `Cargo.toml`,
@@ -155,7 +171,8 @@ Flow). Same approval gates as a release; never cherry-pick by rewriting history.
 ## 8. Report
 
 End each action with: what ran (commit sha / PR URL / tag), what was verified (`ls-remote`
-match), and the next step in one line. Update `.hyperui/state.md` `next:` if it exists.
+match), the root §9 care line when a bump happened (`version vX.Y.Z` · changelog), and the next step in one line.
+Update `.hyperui/state.md` `next:` if it exists.
 
 ## Sources
 

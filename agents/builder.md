@@ -35,6 +35,12 @@ you did not change).
    else the Chrome binary: 360/768/1280, light + dark) and write `## Browser evidence` in
    `<root>/.hyperui/design.md`; when neither exists, report `needs main-session browser check`.
    Never claim the UI looks right without a capture.
+3c. **Code changed → version + changelog** per `${CLAUDE_PLUGIN_ROOT}/skills/git/references/versioning.md`
+   (PATCH by default, MINOR when the task is a feature; skip when the profile says `versioning: off`;
+   docs/tests-only tasks do not bump). Bump the version file(s) and add the `CHANGELOG.md` line.
+   **Other builders run in parallel → do NOT bump** (they would collide on the same file): report
+   `version: pending (parallel)` and the session bumps once for the batch. First UI touch in a project
+   without a version stamp → add it (`skills/design/references/version-stamp.md`), test first.
 4. Tick the task in the spec file (`- [x]`). Do NOT edit `state.md` (the session owns it) and
    do NOT commit. Stop and report instead of acting when a step would be risky: dependency
    version changes, deleting files outside the task, schema drops, anything that costs money.
@@ -47,7 +53,8 @@ TASK-00N <title> — done | blocked: <why>
 Files: <created/changed, relative to root>
 Tests: <runner> · <n> passing · what they prove (one clause each)
 Tools: formatter ✓ · linter ✓ · types ✓ (or the failing one and why)
-Care: <from: responsive · a11y · SEO · i18n · security · tests · performance · dark mode · verified headless (360/768/1280) — only what ran>
+Care: <from: responsive · a11y · SEO · i18n · security · tests · performance · dark mode · verified headless (360/768/1280) · version vX.Y.Z — only what ran>
+Version: vX.Y.Z (<file>) + CHANGELOG line | pending (parallel) | n/a (docs/tests only, or versioning: off)
 Browser: <evidence path(s) · viewports · tool> | needs main-session browser check | n/a (no UI)
 Review: hand off these files to hyperui:reviewer
 Assumptions: <one line, or "none">

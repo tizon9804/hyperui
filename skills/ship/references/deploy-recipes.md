@@ -137,7 +137,21 @@ Common to every host:
   **both** the CNAME and the TXT record Railway shows; TLS automatic. https://docs.railway.com/guides/public-networking#custom-domains
 - Pricing: https://railway.com/pricing · MCP: `railway setup agent --oauth` (https://docs.railway.com/reference/mcp-server)
 
-## 8. After the first deploy (checklist items the skill ticks with the user)
+## 8. After every deploy: verify the live version (the skill runs this — SKILL.md §7)
+
+```bash
+"${CLAUDE_PLUGIN_ROOT}/scripts/verify-deploy.sh" https://<domain> <x.y.z>         # polls 30 s × 10 min; exit 0 = live
+"${CLAUDE_PLUGIN_ROOT}/scripts/verify-deploy.sh" https://<domain> <x.y.z> --once  # single check
+curl -s https://<domain>/version.json                                             # the user's own one-liner
+```
+
+Order of truth: `/version.json` → `<meta name="app-version">` → the `v<x.y.z>` footer text (`skills/design/references/version-stamp.md`).
+Expected version = the version file after the bump (`skills/git/references/versioning.md`). The result line goes to `.hyperui/ship.md`
+`## Deploys`. Still the old version after 10 min → the host built an older commit or the build failed: read the build log
+(Vercel: Deployments → the deployment → Build Logs · Netlify: Deploys → the deploy · Cloudflare: Workers & Pages → Deployments ·
+Amplify: App → the build → Build logs); never redeploy yourself. No version at all → the site has no stamp yet: add it, redeploy.
+
+## 9. After the first deploy (checklist items the skill ticks with the user)
 
 1. Production URL opens over HTTPS; `www` and root redirect to one canonical host.
 2. Env vars present in production (a missing one is the most common first-deploy failure — read

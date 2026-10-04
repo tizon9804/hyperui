@@ -65,13 +65,17 @@ a browser tool (`references/browser-verify.md` §1). Key ones missing → sugges
    live demo, a material, an animation), everything else quiet. **Test first, UI included:** the
    component's render test (project runner — Vitest + Testing Library typical: `getByRole` + accessible
    name, an `axe` assertion when available) is written and red BEFORE the component exists (build §3).
+   **No version stamp in the project yet → add one in this first UI change** (`references/version-stamp.md`: version +
+   short commit injected at build, footer or About `v1.4.2 · ab12cd3`, `<meta name="app-version">`, `/version.json`,
+   a render test that it shows the manifest's version); one line saying so.
 5. **Motion.** Hand off to the `motion` skill. Defaults: entrance stagger on the hero, hover and tap
    micro-feedback on interactive elements, scroll reveal only where it aids reading. Always honor
    `prefers-reduced-motion`.
 6. **QA in the browser, with evidence** — `references/browser-verify.md`: detect the tool (Claude in Chrome →
    Playwright MCP → headless Chrome), capture 360 / 768 / 1280 (+1920 marketing) light AND dark, one interaction,
    run the checks (no horizontal scroll, no clipped text, contrast AA, visible focus, hero in the first 360 viewport,
-   fonts loaded, images sized; 16px phone gutters; full keyboard navigation), record `## Browser evidence` in `design.md`.
+   fonts loaded, images sized; 16px phone gutters; full keyboard navigation; the version stamp visible and equal to the
+   version file), record `## Browser evidence` in `design.md`.
    No browser tool → say so, static checks only, never a visual claim. Lighthouse ≥ 90 ×4 when a build is available.
 7. **Impeccable gate (before declaring any UI done) — with evidence.** Check `claude plugin list`.
    If Impeccable is installed: ACTUALLY invoke `/impeccable audit` (Skill tool), fix the findings,
@@ -166,7 +170,7 @@ Write what you decided: picked direction, tokens, fonts, palette, signature elem
 URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
 When the next step is theirs (pick made, UI done), close with the root §9 care line (what the directions
-or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) — only what verifiably ran) and then the §9 choice prompt.
+or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) · version vX.Y.Z — only what verifiably ran) and then the §9 choice prompt.
 
 ## Sources
 

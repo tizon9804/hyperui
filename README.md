@@ -91,6 +91,7 @@ After setup the installed third-party skills are available too: `/motion`, `/hyp
 
 - **Profile and tone by archetype.** Non-tech, developer or senior: detected from your words and your repo, confirmed in at most three questions, never asked twice.
 - **Show before build.** 2–3 visual directions as HTML artifacts come before any code; UI is never called done without the Impeccable `audit` → `polish` gate (or one line saying Impeccable is not installed).
+- **Critiques before it builds.** Every design direction and every finished UI goes through a heuristic evaluation grounded in the theory below (Norman, Nielsen, ISO 9241-110, Shneiderman, the conversation/repair model, cognitive load, a conversion lens by goal); severities 3–4 are fixed before you see the page. Ask "is this page good?" about any live site, mock or Figma export and you get the same critique as a report and an artifact: top 3 by impact on your goal, what is done well, a verdict.
 - **Sees what it built.** Opens the result in Chrome (Claude in Chrome, `claude --chrome`) or a headless browser at 360/768/1280, light and dark, and keeps the screenshots as evidence in `.hyperui/design.md` — it never says "looks right" without one, and says plainly when no browser tool was available. It shows before it asks: the dev server stays running and you get the local URL, the screenshots and "what to look at" before any approve/commit/merge question. TDD for everything, UI included: the component test is written before the component.
 - **Gated spec, read as artifacts.** PRD → requirements → design → tasks with approval between phases, or a one-file SDD-lite for small changes, in `.hyperui/spec/`. Every spec file is also published as a Claude artifact (a readable page with table of contents and rendered diagrams) the moment it is written, and the full track ends with one consolidated `Spec: <Topic>` artifact; without the Artifact tool the same page is written next to the markdown.
 - **Every step ends with a choice** (continue, do all, fix something, stop) — you never have to guess what to say next.
@@ -149,6 +150,21 @@ How the clips were made: [`docs/assets/README.md`](docs/assets/README.md).
 
 </details>
 
+## What the critique is grounded in
+
+hyperui does not judge a UI by taste. When it critiques a page or checks its own directions before showing them, it applies the theory below — the same body of work a trained UX evaluator uses — and every finding names the principle, the evidence and the source. The research snapshot it works from is public: [`docs/research/hci-ux-foundations.md`](docs/research/hci-ux-foundations.md) (heuristics, repair, cognitive load, conversion) and [`docs/research/munzner-vad.md`](docs/research/munzner-vad.md) (data views); each claim links the page that was opened, and what could not be verified is marked.
+
+- **Don Norman**, *The Design of Everyday Things* — affordances, signifiers, natural mapping, feedback, constraints, conceptual models, the gulfs of execution and evaluation, slips vs mistakes.
+- **Jakob Nielsen** — the 10 usability heuristics, heuristic evaluation and its 0–4 severity scale, the response-time limits (0.1 s · 1 s · 10 s).
+- **ISO 9241-110:2020** — the interaction principles: suitability for the task, self-descriptiveness, conformity with expectations, learnability, controllability, use-error robustness, user engagement.
+- **Ben Shneiderman** — the 8 golden rules (consistency, universal usability, informative feedback, closure, error prevention, easy reversal, user control, low memory load).
+- **Clark & Brennan** (grounding) and **Schegloff, Jefferson & Sacks** (conversational repair), with **Grice**'s cooperative principle and **Reeves & Nass**'s *Media Equation* — the model that a UI is a conversation which must repair misunderstandings instead of dropping them: acknowledge, point at the trouble, let the user fix it with their input preserved, undo, closure.
+- **Miller and Cowan** (working memory, ~4 chunks), **Sweller** (cognitive load), **Hick–Hyman** (choice time), **Gestalt** grouping, NN/g visual hierarchy and scan patterns, **Fitts's law** — the cognitive-load and hierarchy pass.
+- **Tamara Munzner**, *Visualization Analysis and Design* — what–why–how, idiom choice by channel effectiveness, for every chart, table and KPI.
+- **The conversion lens** — the Fogg Behavior Model (B = MAP), the LIFT model, Baymard's checkout and form research, Core Web Vitals, WCAG 2.2 AA, and the deceptive-patterns taxonomy (deceptive.design, EU DSA Art. 25, FTC 2022): a dark pattern is always a blocking finding, even when it would "help" the goal.
+
+Popular misreadings are deliberately not applied: "7±2 items per screen", the 3-click rule, Fitts as "make everything big", the F-pattern as a layout goal, "always confirm destructive actions".
+
 ## Specialists
 
 Every specialist is hidden from the slash menu (`user-invocable: false`) and routed to automatically by `/hyperui`; call one by name if you want:
@@ -156,6 +172,7 @@ Every specialist is hidden from the slash menu (`user-invocable: false`) and rou
 | Skill | Use |
 |---|---|
 | `/hyperui:design` | Brief → 2–3 visual directions as artifacts → tokens → components → QA. |
+| `/hyperui:critique` | Diagnose any UI (live URL, screenshots, mock, Figma, a direction) against HCI/UX theory and your goal: 22 checks, repair model, conversion lens; severity 0–4, evidence, fixes, verdict; report + artifact. |
 | `/hyperui:motion` | Motion language: easing, durations, choreography, `motion` recipes. |
 | `/hyperui:video` | Promo/demo clip with HyperFrames from the project's real tokens and assets. |
 | `/hyperui:spec` | Gated PRD → requirements → design → tasks, or a one-file SDD-lite; every spec file shown as an artifact, plus a consolidated spec artifact at the end. |
@@ -228,7 +245,7 @@ Outbound HTTPS to the official docs and provider pages the skills cite (`WebFetc
 ## Docs
 
 - [`docs/architecture.md`](docs/architecture.md) — how it fits together: component tree, flow, hooks, memory, the company-agnostic gate, evals, how to add a specialist. The spec lives in the author's workshop; its Addendum of as-built findings is summarized here.
-- [`docs/research/`](docs/research/README.md) — the source snapshots the skills are grounded in (providers and MCPs, engineering sources, Munzner).
+- [`docs/research/`](docs/research/README.md) — the source snapshots the skills are grounded in (providers and MCPs, engineering sources, HCI/UX foundations, Munzner).
 - [`CHANGELOG.md`](CHANGELOG.md) — Keep a Changelog, SemVer.
 - [`docs/assets/README.md`](docs/assets/README.md) — how the logo, diagram, demo and example clips were produced.
 

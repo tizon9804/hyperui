@@ -29,13 +29,11 @@ a browser tool (`references/browser-verify.md` §1). Key ones missing → sugges
 
 ## 2. Process
 
-1. **Brief (5 lines, write it to `.hyperui/brief.md` before any code).** Product and what it
-   does · audience · the ONE job of this page (sign up, download, understand, decide) · 3 tone
-   words · constraints (stack, brand assets, existing tokens). If the brief lacks the product,
-   infer it from the repo and confirm. **Product language(s) / i18n:** if `product_languages`
-   is empty, ask once which language(s) the product ships in and whether it needs i18n (several
-   locales, default locale, RTL); store `product_languages` + `i18n` in the profile. Never infer
-   it from the conversation language; never ask again once stored.
+1. **Brief (5 lines, write it to `.hyperui/brief.md` before any code).** Product and what it does · audience · the ONE job of this
+   page (sign up, download, understand, decide) · 3 tone words · constraints (stack, brand assets, existing tokens). If the brief lacks
+   the product, infer it from the repo and confirm. **Product language(s) / i18n:** if `product_languages` is empty, ask once which
+   language(s) the product ships in and whether it needs i18n (several locales, default locale, RTL); store `product_languages` + `i18n`
+   in the profile. Never infer it from the conversation language; never ask again once stored.
 2. **Direction (the only mandatory checkpoint — show before build).** Use `frontend-design` for
    the point of view and `ui-ux-pro-max` to search styles, palettes and font pairings for the
    product category. Produce 2–3 directions, each distinct in type pairing, palette (3 colors +
@@ -46,7 +44,10 @@ a browser tool (`references/browser-verify.md` §1). Key ones missing → sugges
    available); when the session offers `/design` (Claude Design artboards), use it instead.
    No Artifact tool in the session → write `.hyperui/directions/<name>.html` and give the paths.
    Record every URL/path in `.hyperui/design.md`. **A browser tool in the session** (`references/browser-verify.md` §1) → open each
-   direction page and take one 1280 screenshot before presenting it (catches a broken page or a missing font). Present them as one line per direction (name ·
+   direction page and take one 1280 screenshot before presenting it (catches a broken page or a missing font). **Critique quick pass before
+   presenting** (`${CLAUDE_PLUGIN_ROOT}/skills/critique/references/checklist.md`): on each direction check cognitive load (one primary action,
+   hierarchy C11–C12), match and consistency (C3–C6), feedback states (C1–C2), recovery paths (C13–C16) and platform conventions (C6); fix
+   severity ≥ 3 before the user sees it. Present them as one line per direction (name ·
    type pairing · palette · signature · link), then the pick as the entry skill's choice prompt
    (root §9: `AskUserQuestion`, else a numbered list as the LAST thing in the reply; user's language):
    the 2–3 direction names, the recommended one first with "(Recommended)" · "Mix / adjust a
@@ -75,7 +76,8 @@ a browser tool (`references/browser-verify.md` §1). Key ones missing → sugges
    Playwright MCP → headless Chrome), capture 360 / 768 / 1280 (+1920 marketing) light AND dark, one interaction,
    run the checks (no horizontal scroll, no clipped text, contrast AA, visible focus, hero in the first 360 viewport,
    fonts loaded, images sized; 16px phone gutters; full keyboard navigation; the version stamp visible and equal to the
-   version file), record `## Browser evidence` in `design.md`.
+   version file), record `## Browser evidence` in `design.md`. Then the **critique quick pass** on each page (same checks as step 2,
+   from the captures): severity ≥ 3 fixed and recaptured before "done"; the care line says `heuristics checked`.
    No browser tool → say so, static checks only, never a visual claim. Lighthouse ≥ 90 ×4 when a build is available.
 7. **Impeccable gate (before declaring any UI done) — with evidence.** Check `claude plugin list`.
    If Impeccable is installed: ACTUALLY invoke `/impeccable audit` (Skill tool), fix the findings,
@@ -95,22 +97,19 @@ a browser tool (`references/browser-verify.md` §1). Key ones missing → sugges
 - Banned generic tells: purple-to-blue gradient hero, three-icon feature grid with identical
   cards, "Welcome to …" headings, glassmorphism on everything, everything centered, emoji as
   icons, drop shadows on every card, a big number + small label as the default hero.
-- One accent color, used sparingly, always meaning "action" or "live".
-- Depth from layering and tonal steps (bg → surface → raised), not borders on everything.
+- One accent color, used sparingly, always meaning "action" or "live"; depth from layering and tonal steps (bg → surface → raised), not borders on everything.
 - Whitespace is generous and rhythmic: 8pt grid, sections breathe, density only where data lives.
 - Real copy and real data in the deliverable. Never lorem ipsum, never placeholder avatars. Images with intent: the product, its output, its materials; no stock people pointing at laptops.
 - The hero opens with the most characteristic thing in the product's world: a live demo, a real screenshot, a single bold statement. Decide which, on purpose.
 - Dark mode is designed, not inverted: lift surfaces, lower saturation, re-check contrast.
 - Icons from one set, one stroke width, one optical size. Max 80ch line length for body text; serif bodies get slightly more line-height.
-- Empty, loading and error states are designed up front, with the same care as the happy path.
-- Forms: labels always visible, inline validation, generous hit targets (≥ 44px).
+- Empty, loading and error states are designed up front, with the same care as the happy path. Forms: labels always visible, inline validation, hit targets ≥ 44px.
 - Motion is choreography, not decoration: one entrance sequence per view.
 
 ## 4. Stack defaults
 
-React + Next.js App Router unless the project says otherwise. Styling follows the project (CSS Modules or
-Tailwind); tokens always live in CSS variables so either works. `next/image`, `next/font`, Motion (`motion/react`).
-No component-library lock-in: shadcn and 21st.dev pieces are source you own and restyle to the tokens.
+React + Next.js App Router unless the project says otherwise. Styling follows the project (CSS Modules or Tailwind); tokens always live in CSS
+variables so either works. `next/image`, `next/font`, Motion (`motion/react`). No component-library lock-in: shadcn and 21st.dev pieces are source you own and restyle to the tokens.
 
 ## 5. Deliverable
 
@@ -127,16 +126,14 @@ available · Lighthouse numbers if measured · open decisions. Headless `-p` (no
 - Directions keep the information architecture unless the brief asks otherwise and are visibly a step up: new skin,
   type and rhythm. Users forgive a new look, not a lost page. Same artifact contract (step 2) before any code changes.
 - Migrate incrementally: tokens → global type → shared primitives (button, card, input) → pages.
-  Each step ships and keeps Lighthouse ≥ 90.
-- Delete dead CSS as you go; the redesign is not done while two systems coexist.
+  Each step ships and keeps Lighthouse ≥ 90. Delete dead CSS as you go; the redesign is not done while two systems coexist.
 
 ## 7. i18n and content
 
 - Ship every locale in `product_languages`; with `i18n: true`, route per locale and set `lang`.
 - Design with the longest language first (Spanish and German run ~25–30% longer than English);
   no fixed-width labels, no truncation of CTAs.
-- Dates, numbers and currencies through `Intl.*`, never hand-formatted.
-- Every string in the dictionaries, including alt text and aria labels; no copy in components.
+- Dates, numbers and currencies through `Intl.*`, never hand-formatted. Every string in the dictionaries, including alt text and aria labels; no copy in components.
 
 ## 8. Tokens starter
 
@@ -170,7 +167,7 @@ Write what you decided: picked direction, tokens, fonts, palette, signature elem
 URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
 When the next step is theirs (pick made, UI done), close with the root §9 care line (what the directions
-or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) · version vX.Y.Z — only what verifiably ran) and then the §9 choice prompt.
+or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) · heuristics checked · version vX.Y.Z — only what verifiably ran) and then the §9 choice prompt.
 
 ## Sources
 

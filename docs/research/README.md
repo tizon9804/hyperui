@@ -8,6 +8,7 @@ prices and availability before relying on them — these are snapshots, not live
 |---|---|---|
 | [providers-and-mcps.md](providers-and-mcps.md) | Hosting, backend/DB/auth, payments (incl. seller-country availability), domains/DNS/email, IaC & containers, docs-on-demand MCPs, mobile/desktop distribution, decision matrix by budget and user level, gotchas | `ship`, `infra`, `build` |
 | [engineering-sources.md](engineering-sources.md) | Canonical sources: language style guides, architecture & patterns, testing, security (OWASP Top 10:2025, ASVS 5.0, NIST 800-63B-4, RFC 9700), delivery (Conventional Commits, SemVer, branching models), infra, UX heuristics; official MCP servers | `build`, `review`, `patterns`, `git`, `infra` |
+| [hci-ux-foundations.md](hci-ux-foundations.md) | HCI/UX theory for a UI critic: concept map (Miller/Cowan, Hick, Sweller, Gestalt, Fitts, Norman, Nielsen, ISO 9241-110, Shneiderman, grounding and repair, Grice), the 22 merged checks, the conversation/repair model, the conversion lens (Fogg, LIFT, Baymard, CWV, dark patterns), evaluation procedure, severity rubric, reading list, misreadings | `critique`, `design` |
 | [munzner-vad.md](munzner-vad.md) | Tamara Munzner's *Visualization Analysis and Design*: what–why–how, nested model, task typology, channel effectiveness, procedure, question→idiom table, references (free ones marked), where popular summaries diverge from the book | `viz` |
 
 How to refresh: re-run the same questions against the official pages listed in each file, bump

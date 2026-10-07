@@ -22,7 +22,8 @@ hyperui/
 ├── hooks/hooks.json         # SessionStart(startup) → welcome.sh · PreToolUse → permit.sh
 ├── skills/
 │   ├── setup/  doctor/      # manual (disable-model-invocation: true)
-│   ├── design/    references/{sources,browser-verify}.md   # browser-verify: seen-in-Chrome evidence rule
+│   ├── design/    references/{sources,browser-verify,version-stamp}.md   # browser-verify: seen-in-Chrome evidence rule
+│   ├── critique/  references/{checklist,repair-model,conversion-lens,severity-and-report,sources}.md   # heuristic evaluation vs the goal
 │   ├── motion/    references/sources.md
 │   ├── video/     references/sources.md
 │   ├── spec/      references/{prd,requirements,design,tasks,sdd-lite}-template.md
@@ -50,6 +51,7 @@ hyperui/
 Each specialist, one line:
 
 - `design` — brief → 2–3 directions as HTML artifacts (show before build) → tokens → components (test first) → QA in the browser with evidence.
+- `critique` — diagnose a UI (live URL, mock, direction) with the 22 merged checks, the repair model and a conversion lens by goal; evidence, severity 0–4, top 3 by impact on the goal, strengths; report + artifact.
 - `motion` — animation recipes on the chosen tokens; reduced motion always honored.
 - `video` — promo/demo clip with HyperFrames from the project's real tokens; only when asked.
 - `spec` — gated PRD → requirements → design → tasks, or a one-file SDD-lite, in `.hyperui/spec/`.
@@ -72,7 +74,7 @@ flowchart TD
   O --> N["Stated next step - specialist starts next turn"]
   M -- "profile present" --> A["Detect or confirm archetype, tone, languages"]
   A --> R{"Route by intent"}
-  R --> S1["design / motion / video"]
+  R --> S1["design / critique / motion / video"]
   R --> S2["spec / patterns / viz"]
   R --> S3["build"]
   R --> S4["ship / infra / git"]
@@ -123,6 +125,10 @@ commit, merge or push question on UI work without the local URL (dev server left
 the screenshots (artifact or paths) and one line "what to look at" in the same reply; `git` checks the
 evidence exists before proposing a commit of UI changes. `/hyperui:doctor` shows the three browser rows
 (Claude in Chrome is per-session and reported as `unknown` from the shell, honestly).
+
+A **critique gate** sits in front of the user's eyes (`skills/critique/references/checklist.md`): every design direction before it is
+presented and every UI before "done" gets the quick pass (cognitive load, match/consistency, feedback states, recovery paths, platform
+conventions) and severities 3–4 are fixed first; the care line says `heuristics checked`. The full `critique` specialist runs on request.
 
 A fifth gate keeps the **version honest** (`skills/git/references/versioning.md`): every code change hyperui
 makes bumps SemVer in the project's version file — PATCH by default, MINOR for a user-facing feature, MAJOR
@@ -183,6 +189,8 @@ Per project, `<root>/.hyperui/` (seeded from `templates/hyperui/` by `profile.sh
 - `decisions.md` — ADR-lite, one line each: date · decision · why · source URL.
 - `state.md` — phase, next, open items; read first and updated at the end of every turn.
 - `ship.md` — the go-live checklist (domain, DNS, host, secrets, deploy, payments, email, monitoring).
+- `critique/` — one report per critique (`<yyyy-mm-dd>-<target>.md` + the `.html` fallback page): goal, evidence, verdict, top 3, strengths, findings table, to-verify list; artifact urls in `state.md` `artifacts:`.
+- `evidence/<yyyy-mm-dd>/` — the browser captures the design, build and critique passes refer to.
 
 Per machine, `~/.claude/plugins/data/hyperui/user.md`: archetype default, conversation language, country,
 tone notes, and the `roots:` map (directory → repo(s)); a known user gets a one-line confirmation

@@ -2,7 +2,8 @@
 
 hyperui is a Claude Code plugin that acts as a product copilot: one visible entry (`/hyperui`)
 profiles the user, keeps a per-project memory in `.hyperui/`, and routes each request to a
-hidden specialist skill. No MCP server of its own, no backend, no telemetry.
+hidden specialist skill. No MCP server of its own, no backend; telemetry is opt-in, anonymous and
+documented below (nothing leaves the machine until the user says yes once).
 
 ## Component tree (as on disk)
 
@@ -37,9 +38,10 @@ hyperui/
 ├── templates/hyperui/       # seeds for .hyperui/: profile brief state decisions design ship (.md)
 ├── scripts/
 │   ├── setup.sh  doctor.sh  # install / report the third-party stack
-│   ├── welcome.sh           # SessionStart: intro when <root>/.hyperui/ is missing, one routing line otherwise, + update offer
+│   ├── welcome.sh           # SessionStart: intro when <root>/.hyperui/ is missing, one routing line otherwise, + update offer; fires telemetry.sh flush in the background
 │   ├── update-check.sh      # daily check of plugin.json on GitHub main (24 h cache, --decline <v>, silent offline)
-│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, update-check.sh, verify-deploy.sh, <root>/.hyperui/ writes
+│   ├── telemetry.sh         # opt-in anonymous usage events: status | consent | event | flush | purge (allowlist, daily POST, 3 s)
+│   ├── permit.sh            # PreToolUse: allow hyperui:* skills, reference reads, profile.sh, update-check.sh, verify-deploy.sh, telemetry.sh, <root>/.hyperui/ writes
 │   ├── verify-deploy.sh     # after a deploy: /version.json → <meta app-version> → footer text vs the expected version; polls 30 s × 10 min
 │   ├── profile.sh           # init | get | set | private | user-get | user-set | path | root | roots | root-set | root-clear
 │   └── check.sh             # quality + company-agnostic gate
@@ -161,6 +163,38 @@ always-on routing line when it exists, so a bare "what can you do?" reaches `/hy
 of generic help. Several intents in one message run in journey order (design → spec → build →
 review → ship). Every specialist starts with: resolve the root with `profile.sh root`; if
 `<root>/.hyperui/profile.md` is missing, invoke the `hyperui` skill first.
+
+## Telemetry (opt-in, anonymous)
+
+`scripts/telemetry.sh` is the only code path that records or sends usage data, and every command is a
+no-op until `user.md` holds `telemetry: yes`. State lives in the per-machine data dir
+(`~/.claude/plugins/data/hyperui/`, `HYPERUI_DATA` overrides): `user.md` keys `telemetry`
+(`yes|no|unasked`), `telemetry_asked_at`, `telemetry_last_flush`, `telemetry_last_feedback_at`,
+`install_id` (uuid4 minted on the first `yes`); the queue is `telemetry.jsonl`, one event per line.
+
+- **Consent** is asked by the entry skill (§9) exactly once per machine, right before the choice prompt
+  that follows the first closed unit of work, and stored with `telemetry.sh consent yes|no`; no answer
+  is `no`. `/hyperui:setup --telemetry|--no-telemetry` stores it without the prompt. `doctor.sh` shows
+  the state in its `Telemetry` row.
+- **Events** (`telemetry.sh event <name> <skill> [k=v…]`) are validated in python against a fixed
+  allowlist — names `unit_closed | feedback | gate_failed | critique | update_offer`; props `outcome`
+  (`continue|do_all|fix|stop`), `iterations` (int), `severity_max` (0–4), `rating` (`up|down`), `comment`
+  (feedback only, ≤ 280 chars, tokens containing `/`, `\`, `~`, `@` or `://` removed), `archetype`,
+  `accepted` (bool). Unknown keys are dropped, unknown names rejected (exit 1). The entry skill emits
+  `unit_closed` on every closed unit (iterations from `state.md` `iterations:`), `gate_failed` when a
+  check/build/test gate needed a fix round, `critique` from the critique specialist, `update_offer` when
+  the daily offer is answered, and `feedback` at most once every 7 days.
+- **Flush** (`telemetry.sh flush [--force] [--verbose]`) runs from `welcome.sh` at SessionStart in a
+  detached background subshell (so it never delays the session) and after `consent yes`: with consent,
+  a non-empty queue and no flush in the last 24 h (or `--force`), it POSTs `{install_id, plugin_version,
+  os, claude_version, events[≤50]}` to `HYPERUI_TELEMETRY_URL` (default
+  `https://tizonai.com/api/telemetry` → PostHog, owner tizonai) with `curl --max-time 3`; a 2xx truncates
+  the sent events and records `telemetry_last_flush`, anything else keeps the queue. Exit 0 always,
+  silent unless `--verbose`.
+- **Purge** deletes the queue and the `install_id` and sets consent `no`.
+- **Never sent:** prompts, code, file or repo names, URLs, paths, emails, the project profile, anything
+  under `.hyperui/`. The script writes only under the data dir. `permit.sh` and the root / closing
+  specialists' `allowed-tools` pre-approve `telemetry.sh` like the other plugin scripts.
 
 ## Memory model
 

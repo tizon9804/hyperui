@@ -39,6 +39,9 @@ Options:
                         browser fallback for visual checks when Claude in Chrome (claude --chrome) is not available
   --install-prereqs     Install missing node (24 LTS) / python3 with Homebrew on macOS (non-interactive;
                         only after the user said yes). On Linux/WSL2 it prints the distro lines.
+  --telemetry | --no-telemetry
+                        Answer the anonymous-usage question now (yes / no) instead of being asked once
+                        after the first finished task; see README "Telemetry" (default: unasked = off)
   --dry-run             Print every command instead of running it
   -h, --help            This help
 
@@ -61,6 +64,8 @@ while [[ $# -gt 0 ]]; do
     --motion-plus) MOTION_PLUS=1 ;;
     --playwright-mcp) PLAYWRIGHT_MCP=1 ;;
     --install-prereqs) INSTALL_PREREQS=1 ;;
+    --telemetry) TELEMETRY=yes ;;
+    --no-telemetry) TELEMETRY=no ;;
     --21st-key) shift; KEY_21ST="${1:-}" ;;
     --21st-key=*) KEY_21ST="${1#*=}" ;;
     -h|--help) usage; exit 0 ;;
@@ -368,6 +373,15 @@ else
     did "playwright MCP registered ($MCP_SCOPE scope)"; record "Playwright MCP" "$(status_installed)" "claude mcp ($MCP_SCOPE scope)"
   else
     fail "playwright MCP registration failed"; FAILURES+=("playwright-mcp"); record "Playwright MCP" "FAILED" "-"
+  fi
+fi
+
+# ---------------------------------------------------------------- f3. telemetry (opt-in; explicit answer only)
+if [[ -n "${TELEMETRY:-}" ]]; then
+  if run "telemetry consent $TELEMETRY" "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/telemetry.sh" consent "$TELEMETRY" >/dev/null; then
+    did "telemetry: $TELEMETRY (anonymous usage data; scripts/telemetry.sh status | purge)"; record "Telemetry" "$TELEMETRY" "~/.claude/plugins/data/hyperui/user.md"
+  else
+    fail "telemetry consent could not be stored"; FAILURES+=("telemetry"); record "Telemetry" "FAILED" "-"
   fi
 fi
 

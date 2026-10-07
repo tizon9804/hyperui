@@ -4,6 +4,7 @@ description: "Build standout, production-grade frontends end to end: brief → v
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -167,7 +168,8 @@ Write what you decided: picked direction, tokens, fonts, palette, signature elem
 URLs and rejected directions (one line) → `.hyperui/design.md`; the next step → `state.md`;
 one ADR-lite line per settled decision → `decisions.md` (`date · decision · why · source`).
 When the next step is theirs (pick made, UI done), close with the root §9 care line (what the directions
-or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) · heuristics checked · version vX.Y.Z — only what verifiably ran) and then the §9 choice prompt.
+or the UI already handle unasked: responsive · a11y · dark mode · performance · i18n · tests · verified in Chrome (360/768/1280) · heuristics checked · version vX.Y.Z — only what verifiably ran),
+the root §9 telemetry consent line when `profile.sh user-get telemetry` is empty or `unasked` (once per machine), and then the §9 choice prompt.
 
 ## Sources
 

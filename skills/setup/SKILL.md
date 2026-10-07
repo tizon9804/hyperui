@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Install the hyperui stack (HyperFrames, Motion, Motion AI Kit, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable, optional Playwright MCP) into the current project, and help install missing prerequisites (node, python3). Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--motion-plus] [--playwright-mcp] [--install-prereqs] [--dry-run]"
+description: "Install the hyperui stack (HyperFrames, Motion, Motion AI Kit, UI UX Pro Max, 21st.dev MCP, frontend-design, Impeccable, optional Playwright MCP) into the current project, and help install missing prerequisites (node, python3). Manual: /hyperui:setup [--global] [--21st-key KEY] [--skip-*] [--motion-plus] [--playwright-mcp] [--install-prereqs] [--telemetry | --no-telemetry] [--dry-run]"
 disable-model-invocation: true
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh *)
@@ -32,7 +32,9 @@ checks each component before touching anything.
 4. If the 21st.dev MCP row says `skipped (no key)`, add one line: get a free key at
    https://21st.dev/mcp, then rerun `/hyperui:setup --21st-key <key>` (or export
    `TWENTY_FIRST_API_KEY`). The key is stored at user scope, never in the project.
-5. Confirm with:
+5. `--telemetry` / `--no-telemetry` store the anonymous-usage answer (`Telemetry` row); with neither
+   flag nothing changes — hyperui asks once, after the first finished task. No `Telemetry` row → nothing to say.
+6. Confirm with:
 
    ```
    ${CLAUDE_PLUGIN_ROOT}/scripts/doctor.sh

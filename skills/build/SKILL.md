@@ -4,6 +4,7 @@ description: "Implement a spec task or a change in the user's codebase: pick the
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -137,13 +138,16 @@ A red linter or type check is part of the task, not a note for later. Never add 
    "not visually verified", the new version (`vX.Y.Z` + changelog line, §6), review result. **UI touched → show before you ask (root §7):** the dev server stays running, and
    before the choice the reply gives its local URL (+ restart command; headless → the command and paths), the 360/768/1280
    screenshots (artifact or paths) and one line "what to look at". Then the root §9 care line — what you handled unasked (tests · security · a11y ·
-   responsive · verified in Chrome (360/768/1280) · version vX.Y.Z…, only what ran) — then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
+   responsive · verified in Chrome (360/768/1280) · version vX.Y.Z…, only what ran) — then, when `profile.sh user-get telemetry` is empty or `unasked`, the root §9 one-line
+   telemetry consent question (once per machine) — then the entry skill's choice prompt (root §9: `AskUserQuestion`, else a numbered
    list as the LAST thing in the reply), in the user's language, with exactly these options:
    1. Continue with task N+1: <its title> (Recommended)
    2. Do all remaining tasks (M left) without stopping — I will report once at the end and still stop
       for any blocking review finding or risky action
    3. Fix or change something in task N first (free text: tell me what)
    4. Stop here; the spec and state are saved
+   Telemetry (root §9, only with consent): a failing build/lint/test gate that needed a fix round →
+   `telemetry.sh event gate_failed build`; the chosen option closes the unit → `event unit_closed build …`.
 5. **"Do all"** (and any request for ≥ 3 tasks at once) → dispatch per root §10 / `references/dispatch.md` rule (b): one
    `hyperui:builder` (Agent tool, `subagent_type: "hyperui:builder"`) per **independent** task, all launched in ONE message,
    `isolation: worktree` when their files overlap; dependent tasks after the one they need; then `hyperui:reviewer` on each

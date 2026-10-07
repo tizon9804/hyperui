@@ -92,7 +92,7 @@ not fair and tells the builder nothing about what to keep. Not seen → "to veri
    `<root>/.hyperui/critique/<yyyy-mm-dd>-<target>.html` and give the path. Record it in `state.md` `artifacts:` as
    `critique/<yyyy-mm-dd>-<target>.md: <url or path>` and in the report's frontmatter `artifact_url`.
 3. **Reply** (≤ 12 lines for dev/senior, ≤ 15 for non-tech, in the conversation language): the artifact link or path · the
-   goal as understood · the **top 3** (one line each: finding · principle · severity · fix) · **2 strengths** · the **verdict
+   goal as understood · the **top 3** (one line each: finding · principle **+ author/source** · severity · fix) · **2 strengths** · the **verdict
    line** "Will this achieve <goal>? likely / at risk / no — because …" · the evidence line (tool and viewports, or "page not
    seen — static critique only") · the root §9 **care line** (`heuristics checked (22)` · `a11y` · `responsive` · `dark mode` ·
    `performance (CWV)` · `sources cited` · `verified in Chrome at 360/768/1280` — only what ran) · then the **choice prompt**
@@ -116,8 +116,12 @@ when a direction fails the quick pass twice.
 ## 6. Tone
 
 - **non-tech**: plain words; each finding as *what a visitor feels* ("you cannot tell which button downloads, so most people
-  will hesitate") + the fix in one sentence; principle names only in the report, not the reply.
+  will hesitate") + the fix in one sentence, **followed by the author and principle in parentheses** ("— Norman, feedback;
+  Nielsen #1"). The reference is never dropped for anyone: it is what makes the critique trustworthy, not opinion.
 - **dev / senior**: principle names (`C4 labels predict outcomes · H2 · Fogg Ability`), severities, sources; no glosses.
+- **Every recommendation, in the reply and in the report, names its author/source** (Norman, Nielsen #n, ISO 9241-110,
+  Shneiderman, Clark & Brennan, Munzner, Fogg, LIFT, Baymard, WCAG…). A finding without a named source is not a finding;
+  if no listed source supports it, label it "my judgement" explicitly.
 - Never lecture, never pad: the finding, the evidence, the fix. Criticize the screen, not the person who made it.
 - **Cite the principle's source** from `references/sources.md` (or a page opened this session); never invent a URL, never
   propagate the misreadings listed there (7±2 per screen, the 3-click rule, Fitts as "make it big", F-pattern as a goal…).

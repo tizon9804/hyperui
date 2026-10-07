@@ -98,6 +98,7 @@ After setup the installed third-party skills are available too: `/motion`, `/hyp
 - **Does the heavy lifting itself.** When a job is big — "do all the remaining tasks", three features at once, a docs or pricing lookup, a first look at your repo — hyperui decides alone whether to run it inline or in subagents, in parallel, and on which model. No new questions, no menus; experts see one discreet line ("3 tasks in parallel · reviewer after each"), everyone else just the result.
 - **Tells you what it took care of.** Every delivered piece ends with one line of what was handled unasked — responsive · a11y · SEO · i18n · security · tests · performance · dark mode · cost · sources — and any item expands on request.
 - **Review before done.** Security (OWASP Top 10:2025, ASVS), complexity and safety pass after every build task; blocking findings are fixed first.
+- **Asks before it measures.** Anonymous usage data (which steps closed, how many fix rounds, a thumbs up/down once a week) is sent only after you say yes once; nothing from your code, prompts or paths ever leaves the machine. Details and how to turn it off: [Telemetry](#telemetry-opt-in-anonymous).
 - **Keeps your version honest.** Every change bumps SemVer (patch by default, minor for a feature) and adds a changelog line in the same commit; your app shows `v1.4.2 · ab12cd3` in the footer or About and exposes `/version.json` + `<meta name="app-version">`; after a deploy hyperui checks the live version itself (`scripts/verify-deploy.sh`) before saying it is live. Say "no versioning for this project" to turn it off.
 - **Ship never buys or deploys for you.** Domain, DNS, hosting, payments by seller country, store/desktop distribution: it prepares configs and the exact command or clicks; you run every purchase and deploy — then it verifies what went live.
 
@@ -223,7 +224,7 @@ hyperui does not install these. Each line ends with how to check.
 
 | | Why | Check |
 |---|---|---|
-| **Claude Code CLI**, signed in to a Claude account (hyperui runs on your own Claude; no hyperui account, no telemetry). No documented minimum for the `"skills": ["./"]` manifest form hyperui uses (only the `"."` spelling needs v2.1.221+); **tested on 2.1.288** — stay current. | runs everything | `claude --version` |
+| **Claude Code CLI**, signed in to a Claude account (hyperui runs on your own Claude; no hyperui account; usage data only if you opt in — see [Telemetry](#telemetry-opt-in-anonymous)). No documented minimum for the `"skills": ["./"]` manifest form hyperui uses (only the `"."` spelling needs v2.1.221+); **tested on 2.1.288** — stay current. | runs everything | `claude --version` |
 | **macOS** (tested: 15+, Apple Silicon and Intel). Linux should work (bash + python3; untested). Windows only via WSL2 — the hooks and scripts are bash (untested). | hooks, scripts | `uname -s` |
 | **git** | `git` specialist, plugin updates | `git --version` |
 | **Node 24 LTS recommended, ≥ 20 required** (+ npm; `nvm` is the easiest way to manage versions) | `npx @tizonai/hyperui`, `/hyperui:setup` components, `motion` | `node --version` |
@@ -240,7 +241,35 @@ Node or python3 missing (or Node < 20)? `/hyperui:setup` prints the install line
 
 ### Network and permissions
 
-Outbound HTTPS to the official docs and provider pages the skills cite (`WebFetch` prompts for permission in default mode — expected). The plugin pre-approves only its own skills, its reference reads, `scripts/profile.sh` and writes under `<root>/.hyperui/`; everything else follows your normal Claude Code permissions.
+Outbound HTTPS to the official docs and provider pages the skills cite (`WebFetch` prompts for permission in default mode — expected), one daily `GET` of the plugin manifest on GitHub for the update check, and — only after you opt in — one daily `POST` to `tizonai.com/api/telemetry` (below). The plugin pre-approves only its own skills, its reference reads, its own scripts (`profile.sh`, `update-check.sh`, `verify-deploy.sh`, `telemetry.sh`) and writes under `<root>/.hyperui/`; everything else follows your normal Claude Code permissions.
+
+## Telemetry (opt-in, anonymous)
+
+**Default: off.** Nothing is recorded or sent until you answer **yes** once. After the first finished piece of work on a machine, hyperui asks one line — "Anonymous usage data helps improve hyperui (no code, prompts, names or paths — just which steps worked). Send it? yes / no" — and never asks again; **no answer counts as no**. `/hyperui:setup --telemetry` or `--no-telemetry` answers without the prompt.
+
+**What is sent, exactly** (one JSON `POST` a day, at most 50 events, to `https://tizonai.com/api/telemetry`, which forwards to a PostHog project owned by tizonai; the body is the whole payload):
+
+```
+{"install_id": "<random uuid4, minted on your first yes; not derived from anything>",
+ "plugin_version": "0.12.0", "os": "darwin|linux", "claude_version": "2.1.288",
+ "events": [{"ts": "<ISO 8601>", "name": "unit_closed|feedback|gate_failed|critique|update_offer",
+             "skill": "design|build|spec|ship|critique|viz|…", "props": {…}}]}
+```
+
+`props` can only hold: `outcome` (`continue|do_all|fix|stop` — what you chose after a step), `iterations` (how many fix rounds a step took), `severity_max` (0–4, worst finding of a critique), `rating` (`up|down`) and `comment` (≤ 280 characters, **only the text you type when asked "How did hyperui do?"**, at most once a week; anything that looks like a path, URL or email is stripped before it is stored), `archetype` (`non-tech|dev|senior`), `accepted` (did you take an update offer). The script drops any other key or event name.
+
+**Never sent:** your prompts, code, diffs, file or repo names, URLs, paths, emails, the project profile, anything under `.hyperui/`, your account. The endpoint sees your IP like any HTTPS request; it is not stored with the events.
+
+**See, disable, erase** — everything lives in `~/.claude/plugins/data/hyperui/` (`user.md` keys `telemetry`, `install_id`, `telemetry_last_flush`; queue `telemetry.jsonl`, plain text you can read before it goes out):
+
+```
+~/.claude/plugins/marketplaces/tizonai/scripts/telemetry.sh status      # consent, install_id, queued events, last send
+~/.claude/plugins/marketplaces/tizonai/scripts/telemetry.sh consent no  # stop sending (queue kept on disk)
+~/.claude/plugins/marketplaces/tizonai/scripts/telemetry.sh purge       # delete the queue and the install_id, consent no
+/hyperui:setup --no-telemetry                                           # same as consent no, from inside Claude Code
+```
+
+(`/hyperui:doctor` shows the same in its `Telemetry` row; the script path is wherever your marketplace clone lives — `claude plugin list` prints it.) Sending happens at session start in the background with a 3-second timeout; offline or a non-2xx answer keeps the queue for the next day, never blocks a session. `HYPERUI_TELEMETRY_URL` and `HYPERUI_DATA` point the script at a local endpoint and directory for tests.
 
 ## Docs
 

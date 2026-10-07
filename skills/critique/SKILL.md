@@ -4,6 +4,7 @@ description: "Diagnose and critique any UI against established HCI/UX theory and
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -95,14 +96,16 @@ not fair and tells the builder nothing about what to keep. Not seen → "to veri
    goal as understood · the **top 3** (one line each: finding · principle **+ author/source** · severity · fix) · **2 strengths** · the **verdict
    line** "Will this achieve <goal>? likely / at risk / no — because …" · the evidence line (tool and viewports, or "page not
    seen — static critique only") · the root §9 **care line** (`heuristics checked (22)` · `a11y` · `responsive` · `dark mode` ·
-   `performance (CWV)` · `sources cited` · `verified in Chrome at 360/768/1280` — only what ran) · then the **choice prompt**
+   `performance (CWV)` · `sources cited` · `verified in Chrome at 360/768/1280` — only what ran) · the root §9 telemetry consent line when
+   `profile.sh user-get telemetry` is empty or `unasked` (once per machine) · then the **choice prompt**
    (root §9: `AskUserQuestion` when available, else a numbered list as the LAST thing):
    - target is the user's own code or direction → **fix the top 3 now (Recommended)** · fix everything · explain a finding · stop
    - target is someone else's site (competitor, reference) → **design a direction that fixes the top 3 (Recommended)** · spec the
      fixes · explain a finding · stop
    "Fix" routes to `design` (visual/structure) or `build` (code) with the finding ids in the args; `state.md` `open:` keeps
    `pending choice: critique fixes` until answered.
-4. `state.md`: `phase: review`, `next:` the chosen option, `last_updated:` today. One line in `decisions.md` only when the
+4. `state.md`: `phase: review`, `next:` the chosen option, `last_updated:` today. With telemetry consent (root §9):
+   `"${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh" event critique critique severity_max=<highest severity found>`. One line in `decisions.md` only when the
    user settles a fix that changes the design (`date · <fix> · <principle> · <source url>`).
 
 ## 5. When building — the checklist as a gate

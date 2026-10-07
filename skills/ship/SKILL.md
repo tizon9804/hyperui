@@ -4,6 +4,7 @@ description: "Put a product online and get paid: domain, DNS, hosting/deploy, ba
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh *)
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/verify-deploy.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
@@ -105,7 +106,7 @@ deploy, then payments (account approval takes days — start it early and say so
 Each turn: one step, done or blocked, then the next. Append to `.hyperui/decisions.md` one line
 per provider pick: `2026-10-03 · payments = Polar · Colombia seller, MoR, no monthly fee · <url>`.
 End every turn by updating `.hyperui/state.md`: `phase: ship`, `next:` the one next action,
-`open:` blockers. A delivered checklist or recommendation carries the root §9 care line before the choice
+`open:` blockers. A delivered checklist or recommendation carries the root §9 care line (and, when `profile.sh user-get telemetry` is empty or `unasked`, the §9 telemetry consent line) before the choice
 (security · cost (free tier chosen) · performance · sources cited — only what was actually weighed). Set `providers.<concern>` in `profile.md` when a pick is confirmed.
 If `scripts/profile.sh` exists in the plugin, use `profile.sh set <key> <value>`; otherwise edit
 the frontmatter in place and keep it valid YAML.

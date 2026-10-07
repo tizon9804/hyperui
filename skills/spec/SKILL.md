@@ -4,6 +4,7 @@ description: "Plan a product or change before building: gated PRD → requiremen
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -79,7 +80,8 @@ publish its artifact (section 6) → present it → ask the gate question → **
 file, append a one-line entry to its `## Revisions`, present again. If feedback invalidates an
 approved earlier file, say so and update that file too.
 
-**Gate choice.** Every gate question is asked as the entry skill's choice prompt (root §9:
+**Gate choice.** A spec file is a closed unit: the root §9 care line and, when `profile.sh user-get telemetry` is empty or `unasked`, the §9 telemetry
+consent line come right before it. Every gate question is asked as the entry skill's choice prompt (root §9:
 `AskUserQuestion`, else a numbered list as the LAST thing in the reply; options in the user's
 language), after the artifact link line, which stays unchanged:
 1. Approve and continue to <next phase> (Recommended) — after tasks: "Approve and start task 1: <title>"

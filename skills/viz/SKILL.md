@@ -4,6 +4,7 @@ description: "Decide how to visualize data before drawing anything: Munzner's wh
 user-invocable: false
 allowed-tools:
   - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/profile.sh *)
+  - Bash(${CLAUDE_PLUGIN_ROOT}/scripts/telemetry.sh *)
   - Read(//${CLAUDE_PLUGIN_ROOT}/**)
   - Edit(.hyperui/**)
 ---
@@ -110,7 +111,7 @@ Always lead with the result or next step, never with "I'm going to…". Reply in
 4. State plainly, once: *only the immediate validation of the nested model was done (design
    justified against perceptual principles, cost estimated); the downstream validation —
    real users doing their own work, adoption — has not happened.*
-5. Before the closing choice, the root §9 care line for what the chart handled unasked (a11y (color-safe,
+5. Before the closing choice, the root §9 telemetry consent line when `profile.sh user-get telemetry` is empty or `unasked` (once per machine), and the root §9 care line for what the chart handled unasked (a11y (color-safe,
    labels) · responsive · dark mode · performance · sources cited — only what is true).
 6. Name the sources in the reply, one line at the end, every time a chart or table is delivered:
    *Idiom choices follow Munzner, Visualization Analysis and Design — slides

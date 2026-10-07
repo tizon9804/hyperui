@@ -92,6 +92,11 @@ done
 if [[ -n "$CHROME_BIN" ]]; then row "Headless Chrome" "ok" "$CHROME_BIN --headless --screenshot=… (fallback when no browser MCP)"
 else row "Headless Chrome" "missing" "install Google Chrome or Chromium for the headless screenshot fallback"; fi
 
+# Telemetry (opt-in, anonymous; scripts/telemetry.sh)
+TEL="$("$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/telemetry.sh" status 2>/dev/null || true)"
+TEL_C="$(sed -nE 's/^consent: (.*)$/\1/p' <<<"$TEL")"; TEL_Q="$(sed -nE 's/^queued: (.*)$/\1/p' <<<"$TEL")"
+row "Telemetry" "${TEL_C:-unasked}" "${TEL_Q:-0} queued · opt-in, anonymous · /hyperui:setup --no-telemetry or scripts/telemetry.sh purge"
+
 # tools
 command -v node    >/dev/null 2>&1 && row "node"    "ok" "$(node --version)"    || row "node"    "missing" "https://nodejs.org"
 command -v python3 >/dev/null 2>&1 && row "python3" "ok" "$(python3 --version 2>&1 | awk '{print $2}')" || row "python3" "missing" "needed by UI UX Pro Max scripts"
